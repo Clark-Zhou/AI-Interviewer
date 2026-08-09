@@ -1,3 +1,4 @@
+/* 全局基础样式：统一盒模型、字体和页面背景。 */
 * {
   box-sizing: border-box;
 }
@@ -15,6 +16,7 @@ textarea {
   font: inherit;
 }
 
+/* 页面布局：控制内容宽度和卡片外观。 */
 .page {
   width: min(900px, calc(100% - 32px));
   margin: 0 auto;
@@ -32,6 +34,7 @@ textarea {
   margin-top: 20px;
 }
 
+/* 标题和说明文字。 */
 h1 {
   margin: 0 0 8px;
   font-size: 28px;
@@ -47,6 +50,7 @@ h2 {
   color: #4b5563;
 }
 
+/* 表单输入区。 */
 .field {
   margin-bottom: 18px;
 }
@@ -73,6 +77,7 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
+/* 操作按钮和错误提示。 */
 button {
   border: 0;
   border-radius: 8px;
@@ -87,6 +92,18 @@ button:hover {
   background: #1d4ed8;
 }
 
+.error-message {
+  margin: 14px 0 0;
+  color: #dc2626;
+  font-size: 14px;
+}
+
+.empty-state {
+  margin: 0;
+  color: #6b7280;
+}
+
+/* 问题列表展示区。 */
 .question-list {
   list-style: none;
   margin: 0;
