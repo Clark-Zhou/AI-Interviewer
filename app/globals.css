@@ -137,3 +137,19 @@ button:hover {
   font-size: 14px;
   line-height: 1.6;
 }
+
+/* AI 原始返回内容展示区，下一步会改成结构化问题卡片。 */
+.ai-result {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #111827;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
