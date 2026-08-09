@@ -1,3 +1,15 @@
+/**
+ * 文件职责：全局样式文件。
+ *
+ * 关联文件：
+ * - app/layout.js：通过 import './globals.css' 引入本文件。
+ * - components/InterviewSimulator.js：页面组件使用这里定义的 className。
+ *
+ * 说明：
+ * - 当前 MVP 先使用普通 CSS，暂时不引入 Tailwind 或组件库。
+ * - 样式按页面区域分组，方便后续逐步调整视觉效果。
+ */
+
 /* 全局基础样式：统一盒模型、字体和页面背景。 */
 * {
   box-sizing: border-box;
@@ -92,6 +104,11 @@ button:hover {
   background: #1d4ed8;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 .error-message {
   margin: 14px 0 0;
   color: #dc2626;
@@ -147,9 +164,4 @@ button:hover {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 15px;
   line-height: 1.7;
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
 }
