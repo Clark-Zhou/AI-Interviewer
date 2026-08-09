@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI 模拟面试</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #f5f6f8;
+        color: #111827;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      .page {
+        width: min(900px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 40px 0;
+      }
+
+      .panel {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 24px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+      }
+
+      .subtitle {
+        margin: 0 0 24px;
+        color: #4b5563;
+      }
+
+      .field {
+        margin-bottom: 18px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 150px;
+        resize: vertical;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 12px;
+        font: inherit;
+        outline: none;
+      }
+
+      textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      }
+
+      button {
+        border: 0;
+        border-radius: 8px;
+        background: #2563eb;
+        color: #ffffff;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 700;
+        padding: 10px 16px;
+      }
+
+      button:hover {
+        background: #1d4ed8;
+      }
+
+      .preview {
+        margin-top: 20px;
+      }
+
+      .preview h2 {
+        margin: 0 0 12px;
+        font-size: 20px;
+      }
+
+      .empty {
+        color: #6b7280;
+      }
+
+      .question-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .question-item {
+        border-top: 1px solid #e5e7eb;
+        padding: 16px 0;
+      }
+
+      .question-item:first-child {
+        border-top: 0;
+        padding-top: 0;
+      }
+
+      .category {
+        margin: 0 0 6px;
+        color: #6b7280;
+        font-size: 14px;
+      }
+
+      .question {
+        margin: 0 0 6px;
+        font-weight: 700;
+      }
+
+      .reason {
+        margin: 0;
+        color: #4b5563;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="panel">
+        <h1>AI 模拟面试</h1>
+        <p class="subtitle">上传岗位信息和个人简历后，生成一组模拟面试问题。</p>
+
+        <div class="field">
+          <label for="job">岗位信息</label>
+          <textarea id="job" placeholder="先粘贴岗位 JD，例如职责、要求、技术栈等"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="resume">个人简历</label>
+          <textarea id="resume" placeholder="先粘贴简历内容，例如经历、项目、技能等"></textarea>
+        </div>
+
+        <button type="button" id="generate">生成示例问题</button>
+      </section>
+
+      <section class="panel preview">
+        <h2>模拟问题</h2>
+        <div id="result" class="empty">点击按钮后，这里会出现示例问题。</div>
+      </section>
+    </main>
+
+    <script>
+      const questions = [
+        ['岗位匹配', '请结合你的经历，说明你为什么适合这个岗位？', '用于判断你的背景和岗位要求是否匹配。'],
+        ['项目经验', '请介绍一个最能体现你相关能力的项目。', '用于了解你的真实参与度、贡献和解决问题的方式。'],
+        ['技能能力', '岗位要求里的关键技能，你最熟悉哪一项？请举例说明。', '用于验证技能是否能落到实际经验中。'],
+        ['成长空间', '对照这个岗位，你觉得自己还需要补强什么？', '用于观察你的自我认知和准备方向。'],
+      ];
+
+      document.querySelector('#generate').addEventListener('click', () => {
+        const result = document.querySelector('#result');
+        result.className = '';
+        result.innerHTML = `
+          <ul class="question-list">
+            ${questions
+              .map(
+                ([category, question, reason], index) => `
+                  <li class="question-item">
+                    <p class="category">${index + 1}. ${category}</p>
+                    <p class="question">${question}</p>
+                    <p class="reason">${reason}</p>
+                  </li>
+                `,
+              )
+              .join('')}
+          </ul>
+        `;
+      });
+    </script>
+  </body>
+</html>
