@@ -15,29 +15,29 @@
 import { useState } from 'react';
 import { generateInterviewQuestions } from '../lib/client/interviewApi';
 
-// 前端主组件：负责收集输入、触发生成、展示加载/错误/结果状态。
+// 前端主组件：负责收集输入、触发生成、展示加载/错误/结构化问题列表。
 export default function InterviewSimulator() {
   const [jobInfo, setJobInfo] = useState('');
   const [resume, setResume] = useState('');
-  const [aiResult, setAiResult] = useState('');
+  const [questions, setQuestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // 点击按钮时先做前端校验，再调用 client API 方法。
+  // 点击按钮时先做前端校验，再调用 client API 获取问题数组。
   const handleGenerateQuestions = async () => {
     if (!jobInfo.trim() || !resume.trim()) {
       setError('请先填写岗位信息和个人简历。');
-      setAiResult('');
+      setQuestions([]);
       return;
     }
 
     setError('');
-    setAiResult('');
+    setQuestions([]);
     setIsLoading(true);
 
     try {
-      const content = await generateInterviewQuestions({ jobInfo, resume });
-      setAiResult(content || 'AI 没有返回内容。');
+      const generatedQuestions = await generateInterviewQuestions({ jobInfo, resume });
+      setQuestions(generatedQuestions);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -81,14 +81,26 @@ export default function InterviewSimulator() {
         {error && <p className="error-message">{error}</p>}
       </section>
 
-      {/* 结果区：展示空状态、加载状态或 AI 返回内容。 */}
+      {/* 结果区：展示空状态、加载状态或结构化问题列表。 */}
       <section className="panel preview">
         <h2>模拟问题</h2>
         {isLoading && <p className="empty-state">DeepSeek 正在生成问题，请稍等。</p>}
-        {!isLoading && !aiResult && (
+        {!isLoading && questions.length === 0 && (
           <p className="empty-state">填写岗位信息和个人简历后，点击按钮生成面试问题。</p>
         )}
-        {!isLoading && aiResult && <pre className="ai-result">{aiResult}</pre>}
+        {!isLoading && questions.length > 0 && (
+          <ul className="question-list">
+            {questions.map((item, index) => (
+              <li className="question-item" key={`${item.category}-${item.question}`}>
+                <p className="category">
+                  {index + 1}. {item.category}
+                </p>
+                <p className="question">{item.question}</p>
+                <p className="reason">{item.reason}</p>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </main>
   );
