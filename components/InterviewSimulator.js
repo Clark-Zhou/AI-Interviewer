@@ -4,7 +4,8 @@
  * 关联文件：
  * - lib/client/interviewApi.js：封装前端调用后端 API 的请求方法。
  * - app/globals.css：提供本组件使用的页面、表单、按钮和结果区样式。
- * - app/api/generate-questions/route.js：前端最终会请求到这个后端 API。
+ * - app/api/generate-questions/route.js：前端最终会请求到生成问题 API。
+ * - app/api/evaluate-interview/route.js：前端最终会请求到最终评价 API。
  *
  * 说明：
  * - 这个文件只处理浏览器端交互：输入、按钮点击、loading、错误和结果展示。
@@ -13,9 +14,9 @@
 'use client';
 
 import { useState } from 'react';
-import { generateInterviewQuestions } from '../lib/client/interviewApi';
+import { evaluateInterview, generateInterviewQuestions } from '../lib/client/interviewApi';
 
-// 前端主组件：负责收集输入、触发生成、展示加载/错误/结构化问题列表和用户回答。
+// 前端主组件：负责收集输入、生成问题、提交回答，并展示最终评价。
 export default function InterviewSimulator() {
   const [jobInfo, setJobInfo] = useState('');
   const [resume, setResume] = useState('');
@@ -23,14 +24,17 @@ export default function InterviewSimulator() {
   const [answers, setAnswers] = useState({});
   const [submittedAnswers, setSubmittedAnswers] = useState({});
   const [answerErrors, setAnswerErrors] = useState({});
+  const [evaluation, setEvaluation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
   const [error, setError] = useState('');
+  const [evaluationError, setEvaluationError] = useState('');
 
   // 根据已提交回答计算答题进度，只统计当前问题列表里的题目。
   const totalQuestionCount = questions.length;
   const submittedAnswerCount = questions.filter((_, index) => submittedAnswers[index]).length;
 
-  // 整理未来提交给 AI 批改接口的数据结构：每一项都包含问题和对应回答。
+  // 整理提交给 AI 批改接口的数据结构：每一项都包含问题和对应回答。
   const submittedQuestionAnswers = questions
     .map((item, index) => ({
       category: item.category,
@@ -49,7 +53,7 @@ export default function InterviewSimulator() {
       [questionIndex]: answerText,
     }));
 
-    // 用户开始修改回答后，清掉该题之前的局部错误和已提交状态。
+    // 用户开始修改回答后，清掉该题之前的局部错误、已提交状态和旧评价。
     setAnswerErrors((currentErrors) => ({
       ...currentErrors,
       [questionIndex]: '',
@@ -58,6 +62,8 @@ export default function InterviewSimulator() {
       ...currentSubmittedAnswers,
       [questionIndex]: '',
     }));
+    setEvaluation(null);
+    setEvaluationError('');
   };
 
   // 单题提交：当前只在前端记录提交状态，后续再接入单题评价或最终评价接口。
@@ -80,6 +86,8 @@ export default function InterviewSimulator() {
       ...currentSubmittedAnswers,
       [questionIndex]: answerText,
     }));
+    setEvaluation(null);
+    setEvaluationError('');
   };
 
   // 点击按钮时先做前端校验，再调用 client API 获取问题数组。
@@ -90,6 +98,8 @@ export default function InterviewSimulator() {
       setAnswers({});
       setSubmittedAnswers({});
       setAnswerErrors({});
+      setEvaluation(null);
+      setEvaluationError('');
       return;
     }
 
@@ -98,6 +108,8 @@ export default function InterviewSimulator() {
     setAnswers({});
     setSubmittedAnswers({});
     setAnswerErrors({});
+    setEvaluation(null);
+    setEvaluationError('');
     setIsLoading(true);
 
     try {
@@ -107,6 +119,31 @@ export default function InterviewSimulator() {
       setError(error.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // 所有题目提交后，调用最终评价 API 生成整体报告和逐题反馈。
+  const handleEvaluateInterview = async () => {
+    if (!isReadyForEvaluation) {
+      setEvaluationError('请先提交所有题目的回答。');
+      return;
+    }
+
+    setEvaluation(null);
+    setEvaluationError('');
+    setIsEvaluating(true);
+
+    try {
+      const generatedEvaluation = await evaluateInterview({
+        jobInfo,
+        resume,
+        questionAnswers: submittedQuestionAnswers,
+      });
+      setEvaluation(generatedEvaluation);
+    } catch (error) {
+      setEvaluationError(error.message);
+    } finally {
+      setIsEvaluating(false);
     }
   };
 
@@ -196,20 +233,90 @@ export default function InterviewSimulator() {
               ))}
             </ul>
 
-            {/* 评价准备区：当前只展示提交状态，下一步再接入 AI 批改接口。 */}
+            {/* 评价准备区：所有回答提交后，触发最终评价 API。 */}
             <div className="evaluation-ready-panel">
               <p>
                 {isReadyForEvaluation
                   ? '所有回答已提交，评价数据已经准备好。'
                   : '提交所有题目的回答后，就可以准备生成最终评价。'}
               </p>
-              <button type="button" disabled>
-                生成最终评价（接口下一步接入）
+              <button
+                type="button"
+                disabled={!isReadyForEvaluation || isEvaluating}
+                onClick={handleEvaluateInterview}
+              >
+                {isEvaluating ? '正在生成最终评价...' : '生成最终评价'}
               </button>
+              {evaluationError && <p className="answer-error">{evaluationError}</p>}
             </div>
           </>
         )}
       </section>
+
+      {/* 最终评价区：展示整体评分、总结、列表建议和逐题反馈。 */}
+      {evaluation && (
+        <section className="panel evaluation-panel">
+          <div className="evaluation-header">
+            <h2>最终评价</h2>
+            <span className="evaluation-score">{evaluation.overallScore} / 100</span>
+          </div>
+
+          <p className="evaluation-summary">{evaluation.summary}</p>
+
+          <div className="evaluation-grid">
+            <div>
+              <h3>主要优势</h3>
+              <ul>
+                {evaluation.strengths.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3>风险点</h3>
+              <ul>
+                {evaluation.risks.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="evaluation-block">
+            <h3>改进建议</h3>
+            <ul>
+              {evaluation.improvementSuggestions.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="evaluation-block">
+            <h3>逐题反馈</h3>
+            <ul className="feedback-list">
+              {evaluation.questionFeedback.map((item, index) => (
+                <li key={`${item.question}-${index}`}>
+                  <p className="category">
+                    第 {index + 1} 题｜{item.score} / 100
+                  </p>
+                  <p className="question">{item.question}</p>
+                  <p className="reason">{item.feedback}</p>
+                  <p className="reason">改进建议：{item.suggestion}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="evaluation-block">
+            <h3>后续练习题</h3>
+            <ul>
+              {evaluation.nextPracticeQuestions.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
     </main>
   );
 }

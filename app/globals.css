@@ -216,3 +216,86 @@ button:disabled {
   color: #4b5563;
   margin: 0 0 12px;
 }
+
+/* 最终评价区：展示整体分数、总结、优势风险和逐题反馈。 */
+.evaluation-panel {
+  margin-top: 20px;
+}
+
+.evaluation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.evaluation-header h2 {
+  margin-bottom: 0;
+}
+
+.evaluation-score {
+  color: #2563eb;
+  font-size: 20px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.evaluation-summary {
+  color: #374151;
+  line-height: 1.7;
+  margin: 0 0 18px;
+}
+
+.evaluation-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.evaluation-block {
+  border-top: 1px solid #e5e7eb;
+  margin-top: 18px;
+  padding-top: 18px;
+}
+
+.evaluation-panel h3 {
+  font-size: 16px;
+  margin: 0 0 10px;
+}
+
+.evaluation-panel ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.evaluation-panel li {
+  margin-bottom: 8px;
+}
+
+.feedback-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.feedback-list li {
+  border-top: 1px solid #e5e7eb;
+  margin-bottom: 0;
+  padding: 14px 0;
+}
+
+.feedback-list li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+@media (max-width: 720px) {
+  .evaluation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .evaluation-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
