@@ -155,22 +155,32 @@ button:disabled {
   line-height: 1.6;
 }
 
-/* AI 原始返回内容展示区，下一步会改成结构化问题卡片。 */
-.ai-result {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
-  color: #111827;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 15px;
-  line-height: 1.7;
-}
 
-/* 回答输入区：当前只负责展示输入框，后续会接入答案状态。 */
+/* 回答输入区：保存用户对单道面试问题的回答。 */
 .answer-field {
   margin-top: 14px;
 }
 
 .answer-field textarea {
   min-height: 110px;
+}
+
+/* 单题回答提交区：当前只标记前端提交状态，后续再接入评价接口。 */
+.answer-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.answer-status {
+  color: #047857;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.answer-error {
+  margin: 8px 0 0;
+  color: #dc2626;
+  font-size: 14px;
 }

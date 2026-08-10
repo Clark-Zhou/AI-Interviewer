@@ -21,6 +21,8 @@ export default function InterviewSimulator() {
   const [resume, setResume] = useState('');
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
+  const [submittedAnswers, setSubmittedAnswers] = useState({});
+  const [answerErrors, setAnswerErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -28,6 +30,38 @@ export default function InterviewSimulator() {
   const handleAnswerChange = (questionIndex, answerText) => {
     setAnswers((currentAnswers) => ({
       ...currentAnswers,
+      [questionIndex]: answerText,
+    }));
+
+    // 用户开始修改回答后，清掉该题之前的局部错误和已提交状态。
+    setAnswerErrors((currentErrors) => ({
+      ...currentErrors,
+      [questionIndex]: '',
+    }));
+    setSubmittedAnswers((currentSubmittedAnswers) => ({
+      ...currentSubmittedAnswers,
+      [questionIndex]: '',
+    }));
+  };
+
+  // 单题提交：当前只在前端记录提交状态，后续再接入单题评价或最终评价接口。
+  const handleSubmitAnswer = (questionIndex) => {
+    const answerText = answers[questionIndex]?.trim();
+
+    if (!answerText) {
+      setAnswerErrors((currentErrors) => ({
+        ...currentErrors,
+        [questionIndex]: '请先填写这道题的回答。',
+      }));
+      return;
+    }
+
+    setAnswerErrors((currentErrors) => ({
+      ...currentErrors,
+      [questionIndex]: '',
+    }));
+    setSubmittedAnswers((currentSubmittedAnswers) => ({
+      ...currentSubmittedAnswers,
       [questionIndex]: answerText,
     }));
   };
@@ -38,12 +72,16 @@ export default function InterviewSimulator() {
       setError('请先填写岗位信息和个人简历。');
       setQuestions([]);
       setAnswers({});
+      setSubmittedAnswers({});
+      setAnswerErrors({});
       return;
     }
 
     setError('');
     setQuestions([]);
     setAnswers({});
+    setSubmittedAnswers({});
+    setAnswerErrors({});
     setIsLoading(true);
 
     try {
@@ -109,7 +147,7 @@ export default function InterviewSimulator() {
                 <p className="question">{item.question}</p>
                 <p className="reason">{item.reason}</p>
 
-                {/* 回答输入框：当前阶段只保存到前端状态，暂时不提交后端。 */}
+                {/* 回答输入框：当前阶段支持单题提交，但暂时不提交到后端。 */}
                 <div className="answer-field">
                   <label htmlFor={`answer-${index}`}>你的回答</label>
                   <textarea
@@ -118,6 +156,17 @@ export default function InterviewSimulator() {
                     onChange={(event) => handleAnswerChange(index, event.target.value)}
                     placeholder="先输入你的回答，下一步会用于生成最终评价"
                   />
+
+                  <div className="answer-actions">
+                    <button type="button" onClick={() => handleSubmitAnswer(index)}>
+                      提交本题回答
+                    </button>
+                    {submittedAnswers[index] && <span className="answer-status">已提交</span>}
+                  </div>
+
+                  {answerErrors[index] && (
+                    <p className="answer-error">{answerErrors[index]}</p>
+                  )}
                 </div>
               </li>
             ))}
