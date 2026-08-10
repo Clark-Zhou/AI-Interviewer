@@ -26,6 +26,10 @@ export default function InterviewSimulator() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // 根据已提交回答计算答题进度，只统计当前问题列表里的题目。
+  const totalQuestionCount = questions.length;
+  const submittedAnswerCount = questions.filter((_, index) => submittedAnswers[index]).length;
+
   // 按问题下标保存用户回答，下一步会把这些回答提交给评价接口。
   const handleAnswerChange = (questionIndex, answerText) => {
     setAnswers((currentAnswers) => ({
@@ -132,7 +136,14 @@ export default function InterviewSimulator() {
 
       {/* 结果区：展示空状态、加载状态或结构化问题列表。 */}
       <section className="panel preview">
-        <h2>模拟问题</h2>
+        <div className="preview-header">
+          <h2>模拟问题</h2>
+          {totalQuestionCount > 0 && (
+            <span className="answer-progress">
+              已提交 {submittedAnswerCount} / {totalQuestionCount}
+            </span>
+          )}
+        </div>
         {isLoading && <p className="empty-state">DeepSeek 正在生成问题，请稍等。</p>}
         {!isLoading && questions.length === 0 && (
           <p className="empty-state">填写岗位信息和个人简历后，点击按钮生成面试问题。</p>
