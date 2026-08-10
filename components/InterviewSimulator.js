@@ -30,6 +30,18 @@ export default function InterviewSimulator() {
   const totalQuestionCount = questions.length;
   const submittedAnswerCount = questions.filter((_, index) => submittedAnswers[index]).length;
 
+  // 整理未来提交给 AI 批改接口的数据结构：每一项都包含问题和对应回答。
+  const submittedQuestionAnswers = questions
+    .map((item, index) => ({
+      category: item.category,
+      question: item.question,
+      reason: item.reason,
+      answer: submittedAnswers[index] || '',
+    }))
+    .filter((item) => item.answer);
+  const isReadyForEvaluation =
+    totalQuestionCount > 0 && submittedQuestionAnswers.length === totalQuestionCount;
+
   // 按问题下标保存用户回答，下一步会把这些回答提交给评价接口。
   const handleAnswerChange = (questionIndex, answerText) => {
     setAnswers((currentAnswers) => ({
@@ -149,39 +161,53 @@ export default function InterviewSimulator() {
           <p className="empty-state">填写岗位信息和个人简历后，点击按钮生成面试问题。</p>
         )}
         {!isLoading && questions.length > 0 && (
-          <ul className="question-list">
-            {questions.map((item, index) => (
-              <li className="question-item" key={`${item.category}-${item.question}`}>
-                <p className="category">
-                  {index + 1}. {item.category}
-                </p>
-                <p className="question">{item.question}</p>
-                <p className="reason">{item.reason}</p>
+          <>
+            <ul className="question-list">
+              {questions.map((item, index) => (
+                <li className="question-item" key={`${item.category}-${item.question}`}>
+                  <p className="category">
+                    {index + 1}. {item.category}
+                  </p>
+                  <p className="question">{item.question}</p>
+                  <p className="reason">{item.reason}</p>
 
-                {/* 回答输入框：当前阶段支持单题提交，但暂时不提交到后端。 */}
-                <div className="answer-field">
-                  <label htmlFor={`answer-${index}`}>你的回答</label>
-                  <textarea
-                    id={`answer-${index}`}
-                    value={answers[index] || ''}
-                    onChange={(event) => handleAnswerChange(index, event.target.value)}
-                    placeholder="先输入你的回答，下一步会用于生成最终评价"
-                  />
+                  {/* 回答输入框：当前阶段支持单题提交，但暂时不提交到后端。 */}
+                  <div className="answer-field">
+                    <label htmlFor={`answer-${index}`}>你的回答</label>
+                    <textarea
+                      id={`answer-${index}`}
+                      value={answers[index] || ''}
+                      onChange={(event) => handleAnswerChange(index, event.target.value)}
+                      placeholder="先输入你的回答，下一步会用于生成最终评价"
+                    />
 
-                  <div className="answer-actions">
-                    <button type="button" onClick={() => handleSubmitAnswer(index)}>
-                      提交本题回答
-                    </button>
-                    {submittedAnswers[index] && <span className="answer-status">已提交</span>}
+                    <div className="answer-actions">
+                      <button type="button" onClick={() => handleSubmitAnswer(index)}>
+                        提交本题回答
+                      </button>
+                      {submittedAnswers[index] && <span className="answer-status">已提交</span>}
+                    </div>
+
+                    {answerErrors[index] && (
+                      <p className="answer-error">{answerErrors[index]}</p>
+                    )}
                   </div>
+                </li>
+              ))}
+            </ul>
 
-                  {answerErrors[index] && (
-                    <p className="answer-error">{answerErrors[index]}</p>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
+            {/* 评价准备区：当前只展示提交状态，下一步再接入 AI 批改接口。 */}
+            <div className="evaluation-ready-panel">
+              <p>
+                {isReadyForEvaluation
+                  ? '所有回答已提交，评价数据已经准备好。'
+                  : '提交所有题目的回答后，就可以准备生成最终评价。'}
+              </p>
+              <button type="button" disabled>
+                生成最终评价（接口下一步接入）
+              </button>
+            </div>
+          </>
         )}
       </section>
     </main>

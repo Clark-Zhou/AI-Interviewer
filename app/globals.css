@@ -204,3 +204,15 @@ button:disabled {
   font-weight: 700;
   white-space: nowrap;
 }
+
+/* 评价准备区：汇总当前回答提交状态，为后续 AI 批改入口做准备。 */
+.evaluation-ready-panel {
+  border-top: 1px solid #e5e7eb;
+  margin-top: 20px;
+  padding-top: 20px;
+}
+
+.evaluation-ready-panel p {
+  color: #4b5563;
+  margin: 0 0 12px;
+}
