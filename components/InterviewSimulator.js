@@ -15,24 +15,35 @@
 import { useState } from 'react';
 import { generateInterviewQuestions } from '../lib/client/interviewApi';
 
-// 前端主组件：负责收集输入、触发生成、展示加载/错误/结构化问题列表。
+// 前端主组件：负责收集输入、触发生成、展示加载/错误/结构化问题列表和用户回答。
 export default function InterviewSimulator() {
   const [jobInfo, setJobInfo] = useState('');
   const [resume, setResume] = useState('');
   const [questions, setQuestions] = useState([]);
+  const [answers, setAnswers] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // 按问题下标保存用户回答，下一步会把这些回答提交给评价接口。
+  const handleAnswerChange = (questionIndex, answerText) => {
+    setAnswers((currentAnswers) => ({
+      ...currentAnswers,
+      [questionIndex]: answerText,
+    }));
+  };
 
   // 点击按钮时先做前端校验，再调用 client API 获取问题数组。
   const handleGenerateQuestions = async () => {
     if (!jobInfo.trim() || !resume.trim()) {
       setError('请先填写岗位信息和个人简历。');
       setQuestions([]);
+      setAnswers({});
       return;
     }
 
     setError('');
     setQuestions([]);
+    setAnswers({});
     setIsLoading(true);
 
     try {
@@ -98,12 +109,14 @@ export default function InterviewSimulator() {
                 <p className="question">{item.question}</p>
                 <p className="reason">{item.reason}</p>
 
-                {/* 回答输入框：当前阶段只展示 UI，暂时不保存用户输入。 */}
+                {/* 回答输入框：当前阶段只保存到前端状态，暂时不提交后端。 */}
                 <div className="answer-field">
                   <label htmlFor={`answer-${index}`}>你的回答</label>
                   <textarea
                     id={`answer-${index}`}
-                    placeholder="先输入你的回答，下一步会保存这些内容用于最终评价"
+                    value={answers[index] || ''}
+                    onChange={(event) => handleAnswerChange(index, event.target.value)}
+                    placeholder="先输入你的回答，下一步会用于生成最终评价"
                   />
                 </div>
               </li>
