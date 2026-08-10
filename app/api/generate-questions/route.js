@@ -24,8 +24,9 @@ export async function POST(request) {
       );
     }
 
-    const content = await generateInterviewQuestionsWithDeepSeek({ jobInfo, resume });
-    return Response.json({ content });
+    // 服务层已经完成 AI 调用和 JSON 解析，这里只把标准 questions 数组返回给前端。
+    const questions = await generateInterviewQuestionsWithDeepSeek({ jobInfo, resume });
+    return Response.json({ questions });
   } catch (error) {
     return Response.json(
       {
