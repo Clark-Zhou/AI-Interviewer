@@ -1,3 +1,16 @@
+/**
+ * 文件职责：全局样式文件。
+ *
+ * 关联文件：
+ * - app/layout.js：通过 import './globals.css' 引入本文件。
+ * - components/InterviewSimulator.js：页面组件使用这里定义的 className。
+ *
+ * 说明：
+ * - 当前 MVP 先使用普通 CSS，暂时不引入 Tailwind 或组件库。
+ * - 样式按页面区域分组，方便后续逐步调整视觉效果。
+ */
+
+/* 全局基础样式：统一盒模型、字体和页面背景。 */
 * {
   box-sizing: border-box;
 }
@@ -15,6 +28,7 @@ textarea {
   font: inherit;
 }
 
+/* 页面布局：控制内容宽度和卡片外观。 */
 .page {
   width: min(900px, calc(100% - 32px));
   margin: 0 auto;
@@ -32,6 +46,7 @@ textarea {
   margin-top: 20px;
 }
 
+/* 标题和说明文字。 */
 h1 {
   margin: 0 0 8px;
   font-size: 28px;
@@ -47,6 +62,7 @@ h2 {
   color: #4b5563;
 }
 
+/* 表单输入区。 */
 .field {
   margin-bottom: 18px;
 }
@@ -73,6 +89,7 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
+/* 操作按钮和错误提示。 */
 button {
   border: 0;
   border-radius: 8px;
@@ -87,6 +104,23 @@ button:hover {
   background: #1d4ed8;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.error-message {
+  margin: 14px 0 0;
+  color: #dc2626;
+  font-size: 14px;
+}
+
+.empty-state {
+  margin: 0;
+  color: #6b7280;
+}
+
+/* 问题列表展示区。 */
 .question-list {
   list-style: none;
   margin: 0;
@@ -119,4 +153,15 @@ button:hover {
   color: #4b5563;
   font-size: 14px;
   line-height: 1.6;
+}
+
+/* AI 原始返回内容展示区，下一步会改成结构化问题卡片。 */
+.ai-result {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #111827;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
 }
