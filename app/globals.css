@@ -165,3 +165,12 @@ button:disabled {
   font-size: 15px;
   line-height: 1.7;
 }
+
+/* 回答输入区：当前只负责展示输入框，后续会接入答案状态。 */
+.answer-field {
+  margin-top: 14px;
+}
+
+.answer-field textarea {
+  min-height: 110px;
+}

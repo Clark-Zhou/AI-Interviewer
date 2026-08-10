@@ -97,6 +97,15 @@ export default function InterviewSimulator() {
                 </p>
                 <p className="question">{item.question}</p>
                 <p className="reason">{item.reason}</p>
+
+                {/* 回答输入框：当前阶段只展示 UI，暂时不保存用户输入。 */}
+                <div className="answer-field">
+                  <label htmlFor={`answer-${index}`}>你的回答</label>
+                  <textarea
+                    id={`answer-${index}`}
+                    placeholder="先输入你的回答，下一步会保存这些内容用于最终评价"
+                  />
+                </div>
               </li>
             ))}
           </ul>
