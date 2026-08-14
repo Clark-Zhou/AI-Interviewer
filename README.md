@@ -107,6 +107,7 @@ lib/prompts/interviewEvaluation.js 最终评价 prompt
 
 docs/PRD.md                       MVP 产品需求文档
 docs/PROJECT_STATUS.md            当前项目状态文档
+docs/ROADMAP.md                   阶段计划和优先级
 docs/DEVELOPMENT_TESTING.md       开发测试说明
 AGENTS.md                         AI agent 和开发协作规范
 index.html                        旧版静态原型，仅供参考
@@ -169,8 +170,9 @@ components/InterviewSimulator.js
 1. `README.md`
 2. `AGENTS.md`
 3. `docs/PROJECT_STATUS.md`
-4. `docs/DEVELOPMENT_TESTING.md`
-5. `docs/PRD.md`
+4. `docs/ROADMAP.md`
+5. `docs/DEVELOPMENT_TESTING.md`
+6. `docs/PRD.md`
 
 ## 当前不做的事情
 
@@ -187,7 +189,7 @@ components/InterviewSimulator.js
 
 ## 后续可能方向
 
-可以小步考虑：
+具体阶段计划以 `docs/ROADMAP.md` 为准。可以小步考虑：
 
 - 为最终评价失败增加重试按钮
 - 将开发辅助示例数据拆到单独 fixture 文件

@@ -85,6 +85,12 @@ docs/PROJECT_STATUS.md
 当前项目状态文档，也就是本文件。用于快速了解项目已经做到哪里。一个功能分支快结束、准备 PR 前，应更新一次。
 
 ```text
+docs/ROADMAP.md
+```
+
+阶段计划和优先级文档，用于对齐产品助理、前端开发、后端开发等不同 session 的工作顺序。
+
+```text
 docs/DEVELOPMENT_TESTING.md
 ```
 
@@ -387,7 +393,7 @@ http://localhost:3000
 推荐下一步：
 
 ```text
-做一次人工回归测试，并准备当前分支的 Pull Request。
+先做一次人工回归测试并准备当前分支的 Pull Request；下一条功能主线建议参考 docs/ROADMAP.md，从历史记录初始化开始。
 ```
 
 建议检查：
@@ -422,6 +428,7 @@ http://localhost:3000
 后续开发应遵守：
 
 - 前端不能直接调用 DeepSeek API。
+- 多 session 协作的阶段计划和优先级以 `docs/ROADMAP.md` 为准。
 - DeepSeek API Key 只能在服务端读取。
 - 新建重要代码文件需要中文 file header。
 - 函数和重要逻辑块需要简短中文注释。

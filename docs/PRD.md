@@ -103,7 +103,7 @@ User answers each question in text.
 
 MVP behavior:
 
-- Display questions in a list or step-by-step view
+- Display questions in a list for the current MVP; step-by-step interviewing can be reconsidered later
 - Provide one text area per answer
 - Allow the user to submit each answer separately
 
@@ -253,6 +253,6 @@ Recommended tech stack:
 
 - Should the product start in Chinese, English, or support both?
 - Should the first version optimize for software engineering interviews or general job interviews?
-- Should the mock interview be question-list based or one-question-at-a-time?
+- Should the product later evolve from the current question-list flow into one-question-at-a-time interviewing?
 - Should scores be strict and numeric, or more coaching-oriented?
 - Should interview sessions be saved locally after the first prototype?
