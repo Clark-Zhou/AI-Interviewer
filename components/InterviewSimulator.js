@@ -55,6 +55,22 @@ AI Interview Simulator 独立项目
 - 技术理解：JavaScript、React、Next.js、基础 API 调用。
 - AI 相关：Prompt Engineering、AI 返回 JSON 结构设计、基础模型效果评估。`;
 
+const SAMPLE_ANSWER_FOCUS = {
+  岗位匹配: '求职动机、岗位理解和个人优势',
+  项目经验: '项目目标、方案拆解、推进过程和结果复盘',
+  技能能力: '技术理解、Prompt 调优和效果验证方法',
+  协作沟通: '跨角色沟通、问题定位和推动落地',
+  行为问题: '任务取舍、优先级判断和自我管理',
+  风险点: '风险识别、补足计划和改进动作',
+};
+
+// 开发辅助：根据当前题目生成本地测试回答，用于快速走完整提交和评价流程。
+function buildSampleAnswer(questionItem, questionIndex) {
+  const focus = SAMPLE_ANSWER_FOCUS[questionItem.category] || '问题分析、行动过程和结果复盘';
+
+  return `这是第 ${questionIndex + 1} 题的开发测试回答。针对「${questionItem.question}」，我会先结合岗位要求说明问题背景，再引用简历中的 AI Interview Simulator 或 AI 销售助手经历举例，重点说明${focus}。实际面试中我会继续补充具体指标、个人职责、协作方式和复盘思考。`;
+}
+
 // 前端主组件：负责收集输入、生成问题、提交回答，并展示最终评价。
 export default function InterviewSimulator() {
   const [jobInfo, setJobInfo] = useState('');
@@ -79,6 +95,20 @@ export default function InterviewSimulator() {
     setAnswerErrors({});
     setEvaluation(null);
     setError('');
+    setEvaluationError('');
+  };
+
+  // 开发辅助：为当前问题列表填入测试回答，但保留逐题手动提交动作。
+  const handleFillSampleAnswers = () => {
+    const sampleAnswers = questions.reduce((nextAnswers, questionItem, questionIndex) => ({
+      ...nextAnswers,
+      [questionIndex]: buildSampleAnswer(questionItem, questionIndex),
+    }), {});
+
+    setAnswers(sampleAnswers);
+    setSubmittedAnswers({});
+    setAnswerErrors({});
+    setEvaluation(null);
     setEvaluationError('');
   };
 
@@ -252,9 +282,20 @@ export default function InterviewSimulator() {
         <div className="preview-header">
           <h2>模拟问题</h2>
           {totalQuestionCount > 0 && (
-            <span className="answer-progress">
-              已提交 {submittedAnswerCount} / {totalQuestionCount}
-            </span>
+            <div className="preview-actions">
+              <span className="answer-progress">
+                已提交 {submittedAnswerCount} / {totalQuestionCount}
+              </span>
+              {isDevelopment && (
+                <button
+                  type="button"
+                  className="secondary-button compact-button"
+                  onClick={handleFillSampleAnswers}
+                >
+                  填入测试回答
+                </button>
+              )}
+            </div>
           )}
         </div>
         {isLoading && <p className="empty-state">DeepSeek 正在生成问题，请稍等。</p>}

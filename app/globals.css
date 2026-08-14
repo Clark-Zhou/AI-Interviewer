@@ -233,6 +233,17 @@ button:disabled {
   margin-bottom: 0;
 }
 
+.preview-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.compact-button {
+  font-size: 13px;
+  padding: 8px 12px;
+}
+
 .answer-progress {
   color: #4b5563;
   font-size: 14px;
@@ -332,6 +343,12 @@ button:disabled {
 
   .secondary-button {
     width: 100%;
+  }
+
+  .preview-header,
+  .preview-actions {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .evaluation-grid {
