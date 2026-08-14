@@ -4,8 +4,8 @@
  * 关联文件：
  * - lib/client/interviewApi.js：封装前端调用后端 API 的请求方法。
  * - app/globals.css：提供本组件使用的页面、表单、按钮和结果区样式。
- * - app/api/generate-questions/route.js：前端最终会请求到生成问题 API。
- * - app/api/evaluate-interview/route.js：前端最终会请求到最终评价 API。
+ * - app/api/generate-questions/route.js：前端通过请求层调用生成问题 API。
+ * - app/api/evaluate-interview/route.js：前端通过请求层调用最终评价 API。
  *
  * 说明：
  * - 这个文件只处理浏览器端交互：输入、按钮点击、loading、错误和结果展示。
@@ -46,7 +46,7 @@ export default function InterviewSimulator() {
   const isReadyForEvaluation =
     totalQuestionCount > 0 && submittedQuestionAnswers.length === totalQuestionCount;
 
-  // 按问题下标保存用户回答，下一步会把这些回答提交给评价接口。
+  // 按问题下标保存用户回答，提交整场评价时会使用这些回答。
   const handleAnswerChange = (questionIndex, answerText) => {
     setAnswers((currentAnswers) => ({
       ...currentAnswers,
@@ -66,7 +66,7 @@ export default function InterviewSimulator() {
     setEvaluationError('');
   };
 
-  // 单题提交：当前只在前端记录提交状态，后续再接入单题评价或最终评价接口。
+  // 单题提交：在前端记录已确认的回答，最终评价接口只使用已提交回答。
   const handleSubmitAnswer = (questionIndex) => {
     const answerText = answers[questionIndex]?.trim();
 
@@ -153,7 +153,7 @@ export default function InterviewSimulator() {
       <section className="panel">
         <h1>AI 模拟面试</h1>
         <p className="subtitle">
-          先用岗位信息和个人简历跑通面试准备流程。当前版本会调用 DeepSeek 生成第一组面试问题。
+          粘贴岗位信息和个人简历，生成模拟问题；回答并提交所有题目后，可以获得一份最终面试评价。
         </p>
 
         <div className="field">
@@ -208,14 +208,14 @@ export default function InterviewSimulator() {
                   <p className="question">{item.question}</p>
                   <p className="reason">{item.reason}</p>
 
-                  {/* 回答输入框：当前阶段支持单题提交，但暂时不提交到后端。 */}
+                  {/* 回答输入框：用户可以逐题修改和提交回答。 */}
                   <div className="answer-field">
                     <label htmlFor={`answer-${index}`}>你的回答</label>
                     <textarea
                       id={`answer-${index}`}
                       value={answers[index] || ''}
                       onChange={(event) => handleAnswerChange(index, event.target.value)}
-                      placeholder="先输入你的回答，下一步会用于生成最终评价"
+                      placeholder="输入你的回答，提交后会用于生成最终评价"
                     />
 
                     <div className="answer-actions">

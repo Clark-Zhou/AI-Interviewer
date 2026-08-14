@@ -165,7 +165,7 @@ button:disabled {
   min-height: 110px;
 }
 
-/* 单题回答提交区：当前只标记前端提交状态，后续再接入评价接口。 */
+/* 单题回答提交区：确认单道题的回答是否纳入最终评价。 */
 .answer-actions {
   display: flex;
   align-items: center;
@@ -205,7 +205,7 @@ button:disabled {
   white-space: nowrap;
 }
 
-/* 评价准备区：汇总当前回答提交状态，为后续 AI 批改入口做准备。 */
+/* 评价准备区：汇总当前回答提交状态，并提供最终评价入口。 */
 .evaluation-ready-panel {
   border-top: 1px solid #e5e7eb;
   margin-top: 20px;

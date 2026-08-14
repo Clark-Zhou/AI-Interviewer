@@ -3,7 +3,7 @@
  *
  * 关联文件：
  * - lib/server/interviewEvaluation.js：真正调用 DeepSeek 并解析最终评价的服务端逻辑。
- * - lib/client/interviewApi.js：后续前端会通过这里封装的方法请求本 API。
+ * - lib/client/interviewApi.js：前端通过这里封装的方法请求本 API。
  * - .env.local：提供 DEEPSEEK_API_KEY 和可选的 DEEPSEEK_MODEL。
  *
  * 说明：

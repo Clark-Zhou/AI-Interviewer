@@ -7,32 +7,38 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 当前 MVP 的核心目标是先跑通：
 
 ```text
-岗位信息 + 个人简历 -> AI 生成面试问题 -> 页面结构化展示问题
+岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-完整 MVP 后续还会包含：用户回答问题、提交回答、AI 生成最终评价。
+这个阶段暂时不做登录、数据库、文件上传和历史记录，先验证最核心的面试练习闭环是否成立。
 
 ## 2. 当前阶段
 
 当前分支：
 
 ```text
-mvp-ai
+develop-mvp-userResponse
 ```
 
-当前已经完成的是 MVP 的第一段闭环：
+当前已经完成的是 MVP 的核心闭环：
 
 ```text
 输入岗位信息
 输入个人简历
 点击生成面试问题
-前端调用后端 API
+前端调用后端生成问题 API
 后端调用 DeepSeek
 后端解析 AI 返回 JSON
 前端展示结构化问题列表
+用户逐题输入回答
+用户逐题提交回答
+页面展示答题进度
+所有回答提交后生成最终评价
+前端调用后端最终评价 API
+后端调用 DeepSeek
+后端解析最终评价 JSON
+前端展示整体评价和逐题反馈
 ```
-
-当前还没有实现用户回答和最终评价。
 
 ## 3. 技术栈
 
@@ -74,7 +80,7 @@ MVP 产品需求文档，描述产品目标、用户流程、功能范围和未�
 docs/PROJECT_STATUS.md
 ```
 
-当前项目状态文档，也就是本文件。用于快速了解项目已经做到哪里。
+当前项目状态文档，也就是本文件。用于快速了解项目已经做到哪里。一个功能分支快结束、准备 PR 前，应更新一次。
 
 ```text
 app/page.js
@@ -86,37 +92,61 @@ Next.js 首页入口，只挂载主功能组件。
 components/InterviewSimulator.js
 ```
 
-前端主组件，负责岗位信息和简历输入、按钮交互、loading、错误提示和问题列表展示。
+前端主组件，负责岗位信息和简历输入、生成问题、逐题回答、逐题提交、答题进度、最终评价请求和结果展示。
 
 ```text
 lib/client/interviewApi.js
 ```
 
-前端请求封装。前端通过这里调用项目自己的后端 API。
+前端请求封装。前端通过这里调用项目自己的后端 API，不能直接调用 DeepSeek。
 
 ```text
 app/api/generate-questions/route.js
 ```
 
-后端 API 入口，接收前端请求，做基础校验，然后调用服务端 AI 逻辑。
+生成面试问题的后端 API 入口，接收前端请求，做基础校验，然后调用服务端 AI 逻辑。
+
+```text
+app/api/evaluate-interview/route.js
+```
+
+生成最终面试评价的后端 API 入口，接收岗位、简历和整场问答，做基础校验，然后调用服务端 AI 逻辑。
 
 ```text
 lib/server/deepseek.js
 ```
 
-DeepSeek 服务端调用封装。这里读取环境变量、调用 DeepSeek API，并把返回内容交给解析函数。
+生成问题的 DeepSeek 服务端调用封装。这里读取环境变量、调用 DeepSeek API，并把返回内容交给问题解析函数。
+
+```text
+lib/server/interviewEvaluation.js
+```
+
+最终评价的 DeepSeek 服务端调用封装。这里读取环境变量、调用 DeepSeek API，并把返回内容交给评价解析函数。
 
 ```text
 lib/server/parseAiQuestions.js
 ```
 
-AI 返回内容解析模块。负责把模型返回的 JSON 文本解析和校验成标准 `questions` 数组。
+AI 问题返回内容解析模块。负责把模型返回的 JSON 文本解析和校验成标准 `questions` 数组。
+
+```text
+lib/server/parseInterviewEvaluation.js
+```
+
+AI 评价返回内容解析模块。负责把模型返回的 JSON 文本解析和校验成标准 `evaluation` 对象。
 
 ```text
 lib/prompts/interviewQuestions.js
 ```
 
 生成面试问题的 prompt 管理文件。后续优化问题质量时优先修改这里。
+
+```text
+lib/prompts/interviewEvaluation.js
+```
+
+生成最终评价的 prompt 管理文件。后续优化评分标准、反馈结构或语气时优先修改这里。
 
 ```text
 app/globals.css
@@ -126,7 +156,7 @@ app/globals.css
 
 ## 5. 当前数据流
 
-完整链路如下：
+生成问题链路：
 
 ```text
 components/InterviewSimulator.js
@@ -137,6 +167,21 @@ components/InterviewSimulator.js
   -> DeepSeek API
   -> lib/server/parseAiQuestions.js
   -> app/api/generate-questions/route.js
+  -> lib/client/interviewApi.js
+  -> components/InterviewSimulator.js
+```
+
+最终评价链路：
+
+```text
+components/InterviewSimulator.js
+  -> lib/client/interviewApi.js
+  -> app/api/evaluate-interview/route.js
+  -> lib/server/interviewEvaluation.js
+  -> lib/prompts/interviewEvaluation.js
+  -> DeepSeek API
+  -> lib/server/parseInterviewEvaluation.js
+  -> app/api/evaluate-interview/route.js
   -> lib/client/interviewApi.js
   -> components/InterviewSimulator.js
 ```
@@ -156,7 +201,7 @@ components/InterviewSimulator.js
 
 ## 6. 当前 API 协议
 
-前端请求：
+生成问题：
 
 ```http
 POST /api/generate-questions
@@ -182,6 +227,52 @@ POST /api/generate-questions
       "reason": "为什么问这个问题"
     }
   ]
+}
+```
+
+最终评价：
+
+```http
+POST /api/evaluate-interview
+```
+
+请求体：
+
+```json
+{
+  "jobInfo": "岗位信息文本",
+  "resume": "个人简历文本",
+  "questionAnswers": [
+    {
+      "category": "岗位匹配",
+      "question": "问题文本",
+      "reason": "为什么问这个问题",
+      "answer": "用户提交的回答"
+    }
+  ]
+}
+```
+
+成功响应：
+
+```json
+{
+  "evaluation": {
+    "overallScore": 80,
+    "summary": "整体评价文本",
+    "strengths": ["优势 1"],
+    "risks": ["风险点 1"],
+    "improvementSuggestions": ["改进建议 1"],
+    "questionFeedback": [
+      {
+        "question": "原问题文本",
+        "score": 80,
+        "feedback": "这道题回答得怎么样",
+        "suggestion": "这道题可以如何改进"
+      }
+    ],
+    "nextPracticeQuestions": ["建议继续练习的问题 1"]
+  }
 }
 ```
 
@@ -248,29 +339,36 @@ http://localhost:3000
 - 前端空输入校验
 - DeepSeek API Key 环境变量读取
 - `/api/generate-questions` 后端 API
-- DeepSeek chat completions 调用
+- 生成问题 DeepSeek chat completions 调用
 - 面试问题 prompt
-- AI 返回 JSON 解析
+- AI 问题返回 JSON 解析
 - 结构化问题列表展示
+- 每道题单独回答输入框
+- 每道题单独提交按钮
+- 答题进度展示
+- `/api/evaluate-interview` 后端 API
+- 最终评价 DeepSeek chat completions 调用
+- 最终评价 prompt
+- AI 最终评价返回 JSON 解析
+- 最终评价页面展示
 - 代码分层
 - 中文 file header 和关键逻辑注释
 - 项目协作规范 `AGENTS.md`
 
-## 10. 未完成功能
+## 10. 暂未完成 / 暂不做
 
-尚未完成：
+当前 MVP 还没有做：
 
-- 用户回答每个问题
-- 保存每个问题的回答
-- 提交回答生成最终评价
-- 最终评价 prompt
-- 最终评价 API route
-- 最终评价页面展示
-- AI 返回解析失败时的用户友好重试策略
+- AI 返回解析失败时的用户友好重试按钮
 - 文件上传解析简历或 JD
 - 数据库存储历史记录
 - 用户登录
 - 部署配置
+- 多轮追问
+- 语音或视频面试
+- 单题即时 AI 批改
+
+这些功能不影响当前 MVP 主流程验证，可以在后续分支逐步做。
 
 ## 11. 下一步建议
 
@@ -279,15 +377,25 @@ http://localhost:3000
 推荐下一步：
 
 ```text
-在每个生成的问题下面增加回答输入框。
+做一次人工回归测试，并准备当前分支的 Pull Request。
 ```
 
-具体可以拆成：
+建议检查：
 
-1. 在 `components/InterviewSimulator.js` 中为每个问题展示一个 textarea。
-2. 新增 `answers` 状态，保存每道题的回答。
-3. 暂时不调用 AI 评价，只先把回答输入和状态保存跑通。
-4. 确认交互稳定后，再设计最终评价 API。
+1. 岗位信息为空时，点击生成问题是否提示错误。
+2. 简历为空时，点击生成问题是否提示错误。
+3. 正常输入岗位和简历后，是否可以生成问题。
+4. 每道题未填写回答时，点击提交是否提示错误。
+5. 每道题填写并提交后，答题进度是否正确更新。
+6. 所有题提交后，是否可以生成最终评价。
+7. 修改某道题回答后，旧的提交状态和旧评价是否被清空。
+
+后续可以优先考虑：
+
+- 为最终评价失败增加重试按钮。
+- 优化最终评价 prompt 的评分标准。
+- 保存一次完整模拟面试结果，方便后续接数据库。
+- 补充更正式的 PR 描述和测试记录。
 
 不建议马上做：
 
@@ -309,5 +417,4 @@ http://localhost:3000
 - 依赖安装由项目所有者执行，AI agent 只提供命令和说明。
 - 如果运行或测试多次失败，应先停下来讨论，不要持续枚举尝试。
 
-
-**一个功能分支快结束、准备 PR 前，更新一次 PROJECT_STATUS.md**
+**一个功能分支快结束、准备 PR 前，更新一次 PROJECT_STATUS.md。**
