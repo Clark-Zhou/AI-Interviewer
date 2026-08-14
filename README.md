@@ -10,7 +10,7 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前版本先验证最小可用闭环，不包含登录、数据库、文件上传、历史记录、语音或视频面试。
+当前版本先验证最小可用闭环，不包含登录、数据库、文件上传、云端历史记录、语音或视频面试。本地历史记录初始化是下一阶段计划。
 
 ## 当前功能
 
@@ -165,14 +165,28 @@ components/InterviewSimulator.js
 
 ## 重要文档阅读顺序
 
-如果是新的开发者或 AI agent 接手，建议先读：
+如果是新的开发者或 AI agent 接手，通用必读：
 
 1. `README.md`
 2. `AGENTS.md`
 3. `docs/PROJECT_STATUS.md`
 4. `docs/ROADMAP.md`
-5. `docs/DEVELOPMENT_TESTING.md`
-6. `docs/PRD.md`
+
+按需阅读：
+
+- `docs/DEVELOPMENT_TESTING.md`：改开发辅助、mock 策略或本地测试流程时阅读。
+- `docs/PRD.md`：改产品范围、用户流程、MVP 边界或非目标时阅读。
+
+## Session 协作方式
+
+当前项目推荐按阶段闭环拆分 session，而不是按前端/后端拆分。常用角色见 `AGENTS.md`：
+
+- 产品助理 session
+- 阶段开发 session
+- 代码审查 session
+- 开发测试 session（可选）
+
+具体阶段计划和启动话术见 `docs/ROADMAP.md`。
 
 ## 当前不做的事情
 
@@ -181,7 +195,7 @@ components/InterviewSimulator.js
 - 登录注册
 - 数据库存储
 - 文件上传解析简历或 JD
-- 历史面试记录
+- 云端/数据库历史面试记录
 - 多轮追问
 - 语音或视频面试
 - 单题即时 AI 批改
@@ -195,4 +209,4 @@ components/InterviewSimulator.js
 - 将开发辅助示例数据拆到单独 fixture 文件
 - 设计一次完整面试 session 的数据结构
 - 增加显式 mock AI 开关，降低开发测试成本
-- 保存面试历史记录
+- 初始化本地历史记录

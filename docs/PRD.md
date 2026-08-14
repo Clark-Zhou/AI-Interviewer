@@ -141,7 +141,7 @@ The MVP will not include:
 - Real-time voice conversation
 - Video interview analysis
 - Complex resume parsing
-- Persistent interview history
+- Account-based or cloud-synced persistent interview history
 - Multi-model scoring comparison
 
 These features can be considered after the core workflow proves useful.

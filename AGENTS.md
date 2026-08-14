@@ -12,38 +12,47 @@
 
 ## 新 session 接手规则
 
-新的 AI agent 或新的对话 session 接手项目时，应先完成以下检查，再开始修改代码：
+新的 AI agent 或新的对话 session 接手项目时，应先完成以下检查，再开始修改代码。
+
+通用必读：
 
 1. 阅读 `README.md`，了解项目目标、运行方式和目录结构。
-2. 阅读 `docs/PROJECT_STATUS.md`，确认当前分支、已完成功能、未完成事项和下一步建议。
-3. 阅读 `docs/ROADMAP.md`，确认当前计划、优先级和暂缓事项。
-4. 如果要改开发测试辅助逻辑，阅读 `docs/DEVELOPMENT_TESTING.md`。
-5. 如果要改产品范围、用户流程或功能边界，阅读 `docs/PRD.md`。
-6. 运行只读检查命令，例如 `git status --short` 和必要的 `rg` / `sed`，确认工作区是否已有用户改动。
-7. 如果发现工作区有未提交改动，不要默认撤销；先判断是否与当前任务相关，必要时向用户确认。
+2. 阅读 `AGENTS.md`，了解协作规则、边界和收尾要求。
+3. 阅读 `docs/PROJECT_STATUS.md`，确认当前分支、已完成功能、未完成事项和下一步建议。
+4. 阅读 `docs/ROADMAP.md`，确认当前计划、优先级、任务拆分和验收标准。
+
+按需阅读：
+
+- 如果要改开发测试辅助逻辑、mock 策略或本地测试流程，阅读 `docs/DEVELOPMENT_TESTING.md`。
+- 如果要改产品范围、用户流程、MVP 边界或非目标，阅读 `docs/PRD.md`。
+
+开始前检查：
+
+1. 运行只读检查命令，例如 `git status --short` 和必要的 `rg` / `sed`，确认工作区是否已有用户改动。
+2. 如果发现工作区有未提交改动，不要默认撤销；先判断是否与当前任务相关，必要时向用户确认。
 
 接手时不要假设上下文仍然完整，应以仓库内文档和当前 git 状态为准。
 
 ## 多 session 协作规则
 
-项目允许按角色拆分多个 session 协作，但每个 session 都必须先读“新 session 接手规则”列出的文档。
+项目当前更适合按“阶段闭环”拆分 session，而不是按前端/后端拆分。一个阶段开发 session 应负责某个 ROADMAP 阶段的完整实现、必要文档同步和收尾检查。
 
 推荐角色分工：
 
-- 产品助理 session：维护产品范围、阶段计划和优先级，主要修改 `docs/PRD.md`、`docs/ROADMAP.md`、`docs/PROJECT_STATUS.md`。
-- 前端开发 session：实现页面、交互和浏览器端状态，主要修改 `components/`、`app/page.js`、`app/globals.css`、`lib/client/`。
-- 后端开发 session：实现 API、服务端 AI 调用、prompt 和解析，主要修改 `app/api/`、`lib/server/`、`lib/prompts/`。
-- 开发测试 session：维护本地测试流程和开发辅助边界，主要修改 `docs/DEVELOPMENT_TESTING.md`，必要时配合前端开发修改开发辅助按钮。
-- 代码审查 session：以 review 姿态检查 diff、风险、遗漏测试和文档同步，不主动做大范围重构。
+- 产品助理 session：维护产品范围、阶段计划、优先级和验收标准，主要修改 `docs/PRD.md`、`docs/ROADMAP.md`、`docs/PROJECT_STATUS.md`。
+- 阶段开发 session：按照 `docs/ROADMAP.md` 的某个阶段完成完整实现，可能同时修改前端、后端、prompt、客户端工具和相关文档。
+- 代码审查 session：以 review 姿态检查阶段开发 session 的 diff、风险、遗漏测试和文档同步，不主动做大范围重构。
+- 开发测试 session（可选）：维护本地测试流程和开发辅助边界，主要修改 `docs/DEVELOPMENT_TESTING.md`，必要时配合阶段开发 session 修改开发辅助按钮。
 
 协作规则：
 
 1. 每个 session 开始时说明自己的角色和本轮目标。
-2. 每个 session 只改自己任务所需文件，避免跨角色顺手重构。
+2. 阶段开发 session 应围绕一个 ROADMAP 阶段闭环，不要在同一轮顺手做多个阶段。
 3. 不同 session 不应同时修改同一批文件；如果发现未提交改动，先确认归属。
-4. 产品范围或优先级变化时，先更新 `docs/ROADMAP.md` 或 `docs/PRD.md`，再进入开发。
-5. 开发 session 完成后，按“每次收尾工作”更新对应文档。
-6. 如果任务边界不清晰，先写计划或提出问题，不要直接改代码。
+4. 产品范围、优先级或验收标准变化时，先由产品助理 session 更新 `docs/ROADMAP.md` 或 `docs/PRD.md`，再进入开发。
+5. 阶段开发 session 完成后，按“每次收尾工作”更新对应文档。
+6. 代码审查 session 只基于当前 diff 和文档契约提问题、指出风险或做小修，不重新定义产品方向。
+7. 如果任务边界不清晰，先写计划或提出问题，不要直接改代码。
 
 ## 前后端职责边界
 
@@ -181,7 +190,7 @@ AI agent 应该先停下来，向用户说明当前情况和可选方案，而�
 4. 如果新增或修改重要代码文件，确认文件顶部有中文 file header。
 5. 如果新增函数、较大逻辑块、关键条件判断或重要数据转换，确认有简短中文注释。
 6. 如果改变功能状态、数据流、API 协议、开发辅助逻辑或下一步建议，更新 `docs/PROJECT_STATUS.md`。
-7. 如果改变阶段计划、优先级、暂缓事项或跨 session 分工，更新 `docs/ROADMAP.md`。
+7. 如果改变阶段计划、优先级、验收标准、暂缓事项或跨 session 分工，更新 `docs/ROADMAP.md`。
 8. 如果改变开发测试方式、开发辅助按钮、mock 策略或本地测试流程，更新 `docs/DEVELOPMENT_TESTING.md`。
 9. 如果改变项目安装、运行、目录结构、环境变量或总体功能说明，更新 `README.md`。
 10. 如果改变产品目标、MVP 范围、用户流程或非目标，更新 `docs/PRD.md`。
@@ -196,7 +205,7 @@ AI agent 应该先停下来，向用户说明当前情况和可选方案，而�
 
 1. 先保持当前 MVP 核心闭环稳定。
 2. 再小步优化开发测试效率和用户体验。
-3. 后续如需新增 mock AI、历史记录或文件上传，应先明确产品边界。
+3. 后续如需新增 mock AI、历史记录、文件上传或对话式提问，应先明确产品边界。
 4. 暂不做登录、数据库、文件上传、语音或视频面试。
 
 每一步都应保持可理解、可运行、可回退。
