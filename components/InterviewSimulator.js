@@ -16,6 +16,45 @@
 import { useState } from 'react';
 import { evaluateInterview, generateInterviewQuestions } from '../lib/client/interviewApi';
 
+const isDevelopment = process.env.NODE_ENV === 'development';
+
+const SAMPLE_JOB_INFO = `岗位名称：AI 产品经理实习生
+
+岗位职责：
+1. 参与 AI 面试训练产品的需求分析、用户流程设计和功能验收。
+2. 协助梳理岗位 JD、简历内容和面试问题之间的匹配逻辑。
+3. 与前端和后端开发协作，推动 MVP 功能快速落地。
+4. 参与 Prompt 调优、AI 返回结果评估和 bad case 复盘。
+
+任职要求：
+1. 对 AI 产品、Prompt Engineering 或求职面试场景有兴趣。
+2. 能够拆解用户需求，写出清晰的产品文档和验收标准。
+3. 具备基本技术理解能力，能和工程师沟通接口、数据结构和异常情况。
+4. 有独立项目、实习经历或校园项目经验者优先。`;
+
+const SAMPLE_RESUME = `姓名：张同学
+目标岗位：AI 产品经理实习生
+
+教育背景：
+某大学 信息管理与信息系统 本科
+
+项目经历：
+AI Interview Simulator 独立项目
+- 设计一个基于岗位 JD 和个人简历生成模拟面试问题的 MVP。
+- 拆分前端输入、后端 API、Prompt 管理、AI 返回解析和结果展示模块。
+- 使用 Next.js 和 DeepSeek API 跑通从生成问题到最终评价的核心流程。
+
+实习经历：
+互联网产品实习生
+- 参与 AI 销售助手项目，整理用户需求和常见问答场景。
+- 协助测试 RAG 检索效果，记录模型回答不准确的 bad case。
+- 根据测试结果调整 Prompt 结构，提高回答稳定性。
+
+技能能力：
+- 产品能力：需求分析、竞品分析、流程设计、PRD 写作。
+- 技术理解：JavaScript、React、Next.js、基础 API 调用。
+- AI 相关：Prompt Engineering、AI 返回 JSON 结构设计、基础模型效果评估。`;
+
 // 前端主组件：负责收集输入、生成问题、提交回答，并展示最终评价。
 export default function InterviewSimulator() {
   const [jobInfo, setJobInfo] = useState('');
@@ -29,6 +68,19 @@ export default function InterviewSimulator() {
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [error, setError] = useState('');
   const [evaluationError, setEvaluationError] = useState('');
+
+  // 开发辅助：填入固定示例输入，并清空上一轮生成结果，方便反复测试主流程。
+  const handleFillSampleInputs = () => {
+    setJobInfo(SAMPLE_JOB_INFO);
+    setResume(SAMPLE_RESUME);
+    setQuestions([]);
+    setAnswers({});
+    setSubmittedAnswers({});
+    setAnswerErrors({});
+    setEvaluation(null);
+    setError('');
+    setEvaluationError('');
+  };
 
   // 根据已提交回答计算答题进度，只统计当前问题列表里的题目。
   const totalQuestionCount = questions.length;
@@ -155,6 +207,18 @@ export default function InterviewSimulator() {
         <p className="subtitle">
           粘贴岗位信息和个人简历，生成模拟问题；回答并提交所有题目后，可以获得一份最终面试评价。
         </p>
+
+        {isDevelopment && (
+          <div className="dev-helper">
+            <div>
+              <p className="dev-helper-title">开发辅助</p>
+              <p className="dev-helper-description">本地区域只在开发环境显示，用来快速填入固定测试输入。</p>
+            </div>
+            <button type="button" className="secondary-button" onClick={handleFillSampleInputs}>
+              填入示例 JD/简历
+            </button>
+          </div>
+        )}
 
         <div className="field">
           <label htmlFor="job">岗位信息</label>

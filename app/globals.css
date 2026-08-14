@@ -62,6 +62,41 @@ h2 {
   color: #4b5563;
 }
 
+/* 开发辅助区：仅在本地开发环境显示，用于快速填充测试输入。 */
+.dev-helper {
+  align-items: center;
+  background: #f9fafb;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 14px;
+}
+
+.dev-helper-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.dev-helper-description {
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.secondary-button {
+  background: #111827;
+  flex-shrink: 0;
+}
+
+.secondary-button:hover {
+  background: #374151;
+}
+
 /* 表单输入区。 */
 .field {
   margin-bottom: 18px;
@@ -290,6 +325,15 @@ button:disabled {
 }
 
 @media (max-width: 720px) {
+  .dev-helper {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .secondary-button {
+    width: 100%;
+  }
+
   .evaluation-grid {
     grid-template-columns: 1fr;
   }
