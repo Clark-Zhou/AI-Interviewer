@@ -1,5 +1,7 @@
 # AI Interview Simulator MVP PRD
 
+> 文档职责：记录当前 MVP 的产品目标、用户流程、功能边界和后续方向。当前实现以 Next.js + DeepSeek、6 道问题、逐题提交回答、最终整体评价为准。
+
 ## 1. Product Overview
 
 AI Interview Simulator is a personal interview preparation tool. Users provide a target job description and their resume, then the product generates a customized mock interview, collects answers, and returns structured feedback.
@@ -40,9 +42,9 @@ The first version should prioritize a complete, useful workflow over advanced fe
 2. User pastes the job description.
 3. User pastes resume text.
 4. User clicks "Start Mock Interview".
-5. The system generates 8 to 10 interview questions.
+5. The system generates 6 interview questions.
 6. User answers questions one by one.
-7. User submits all answers.
+7. User submits each answer separately.
 8. The system generates a final report.
 9. User reviews strengths, weaknesses, and improvement suggestions.
 
@@ -92,7 +94,7 @@ Question types should include:
 
 MVP output:
 
-- 8 to 10 questions
+- 6 questions
 - Each question has a short reason explaining why it was asked
 
 ### 5.4 Answer Collection
@@ -103,7 +105,7 @@ MVP behavior:
 
 - Display questions in a list or step-by-step view
 - Provide one text area per answer
-- Allow the user to submit all answers at once
+- Allow the user to submit each answer separately
 
 Out of scope for MVP:
 
@@ -190,7 +192,7 @@ Input:
 
 Output:
 
-- 8 to 10 interview questions
+- 6 interview questions
 - Category for each question
 - Reason for each question
 
@@ -243,8 +245,8 @@ Deliverables:
 Recommended tech stack:
 
 - Frontend: Next.js or React
-- Backend: Next.js API routes or FastAPI
-- AI provider: OpenAI API
+- Backend: Next.js API routes
+- AI provider: DeepSeek API
 - Database: none for first prototype, then SQLite or Supabase later
 
 ## 11. Open Questions
