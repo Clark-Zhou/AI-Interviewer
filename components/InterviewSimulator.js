@@ -13,8 +13,13 @@
  */
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { evaluateInterview, generateInterviewQuestions } from '../lib/client/interviewApi';
+import {
+  createInterviewSessionId,
+  getInterviewSessions,
+  saveInterviewSession,
+} from '../lib/client/interviewHistoryStorage';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -71,6 +76,35 @@ function buildSampleAnswer(questionItem, questionIndex) {
   return `这是第 ${questionIndex + 1} 题的开发测试回答。针对「${questionItem.question}」，我会先结合岗位要求说明问题背景，再引用简历中的 AI Interview Simulator 或 AI 销售助手经历举例，重点说明${focus}。实际面试中我会继续补充具体指标、个人职责、协作方式和复盘思考。`;
 }
 
+function getTextSummary(text, maxLength = 48) {
+  const normalizedText = String(text || '').replace(/\s+/g, ' ').trim();
+
+  if (!normalizedText) {
+    return '未填写内容';
+  }
+
+  if (normalizedText.length <= maxLength) {
+    return normalizedText;
+  }
+
+  return `${normalizedText.slice(0, maxLength)}...`;
+}
+
+function formatHistoryTime(value) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '时间未知';
+  }
+
+  return date.toLocaleString('zh-CN', {
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 // 前端主组件：负责收集输入、生成问题、提交回答，并展示最终评价。
 export default function InterviewSimulator() {
   const [jobInfo, setJobInfo] = useState('');
@@ -84,6 +118,15 @@ export default function InterviewSimulator() {
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [error, setError] = useState('');
   const [evaluationError, setEvaluationError] = useState('');
+  const [historySaveStatus, setHistorySaveStatus] = useState('');
+  const [historySaveMessage, setHistorySaveMessage] = useState('');
+  const [historySessions, setHistorySessions] = useState([]);
+  const [selectedHistorySessionId, setSelectedHistorySessionId] = useState('');
+
+  // 首次进入页面时读取本地历史记录，只在浏览器端执行。
+  useEffect(() => {
+    setHistorySessions(getInterviewSessions());
+  }, []);
 
   // 开发辅助：填入固定示例输入，并清空上一轮生成结果，方便反复测试主流程。
   const handleFillSampleInputs = () => {
@@ -96,6 +139,8 @@ export default function InterviewSimulator() {
     setEvaluation(null);
     setError('');
     setEvaluationError('');
+    setHistorySaveStatus('');
+    setHistorySaveMessage('');
   };
 
   // 开发辅助：为当前问题列表填入测试回答，但保留逐题手动提交动作。
@@ -110,6 +155,8 @@ export default function InterviewSimulator() {
     setAnswerErrors({});
     setEvaluation(null);
     setEvaluationError('');
+    setHistorySaveStatus('');
+    setHistorySaveMessage('');
   };
 
   // 根据已提交回答计算答题进度，只统计当前问题列表里的题目。
@@ -127,6 +174,10 @@ export default function InterviewSimulator() {
     .filter((item) => item.answer);
   const isReadyForEvaluation =
     totalQuestionCount > 0 && submittedQuestionAnswers.length === totalQuestionCount;
+  const selectedHistorySession = historySessions.find(
+    (session) => session.id === selectedHistorySessionId
+  );
+  const selectedHistoryScore = selectedHistorySession?.evaluation?.overallScore;
 
   // 按问题下标保存用户回答，提交整场评价时会使用这些回答。
   const handleAnswerChange = (questionIndex, answerText) => {
@@ -146,6 +197,8 @@ export default function InterviewSimulator() {
     }));
     setEvaluation(null);
     setEvaluationError('');
+    setHistorySaveStatus('');
+    setHistorySaveMessage('');
   };
 
   // 单题提交：在前端记录已确认的回答，最终评价接口只使用已提交回答。
@@ -170,6 +223,8 @@ export default function InterviewSimulator() {
     }));
     setEvaluation(null);
     setEvaluationError('');
+    setHistorySaveStatus('');
+    setHistorySaveMessage('');
   };
 
   // 点击按钮时先做前端校验，再调用 client API 获取问题数组。
@@ -182,6 +237,8 @@ export default function InterviewSimulator() {
       setAnswerErrors({});
       setEvaluation(null);
       setEvaluationError('');
+      setHistorySaveStatus('');
+      setHistorySaveMessage('');
       return;
     }
 
@@ -192,6 +249,8 @@ export default function InterviewSimulator() {
     setAnswerErrors({});
     setEvaluation(null);
     setEvaluationError('');
+    setHistorySaveStatus('');
+    setHistorySaveMessage('');
     setIsLoading(true);
 
     try {
@@ -213,6 +272,8 @@ export default function InterviewSimulator() {
 
     setEvaluation(null);
     setEvaluationError('');
+    setHistorySaveStatus('');
+    setHistorySaveMessage('');
     setIsEvaluating(true);
 
     try {
@@ -222,6 +283,33 @@ export default function InterviewSimulator() {
         questionAnswers: submittedQuestionAnswers,
       });
       setEvaluation(generatedEvaluation);
+
+      // 评价成功后保存完整本地 session；保存失败不能影响最终评价展示。
+      try {
+        const savedAt = new Date().toISOString();
+
+        const savedSession = saveInterviewSession({
+          id: createInterviewSessionId(),
+          version: 1,
+          source: 'localStorage',
+          jobInfo,
+          resume,
+          questions,
+          answers: submittedAnswers,
+          questionAnswers: submittedQuestionAnswers,
+          evaluation: generatedEvaluation,
+          createdAt: savedAt,
+          updatedAt: savedAt,
+        });
+
+        setHistorySessions(getInterviewSessions());
+        setSelectedHistorySessionId(savedSession.id);
+        setHistorySaveStatus('success');
+        setHistorySaveMessage('已保存到本地历史记录。');
+      } catch {
+        setHistorySaveStatus('error');
+        setHistorySaveMessage('最终评价已生成，但本地保存失败。');
+      }
     } catch (error) {
       setEvaluationError(error.message);
     } finally {
@@ -367,6 +455,11 @@ export default function InterviewSimulator() {
           </div>
 
           <p className="evaluation-summary">{evaluation.summary}</p>
+          {historySaveMessage && (
+            <p className={`history-save-status ${historySaveStatus}`}>
+              {historySaveMessage}
+            </p>
+          )}
 
           <div className="evaluation-grid">
             <div>
@@ -422,6 +515,106 @@ export default function InterviewSimulator() {
           </div>
         </section>
       )}
+
+      {/* 历史记录区：展示最近保存的本地面试记录，并支持查看详情。 */}
+      <section className="panel history-panel">
+        <div className="preview-header">
+          <h2>历史记录</h2>
+          {historySessions.length > 0 && (
+            <span className="answer-progress">最近 {historySessions.length} 条</span>
+          )}
+        </div>
+
+        {historySessions.length === 0 && (
+          <p className="empty-state">完成一次最终评价后，这里会显示本地历史记录。</p>
+        )}
+
+        {historySessions.length > 0 && (
+          <div className="history-layout">
+            <ul className="history-list">
+              {historySessions.map((session) => (
+                <li key={session.id}>
+                  <button
+                    type="button"
+                    className={`history-item-button ${
+                      selectedHistorySessionId === session.id ? 'active' : ''
+                    }`}
+                    onClick={() => setSelectedHistorySessionId(session.id)}
+                  >
+                    <span className="history-item-main">
+                      <span className="history-title">
+                        {getTextSummary(session.jobInfo, 36)}
+                      </span>
+                      <span className="history-meta">
+                        {formatHistoryTime(session.createdAt)}
+                        {typeof session.evaluation?.overallScore === 'number'
+                          ? ` ｜ ${session.evaluation.overallScore} / 100`
+                          : ''}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+
+            <div className="history-detail">
+              {!selectedHistorySession && (
+                <p className="empty-state">选择一条历史记录查看详情。</p>
+              )}
+
+              {selectedHistorySession && (
+                <>
+                  <div className="history-detail-header">
+                    <div>
+                      <p className="category">
+                        {formatHistoryTime(selectedHistorySession.createdAt)}
+                      </p>
+                      <h3>{getTextSummary(selectedHistorySession.jobInfo, 56)}</h3>
+                    </div>
+                    {typeof selectedHistoryScore === 'number' && (
+                      <span className="evaluation-score">
+                        {selectedHistoryScore} / 100
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="history-detail-block">
+                    <h4>岗位信息摘要</h4>
+                    <p>{getTextSummary(selectedHistorySession.jobInfo, 120)}</p>
+                  </div>
+
+                  <div className="history-detail-block">
+                    <h4>简历摘要</h4>
+                    <p>{getTextSummary(selectedHistorySession.resume, 120)}</p>
+                  </div>
+
+                  {selectedHistorySession.evaluation?.summary && (
+                    <div className="history-detail-block">
+                      <h4>整体评价</h4>
+                      <p>{selectedHistorySession.evaluation.summary}</p>
+                    </div>
+                  )}
+
+                  <div className="history-detail-block">
+                    <h4>问答记录</h4>
+                    <ul className="history-qa-list">
+                      {(selectedHistorySession.questionAnswers || []).map((item, index) => (
+                        <li key={`${selectedHistorySession.id}-${item.question}-${index}`}>
+                          <p className="category">
+                            第 {index + 1} 题｜{item.category}
+                          </p>
+                          <p className="question">{item.question}</p>
+                          <p className="reason">回答：{item.answer}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </section>
     </main>
   );
 }

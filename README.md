@@ -10,7 +10,7 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前版本先验证最小可用闭环，不包含登录、数据库、文件上传、云端历史记录、语音或视频面试。本地历史记录初始化是下一阶段计划。
+当前版本先验证最小可用闭环，不包含登录、数据库、文件上传、云端历史记录、语音或视频面试。当前已完成本地历史记录初始化、列表和详情查看，用于在浏览器保存并复盘完整面试 session。
 
 ## 当前功能
 
@@ -26,6 +26,10 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 - 展示答题进度
 - 所有回答提交后生成最终评价
 - 展示总分、总结、优势、风险点、改进建议、逐题反馈和后续练习题
+- 最终评价成功后保存本地历史记录
+- 展示本地历史保存成功或失败提示
+- 展示最近本地历史记录列表
+- 点击历史记录查看岗位摘要、简历摘要、整体评价和问答记录
 - 开发环境下快速填入示例 JD/简历
 - 开发环境下根据当前问题填入本地测试回答
 
@@ -43,6 +47,7 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 - 数据库
 - 用户系统
 - 文件上传
+- 云端历史记录
 - Tailwind CSS
 - UI 组件库
 - TypeScript
@@ -98,6 +103,7 @@ app/api/evaluate-interview/       生成最终评价 API
 components/InterviewSimulator.js  主前端组件
 
 lib/client/interviewApi.js        前端请求封装
+lib/client/interviewHistoryStorage.js 本地历史记录读写工具
 lib/server/deepseek.js            生成问题的 DeepSeek 服务端调用
 lib/server/interviewEvaluation.js 最终评价的 DeepSeek 服务端调用
 lib/server/parseAiQuestions.js    面试问题 JSON 解析和校验
@@ -160,6 +166,8 @@ components/InterviewSimulator.js
 6. 确认进度为 `已提交 6 / 6`。
 7. 点击 `生成最终评价`。
 8. 检查最终评价是否完整展示。
+9. 检查最终评价区是否提示已保存到本地历史记录。
+10. 检查页面底部历史记录区是否新增记录，点击后是否能查看详情。
 
 更多开发测试边界见：`docs/DEVELOPMENT_TESTING.md`。
 
@@ -196,6 +204,7 @@ components/InterviewSimulator.js
 - 数据库存储
 - 文件上传解析简历或 JD
 - 云端/数据库历史面试记录
+- 历史记录删除、编辑、搜索和恢复 session
 - 多轮追问
 - 语音或视频面试
 - 单题即时 AI 批改
@@ -207,6 +216,5 @@ components/InterviewSimulator.js
 
 - 为最终评价失败增加重试按钮
 - 将开发辅助示例数据拆到单独 fixture 文件
-- 设计一次完整面试 session 的数据结构
 - 增加显式 mock AI 开关，降低开发测试成本
-- 初始化本地历史记录
+- 评估是否支持恢复历史 session

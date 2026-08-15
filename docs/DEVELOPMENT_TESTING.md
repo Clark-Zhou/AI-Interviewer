@@ -9,6 +9,7 @@
 - `components/InterviewSimulator.js`：开发辅助按钮和本地测试回答生成逻辑在这里。
 - `app/globals.css`：开发辅助区和按钮样式在这里。
 - `lib/client/interviewApi.js`：前端真实 API 请求封装在这里。
+- `lib/client/interviewHistoryStorage.js`：最终评价成功后的本地历史记录读写工具在这里。
 - `app/api/generate-questions/route.js`：生成问题的后端 API。
 - `app/api/evaluate-interview/route.js`：生成最终评价的后端 API。
 
@@ -41,6 +42,28 @@ process.env.NODE_ENV === 'development'
 8. 确认答题进度显示为 `已提交 6 / 6`。
 9. 点击 `生成最终评价`。
 10. 检查页面是否展示总分、总结、优势、风险点、改进建议、逐题反馈和后续练习题。
+11. 检查最终评价区是否显示 `已保存到本地历史记录。`。
+12. 打开浏览器 DevTools，确认 localStorage 的 `ai-interview-sessions` 中新增一条完整记录。
+13. 检查页面底部历史记录区是否新增一条记录，点击后能看到岗位摘要、简历摘要、整体评价和问答记录。
+
+## 历史记录检查
+
+当前阶段验证本地保存、历史列表和历史详情，不验证删除、编辑、搜索、云端同步或恢复 session。
+
+生成最终评价后，localStorage 中的 `ai-interview-sessions` 应满足：
+
+- 数据是数组，新记录排在最前面。
+- 最多保留 10 条记录。
+- 每条记录包含 `id`、`version`、`source`、`jobInfo`、`resume`、`questions`、`answers`、`questionAnswers`、`evaluation`、`createdAt` 和 `updatedAt`。
+- `source` 当前为 `localStorage`。
+- 如果 localStorage 写入失败，页面仍然展示最终评价，并显示本地保存失败提示。
+
+页面底部历史记录区应满足：
+
+- 没有历史记录时显示空状态。
+- 有历史记录时显示最近记录数量、保存时间、岗位摘要和总分。
+- 点击单条记录后，右侧或下方展示该记录的岗位摘要、简历摘要、整体评价和问答记录。
+- 新完成一次最终评价后，历史列表自动刷新，并默认选中最新记录。
 
 ## 重要边界
 
@@ -64,3 +87,5 @@ process.env.NODE_ENV === 'development'
 - 修改某道题回答后，该题已提交状态会被清空。
 - 所有题提交后，才能点击 `生成最终评价`。
 - 最终评价失败时会展示错误信息。
+- 最终评价成功后，会自动尝试保存本地历史记录。
+- 本地历史记录保存失败时，不应影响最终评价展示。
