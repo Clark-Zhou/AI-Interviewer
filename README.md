@@ -217,4 +217,4 @@ components/InterviewSimulator.js
 - 为最终评价失败增加重试按钮
 - 将开发辅助示例数据拆到单独 fixture 文件
 - 增加显式 mock AI 开关，降低开发测试成本
-- 评估是否支持恢复历史 session
+- 讨论并确定下一阶段主线
