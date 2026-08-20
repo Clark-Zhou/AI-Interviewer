@@ -14,14 +14,14 @@
 
 ## 当前推荐方向
 
-当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户逐题回答 -> AI 生成最终评价”，并已完成本地历史记录和开发模式 Mock 流程。下一步建议做“阶段 9：一键提交全部回答”，继续降低真实使用和开发测试中的重复点击成本。
+当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成本地历史记录、开发模式 Mock 流程和一键提交全部回答。下一步建议先做人工回归测试并准备当前分支 PR。
 
 原因：
 
-- 当前每道题都要单独点击提交，完整流程测试仍有重复操作。
-- 一键提交全部回答不改变 AI API、prompt、mock 流程或历史保存机制。
-- 这个能力同时改善正式用户体验和开发测试效率，复杂度适合一个小阶段完成。
-- 完成后仍保留逐题单独提交能力，用户可以按原流程慢慢答题。
+- 一键提交全部回答降低了真实使用和开发测试中的重复点击成本。
+- 阶段 9 没有改变 AI API、prompt、mock 流程或历史保存机制。
+- 逐题单独提交能力仍然保留，用户可以按原流程慢慢答题。
+- 后续可以优先评估最终评价失败后的重试体验。
 
 ## 阶段计划
 
@@ -33,16 +33,16 @@
 - [x] 阶段 6：历史记录初始化
 - [x] 阶段 7：历史记录列表和详情查看
 - [x] 阶段 8：开发模式 Mock 问题与 Mock 评价
-- [ ] 阶段 9：一键提交全部回答
+- [x] 阶段 9：一键提交全部回答
 
 ## 当前优先级
 
 当前优先级：
 
-1. 在 `develop-improve-efficiency` 分支完成阶段 9。
-2. 新增 `提交全部回答` 按钮，降低逐题提交的重复点击。
-3. 保留每道题单独提交按钮，不改变现有逐题答题流程。
-4. 不修改 AI API、prompt、mock 流程或历史保存机制。
+1. 在 `develop-improve-efficiency` 分支做人工回归测试。
+2. 确认真实 AI 流程和 Mock 快速流程都能通过 `提交全部回答` 跑通。
+3. 准备当前分支 PR。
+4. 后续再评估最终评价失败重试能力或 prompt 优化。
 
 推荐当前功能分支：
 
@@ -324,7 +324,7 @@ createInterviewSessionId()
 
 ## 阶段 9：一键提交全部回答
 
-阶段状态：计划中。当前分支为 `develop-improve-efficiency`。
+阶段状态：已完成。当前分支为 `develop-improve-efficiency`。
 
 ### 阶段目标
 
@@ -428,10 +428,10 @@ createInterviewSessionId()
 你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“[阶段名称]”阶段。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md；如果本阶段涉及开发测试流程，也阅读 docs/DEVELOPMENT_TESTING.md。然后按 ROADMAP 的任务拆分和验收标准实现。只有在需要改变产品范围或用户流程时才阅读 docs/PRD.md。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
 ```
 
-当前阶段开发 session 可以这样启动：
+当前回归测试或 PR 准备 session 可以这样启动：
 
 ```text
-你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“阶段 9：一键提交全部回答”。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md；本阶段涉及测试流程，也请阅读 docs/DEVELOPMENT_TESTING.md。实现时只新增 `提交全部回答` 按钮和必要的前端提交状态逻辑：要求所有回答非空后一次性标记全部题目为已提交。不要改 AI API、prompt、mock 流程、历史保存逻辑或数据结构。不要安装依赖，不要启动 dev server，除非我明确要求。
+你是 AI Interview Simulator 的开发测试 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md 和 docs/DEVELOPMENT_TESTING.md。本轮目标是回归测试 develop-improve-efficiency 分支的真实 AI 流程、Mock 快速流程和一键提交全部回答，并整理 PR 前测试记录。不要修改产品范围；如果发现 bug，只记录清楚复现路径和建议修复点。
 ```
 
 代码审查 session 用于检查阶段开发结果：

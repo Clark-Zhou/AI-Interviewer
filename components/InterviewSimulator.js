@@ -284,6 +284,39 @@ export default function InterviewSimulator() {
     setHistorySaveMessage('');
   };
 
+  // 一键提交：所有题都有回答时，把当前问题列表里的回答一次性纳入最终评价。
+  const handleSubmitAllAnswers = () => {
+    const nextErrors = {};
+    const nextSubmittedAnswers = {};
+    let hasEmptyAnswer = false;
+
+    questions.forEach((_, questionIndex) => {
+      const answerText = answers[questionIndex]?.trim();
+
+      if (!answerText) {
+        nextErrors[questionIndex] = '请先填写这道题的回答。';
+        hasEmptyAnswer = true;
+        return;
+      }
+
+      nextErrors[questionIndex] = '';
+      nextSubmittedAnswers[questionIndex] = answerText;
+    });
+
+    if (hasEmptyAnswer) {
+      setAnswerErrors(nextErrors);
+      setEvaluationError('请先填写所有题目的回答。');
+      return;
+    }
+
+    setAnswerErrors(nextErrors);
+    setSubmittedAnswers(nextSubmittedAnswers);
+    setEvaluation(null);
+    setEvaluationError('');
+    setHistorySaveStatus('');
+    setHistorySaveMessage('');
+  };
+
   // 点击按钮时先做前端校验，再调用 client API 获取问题数组。
   const handleGenerateQuestions = async () => {
     if (!jobInfo.trim() || !resume.trim()) {
@@ -472,6 +505,13 @@ export default function InterviewSimulator() {
                   填入测试回答
                 </button>
               )}
+              <button
+                type="button"
+                className="secondary-button compact-button"
+                onClick={handleSubmitAllAnswers}
+              >
+                提交全部回答
+              </button>
             </div>
           )}
         </div>
