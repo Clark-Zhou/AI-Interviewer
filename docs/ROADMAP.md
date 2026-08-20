@@ -268,10 +268,16 @@ createInterviewSessionId()
 你是 AI Interview Simulator 的产品助理 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/PRD.md。你的职责是维护产品范围、阶段计划、优先级和验收标准；本轮先不要写功能代码。
 ```
 
-阶段开发 session 用于完成一个 ROADMAP 阶段：
+阶段开发 session 用于完成一个 ROADMAP 阶段。启动时把“[阶段名称]”替换成当前要做的阶段，不要沿用旧阶段名称：
 
 ```text
-你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“历史记录初始化”阶段。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/DEVELOPMENT_TESTING.md，然后按 ROADMAP 的任务拆分实现。只有在需要改变产品范围或用户流程时才阅读 docs/PRD.md。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后按 AGENTS.md 的收尾清单更新文档并说明未运行的测试。
+你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“[阶段名称]”阶段。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md；如果本阶段涉及开发测试流程，也阅读 docs/DEVELOPMENT_TESTING.md。然后按 ROADMAP 的任务拆分和验收标准实现。只有在需要改变产品范围或用户流程时才阅读 docs/PRD.md。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
+```
+
+当前下一阶段可以这样启动：
+
+```text
+你是 AI Interview Simulator 的阶段开发 session。本轮目标是评估并实现 docs/ROADMAP.md 中的“恢复历史 session 到当前页面”的最小能力。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md 和 docs/DEVELOPMENT_TESTING.md，然后按 ROADMAP 的任务拆分小步实现。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。
 ```
 
 代码审查 session 用于检查阶段开发结果：

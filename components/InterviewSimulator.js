@@ -3,12 +3,13 @@
  *
  * 关联文件：
  * - lib/client/interviewApi.js：封装前端调用后端 API 的请求方法。
+ * - lib/client/interviewHistoryStorage.js：保存和读取浏览器本地面试历史记录。
  * - app/globals.css：提供本组件使用的页面、表单、按钮和结果区样式。
  * - app/api/generate-questions/route.js：前端通过请求层调用生成问题 API。
  * - app/api/evaluate-interview/route.js：前端通过请求层调用最终评价 API。
  *
  * 说明：
- * - 这个文件只处理浏览器端交互：输入、按钮点击、loading、错误和结果展示。
+ * - 这个文件只处理浏览器端交互：输入、按钮点击、loading、错误、结果展示和本地历史记录展示。
  * - 不要在这里读取 DEEPSEEK_API_KEY，API Key 只能放在服务端。
  */
 'use client';
