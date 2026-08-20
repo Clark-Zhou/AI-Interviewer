@@ -224,5 +224,5 @@ components/InterviewSimulator.js
 
 具体阶段计划以 `docs/ROADMAP.md` 为准。可以小步考虑：
 
-- 为最终评价失败增加更友好的重试能力
+- AI 请求失败后的重试按钮和更清楚的提示文案
 - 将开发辅助示例数据拆到单独 fixture 文件
