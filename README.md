@@ -32,6 +32,8 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 - 点击历史记录查看岗位摘要、简历摘要、整体评价和问答记录
 - 开发环境下快速填入示例 JD/简历
 - 开发环境下根据当前问题填入本地测试回答
+- 开发环境下使用本地 Mock 问题快速进入答题流程
+- 开发环境下使用本地 Mock 评价快速验证最终评价和历史记录链路
 
 ## 技术栈
 
@@ -104,6 +106,7 @@ components/InterviewSimulator.js  主前端组件
 
 lib/client/interviewApi.js        前端请求封装
 lib/client/interviewHistoryStorage.js 本地历史记录读写工具
+lib/dev/interviewMocks.js         开发环境本地 mock 问题和 mock 评价
 lib/server/deepseek.js            生成问题的 DeepSeek 服务端调用
 lib/server/interviewEvaluation.js 最终评价的 DeepSeek 服务端调用
 lib/server/parseAiQuestions.js    面试问题 JSON 解析和校验
@@ -155,6 +158,8 @@ components/InterviewSimulator.js
 
 - `填入示例 JD/简历`
 - `填入测试回答`
+- `使用 Mock 问题`
+- `使用 Mock 评价`
 
 推荐测试路径：
 
@@ -168,6 +173,8 @@ components/InterviewSimulator.js
 8. 检查最终评价是否完整展示。
 9. 检查最终评价区是否提示已保存到本地历史记录。
 10. 检查页面底部历史记录区是否新增记录，点击后是否能查看详情。
+
+开发环境也可以用 Mock 快速流程：填入示例 JD/简历后点击 `使用 Mock 问题`，填入并提交测试回答，再点击 `使用 Mock 评价` 验证最终评价和历史记录链路。
 
 更多开发测试边界见：`docs/DEVELOPMENT_TESTING.md`。
 
@@ -216,5 +223,4 @@ components/InterviewSimulator.js
 
 - 为最终评价失败增加重试按钮
 - 将开发辅助示例数据拆到单独 fixture 文件
-- 增加显式 mock AI 开关，降低开发测试成本
-- 讨论并确定下一阶段主线
+- 为最终评价失败增加更友好的重试能力

@@ -10,6 +10,7 @@
 - `app/globals.css`：开发辅助区和按钮样式在这里。
 - `lib/client/interviewApi.js`：前端真实 API 请求封装在这里。
 - `lib/client/interviewHistoryStorage.js`：最终评价成功后的本地历史记录读写工具在这里。
+- `lib/dev/interviewMocks.js`：开发环境 Mock 问题和 Mock 评价数据在这里。
 - `app/api/generate-questions/route.js`：生成问题的后端 API。
 - `app/api/evaluate-interview/route.js`：生成最终评价的后端 API。
 
@@ -21,30 +22,44 @@
 process.env.NODE_ENV === 'development'
 ```
 
-当前有两个开发辅助按钮：
+当前已有四个开发辅助按钮：
 
 - `填入示例 JD/简历`：填入固定岗位信息和固定简历，并清空上一轮问题、回答、提交状态和评价。
 - `填入测试回答`：在问题生成后显示，根据当前问题列表在前端本地生成 mock 回答。
+- `使用 Mock 问题`：在开发环境下直接使用固定 mock 问题，不调用后端 API。
+- `使用 Mock 评价`：在开发环境下根据当前已提交问答生成固定 mock 评价，不调用后端 API。
 
-这些辅助按钮的目标是减少手动复制粘贴，不是正式产品能力。
+这些辅助按钮的目标是减少手动复制粘贴、等待 AI 返回和消耗 API 的成本，不是正式产品能力。
 
 ## 测试流程
 
-推荐本地测试路径：
+推荐本地测试路径分两条。
+
+真实 AI 流程：
 
 1. 项目所有者运行 `npm run dev`。
 2. 打开 `http://localhost:3000`。
 3. 点击 `填入示例 JD/简历`。
-4. 点击 `生成面试问题`。
-5. 等待 DeepSeek 返回问题列表。
-6. 点击 `填入测试回答`。
-7. 逐题点击 `提交本题回答`。
-8. 确认答题进度显示为 `已提交 6 / 6`。
-9. 点击 `生成最终评价`。
-10. 检查页面是否展示总分、总结、优势、风险点、改进建议、逐题反馈和后续练习题。
-11. 检查最终评价区是否显示 `已保存到本地历史记录。`。
-12. 打开浏览器 DevTools，确认 localStorage 的 `ai-interview-sessions` 中新增一条完整记录。
-13. 检查页面底部历史记录区是否新增一条记录，点击后能看到岗位摘要、简历摘要、整体评价和问答记录。
+4. 点击真实 AI 问题按钮，等待 DeepSeek 返回问题列表。
+5. 点击 `填入测试回答`。
+6. 逐题点击 `提交本题回答`。
+7. 确认答题进度显示为 `已提交 6 / 6`。
+8. 点击真实 AI 评价按钮，等待 DeepSeek 返回最终评价。
+9. 检查页面是否展示总分、总结、优势、风险点、改进建议、逐题反馈和后续练习题。
+10. 检查最终评价区是否显示 `已保存到本地历史记录。`。
+11. 检查页面底部历史记录区是否新增记录，点击后能看到详情。
+
+Mock 快速流程：
+
+1. 项目所有者运行 `npm run dev`。
+2. 打开 `http://localhost:3000`。
+3. 点击 `填入示例 JD/简历`。
+4. 点击 `使用 Mock 问题`，应立即展示固定问题列表。
+5. 点击 `填入测试回答`。
+6. 逐题点击 `提交本题回答`。
+7. 点击 `使用 Mock 评价`，应立即展示固定结构的最终评价。
+8. 打开浏览器 DevTools，确认 localStorage 的 `ai-interview-sessions` 中新增一条完整记录，且 `generationSource` 标记为 mock。
+9. 检查页面底部历史记录区是否新增记录，点击后能看到详情。
 
 ## 历史记录检查
 
@@ -54,14 +69,15 @@ process.env.NODE_ENV === 'development'
 
 - 数据是数组，新记录排在最前面。
 - 最多保留 10 条记录。
-- 每条记录包含 `id`、`version`、`source`、`jobInfo`、`resume`、`questions`、`answers`、`questionAnswers`、`evaluation`、`createdAt` 和 `updatedAt`。
+- 每条新记录包含 `id`、`version`、`source`、`generationSource`、`jobInfo`、`resume`、`questions`、`answers`、`questionAnswers`、`evaluation`、`createdAt` 和 `updatedAt`。
 - `source` 当前为 `localStorage`。
+- `generationSource.questions` 和 `generationSource.evaluation` 用于区分 `ai` 与 `mock`，旧历史记录没有该字段也应能正常展示。
 - 如果 localStorage 写入失败，页面仍然展示最终评价，并显示本地保存失败提示。
 
 页面底部历史记录区应满足：
 
 - 没有历史记录时显示空状态。
-- 有历史记录时显示最近记录数量、保存时间、岗位摘要和总分。
+- 有历史记录时显示最近记录数量、保存时间、岗位摘要、总分和可用的生成来源。
 - 点击单条记录后，右侧或下方展示该记录的岗位摘要、简历摘要、整体评价和问答记录。
 - 新完成一次最终评价后，历史列表自动刷新，并默认选中最新记录。
 
@@ -71,10 +87,23 @@ process.env.NODE_ENV === 'development'
 
 - 开发辅助按钮不应出现在生产环境。
 - `填入测试回答` 不调用 DeepSeek，也不调用任何第三方 AI。
-- 不要因为本地开发环境就切换另一套生成问题 prompt 或最终评价 prompt。
-- 生成问题和最终评价仍然走真实后端 API，除非用户明确要求新增 mock AI 开关。
-- 如果未来新增 mock AI 开关，应优先放在服务端，并用明确环境变量控制，例如 `USE_MOCK_AI=true`。
-- 如果修改开发辅助逻辑，应同步更新本文件和 `docs/PROJECT_STATUS.md`。
+- `使用 Mock 问题` 和 `使用 Mock 评价` 只在开发环境显示，不调用后端 API，也不读取 API Key。
+- 不要因为本地开发环境就自动切换另一套正式 prompt。真实 AI 按钮仍应走原来的后端 API 和正式 prompt。
+- Mock 问题和 Mock 评价应由用户显式点击触发，不自动替代真实 AI。
+- Mock 评价应复用现有本地历史保存机制，保证 mock 流程也能验证历史记录。
+- 如果修改开发辅助逻辑，应按 `AGENTS.md` 的分档收尾规则判断是否更新本文件和 `docs/PROJECT_STATUS.md`。
+
+## 阶段 8 检查点
+
+开发模式 Mock 问题与 Mock 评价实现后，重点检查：
+
+- 真实 AI 按钮和 mock 按钮是独立按钮，不互相替代。
+- Mock 问题按钮复用岗位信息和简历的空输入校验。
+- Mock 问题成功后会清空上一轮回答、提交状态、评价和保存提示。
+- Mock 评价按钮只有在全部题目提交后才可用或才允许生成。
+- Mock 评价展示结构和真实 AI 评价展示结构一致。
+- Mock 评价成功后会新增本地历史记录，并且历史详情可查看。
+- 如果保存 `generationSource`，真实 AI 流程写 `ai`，mock 流程写 `mock`，旧历史记录不受影响。
 
 ## 常见检查点
 

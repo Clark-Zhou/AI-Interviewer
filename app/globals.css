@@ -144,6 +144,13 @@ button:disabled {
   opacity: 0.7;
 }
 
+.button-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .error-message {
   margin: 14px 0 0;
   color: #dc2626;
@@ -411,6 +418,17 @@ button:disabled {
   line-height: 1.4;
 }
 
+.history-source {
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.detail-source {
+  margin: 6px 0 0;
+}
+
 .history-detail {
   border-left: 1px solid #e5e7eb;
   min-height: 160px;
@@ -490,6 +508,10 @@ button:disabled {
   .evaluation-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .button-row button {
+    width: 100%;
   }
 
   .history-layout {

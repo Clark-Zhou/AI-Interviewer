@@ -12,15 +12,16 @@
 - `docs/PRD.md`：产品范围和需求定义，产品助理 session 或产品范围变化时阅读。
 - `docs/DEVELOPMENT_TESTING.md`：开发测试流程和开发辅助边界。
 
-## 当前状态与待决策
+## 当前推荐方向
 
-当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 逐题回答 -> 最终评价”，并已完成本地历史记录初始化、历史记录列表和详情查看。阶段 7 已完成，下一阶段暂不预设为“恢复历史 session”或“AI 逐步提问”，先由产品助理 session 和用户一起决定下一条主线。
+当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 逐题回答 -> 最终评价”，并已完成本地历史记录初始化、历史记录列表和详情查看、开发模式 Mock 问题与 Mock 评价。下一步建议先做人工回归测试并准备当前分支 PR。
 
-下一阶段讨论时优先看三个问题：
+原因：
 
-- 哪个功能最能提升用户完成一次完整练习的体验？
-- 哪个功能能降低开发测试和后续迭代成本？
-- 哪个功能的复杂度适合一个小分支完成？
+- Mock 能力只影响开发环境，不改变正式用户流程。
+- Mock 问题和 Mock 评价能显著减少等待 AI 返回和消耗 API 的次数。
+- Mock 结果继续走现有页面状态和本地历史保存机制，可以顺手验证历史记录链路。
+- 当前阶段没有引入新依赖，也没有改变真实 AI prompt 或 API 协议。
 
 ## 阶段计划
 
@@ -31,18 +32,24 @@
 - [x] 阶段 5：准备并合并当前用户回答/最终评价分支 PR
 - [x] 阶段 6：历史记录初始化
 - [x] 阶段 7：历史记录列表和详情查看
+- [x] 阶段 8：开发模式 Mock 问题与 Mock 评价
 
 ## 当前优先级
 
 当前优先级：
 
-1. 确认阶段 7 的历史记录列表和详情查看是否可以作为一个完整阶段收尾。
-2. 讨论并确定下一阶段目标、范围、验收标准和分支名。
-3. 在下一阶段确定前，不先预设为恢复历史 session、AI 逐步提问或多轮追问。
+1. 在 `develop-improve-efficiency` 分支做人工回归测试。
+2. 确认真实 AI 流程和 Mock 快速流程都能跑通。
+3. 准备当前分支 PR。
+4. 后续再评估最终评价失败重试能力或 prompt 优化。
 
-下一阶段确定后，再补充推荐功能分支名和阶段验收标准。
+推荐当前功能分支：
 
-## 下一阶段设计：历史记录初始化
+```text
+develop-improve-efficiency
+```
+
+## 阶段 6：历史记录初始化
 
 阶段状态：已完成。当前实现已经新增 `lib/client/interviewHistoryStorage.js`，并在最终评价成功后自动把完整 session 保存到 localStorage。
 
@@ -234,6 +241,86 @@ createInterviewSessionId()
 - 新完成一次最终评价后，历史列表自动刷新，并默认选中最新记录。
 - 不引入删除、编辑、搜索、恢复 session、数据库或云端同步。
 
+## 阶段 8：开发模式 Mock 问题与 Mock 评价
+
+阶段状态：已完成。当前分支为 `develop-improve-efficiency`。
+
+### 阶段目标
+
+在开发模式下，让开发者既可以继续使用真实 AI 生成问题和最终评价，也可以一键使用本地 mock 问题和 mock 评价快速跑完整流程。两条路径按钮独立，mock 不调用 DeepSeek，不新增依赖，但 mock 结果要进入和真实 AI 相同的页面状态、评价展示和本地历史记录保存链路。
+
+### 用户价值
+
+这个能力不面向正式用户，主要服务开发测试：减少重复粘贴、等待 AI 返回和消耗 API 的成本，让开发者能更快验证“问题 -> 回答 -> 评价 -> 历史记录”的完整闭环。
+
+### MVP 范围
+
+本阶段应包含：
+
+- 新增独立 mock 数据文件，建议为 `lib/dev/interviewMocks.js`。
+- 在开发环境的问题生成区域保留真实 AI 按钮，并新增 `使用 Mock 问题` 按钮。
+- 在开发环境的最终评价区域保留真实 AI 按钮，并新增 `使用 Mock 评价` 按钮。
+- Mock 问题使用固定结构化问题数组，不调用后端 API。
+- Mock 评价根据当前 `questionAnswers` 返回固定结构的评价对象，不调用后端 API。
+- Mock 评价生成后复用现有历史保存逻辑，历史记录里能看到这次 mock 面试。
+- 建议在保存的 session 中增加轻量来源标记，例如 `generationSource.questions` 和 `generationSource.evaluation`，用于区分 `ai` 与 `mock`。
+- 更新开发测试说明，补充真实 AI 流程和 mock 流程的测试路径。
+
+本阶段暂不包含：
+
+- 新增后端 mock API route。
+- 新增环境变量控制 mock。
+- 生产环境展示 mock 按钮。
+- 自动用 mock 替代真实 AI。
+- 数据库或云端历史记录。
+- 恢复历史 session 到当前页面。
+- AI 逐步提问、多轮追问或单题即时批改。
+
+### 建议任务拆分
+
+阶段开发 session 按以下顺序实现，不要一次扩展到其他功能：
+
+1. 新建 `lib/dev/interviewMocks.js`，添加中文 file header。
+2. 在 mock 文件中导出固定 `mockInterviewQuestions`，结构必须和真实问题 API 返回的 question item 一致。
+3. 在 mock 文件中导出 `createMockInterviewEvaluation(questionAnswers)`，返回结构必须和真实最终评价 API 返回的 `evaluation` 一致。
+4. 在 `components/InterviewSimulator.js` 中新增开发环境 `使用 Mock 问题` 按钮，和真实 `AI 生成问题` 按钮独立。
+5. Mock 问题按钮应复用当前空输入校验；成功后清空上一轮回答、提交状态、评价和保存提示。
+6. 在最终评价区域新增开发环境 `使用 Mock 评价` 按钮，和真实 `AI 生成最终评价` 按钮独立。
+7. Mock 评价按钮应复用当前“所有题已提交后才能评价”的约束。
+8. 抽出或复用一段统一逻辑处理“设置 evaluation + 保存历史 + 刷新历史列表”，避免 AI 评价和 Mock 评价各写一套保存代码。
+9. 如新增 `generationSource`，真实 AI 路径写 `ai`，mock 路径写 `mock`，不要破坏旧历史记录读取。
+10. 更新 `docs/DEVELOPMENT_TESTING.md`，说明开发模式下真实 AI 和 mock 两条完整测试流程。
+11. 阶段完成或准备 PR 前，按 `AGENTS.md` 的分档收尾规则更新 `docs/PROJECT_STATUS.md` 和 `docs/ROADMAP.md`。
+
+### 验收标准
+
+阶段 8 完成时，应满足：
+
+- 生产环境不显示 mock 问题或 mock 评价按钮。
+- 开发环境同时存在真实 AI 按钮和 mock 按钮，且按钮语义清楚。
+- 点击真实 AI 生成问题仍调用 `/api/generate-questions`。
+- 点击真实 AI 生成最终评价仍调用 `/api/evaluate-interview`。
+- 点击 `使用 Mock 问题` 不调用后端 API，也不读取 API Key。
+- 点击 `使用 Mock 评价` 不调用后端 API，也不读取 API Key。
+- Mock 问题后可以继续填写回答、逐题提交并显示进度。
+- Mock 评价后页面展示完整评价结构。
+- Mock 评价后 localStorage 的 `ai-interview-sessions` 新增记录，历史列表和详情可查看。
+- 如果保存 session 增加来源标记，旧历史记录仍能正常展示。
+- 新增文件有中文 file header，新增函数和关键逻辑有简短中文注释。
+- 没有新增依赖，没有改变正式 AI prompt。
+
+### 代码审查关注点
+
+代码审查 session 应重点检查：
+
+- Mock 逻辑是否只在开发环境入口可触发。
+- Mock 数据是否放在 `lib/dev/`，没有混入 `lib/server/` 或 prompt 文件。
+- 前端是否仍然不能直接调用 DeepSeek 或其他第三方 AI。
+- AI 路径和 Mock 路径是否共享状态更新和历史保存机制，避免重复逻辑分叉。
+- Mock 返回结构是否和真实 API 解析后的结构一致。
+- 历史记录是否能区分来源，同时兼容旧数据。
+- 是否没有引入新依赖、没有启动或要求用户安装额外工具。
+
 ## 暂缓事项
 
 暂不优先做：
@@ -248,7 +335,7 @@ createInterviewSessionId()
 - 复杂 UI 重构
 - 历史记录删除、编辑、搜索和云同步
 
-这些方向可以在下一阶段规划时逐项比较，但不要在 ROADMAP 中提前排成固定阶段。
+这些方向可以在后续阶段规划时逐项比较，但不要在 ROADMAP 中提前排成固定阶段。
 
 ## 推荐 session 启动方式
 
@@ -264,7 +351,11 @@ createInterviewSessionId()
 你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“[阶段名称]”阶段。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md；如果本阶段涉及开发测试流程，也阅读 docs/DEVELOPMENT_TESTING.md。然后按 ROADMAP 的任务拆分和验收标准实现。只有在需要改变产品范围或用户流程时才阅读 docs/PRD.md。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
 ```
 
-当前下一阶段尚未确定。确定后，再在这里补充具体阶段开发 session 启动话术。
+当前回归测试或 PR 准备 session 可以这样启动：
+
+```text
+你是 AI Interview Simulator 的开发测试 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md 和 docs/DEVELOPMENT_TESTING.md。本轮目标是回归测试 develop-improve-efficiency 分支的真实 AI 流程和 Mock 快速流程，并整理 PR 前测试记录。不要修改产品范围；如果发现 bug，只记录清楚复现路径和建议修复点。
+```
 
 代码审查 session 用于检查阶段开发结果：
 
