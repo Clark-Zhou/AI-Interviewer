@@ -57,6 +57,13 @@ h2 {
   font-size: 20px;
 }
 
+.panel-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
 .subtitle {
   margin: 0 0 24px;
   color: #4b5563;
@@ -507,6 +514,10 @@ button:disabled {
 
   .evaluation-header {
     align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .panel-heading {
     flex-direction: column;
   }
 

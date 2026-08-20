@@ -15,7 +15,7 @@
  */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { evaluateInterview, generateInterviewQuestions } from '../lib/client/interviewApi';
 import {
   createInterviewSessionId,
@@ -124,6 +124,7 @@ function formatGenerationSource(generationSource) {
 
 // 前端主组件：负责收集输入、生成问题、提交回答，并展示最终评价。
 export default function InterviewSimulator() {
+  const actionVersionRef = useRef(0);
   const [jobInfo, setJobInfo] = useState('');
   const [resume, setResume] = useState('');
   const [questions, setQuestions] = useState([]);
@@ -200,6 +201,46 @@ export default function InterviewSimulator() {
   const selectedHistorySourceLabel = formatGenerationSource(
     selectedHistorySession?.generationSource
   );
+
+  const hasCurrentInterviewContent =
+    Boolean(jobInfo.trim()) ||
+    Boolean(resume.trim()) ||
+    questions.length > 0 ||
+    Object.values(answers).some((answerText) => Boolean(answerText)) ||
+    Object.values(submittedAnswers).some((answerText) => Boolean(answerText)) ||
+    Object.values(answerErrors).some((errorText) => Boolean(errorText)) ||
+    Boolean(evaluation) ||
+    Boolean(error) ||
+    Boolean(evaluationError) ||
+    Boolean(historySaveMessage) ||
+    isLoading ||
+    isEvaluating;
+
+  // 清空当前面试状态，但保留 localStorage 历史记录和当前历史列表展示。
+  const handleResetInterview = () => {
+    if (
+      hasCurrentInterviewContent &&
+      !window.confirm('确定开始新一轮吗？当前页面中的输入、回答和评价会被清空，历史记录不会删除。')
+    ) {
+      return;
+    }
+
+    actionVersionRef.current += 1;
+    setJobInfo('');
+    setResume('');
+    setQuestions([]);
+    setAnswers({});
+    setSubmittedAnswers({});
+    setAnswerErrors({});
+    setEvaluation(null);
+    setIsLoading(false);
+    setIsEvaluating(false);
+    setError('');
+    setEvaluationError('');
+    setHistorySaveStatus('');
+    setHistorySaveMessage('');
+    setQuestionGenerationSource('');
+  };
 
   // 按问题下标保存用户回答，提交整场评价时会使用这些回答。
   const handleAnswerChange = (questionIndex, answerText) => {
@@ -319,6 +360,9 @@ export default function InterviewSimulator() {
 
   // 点击按钮时先做前端校验，再调用 client API 获取问题数组。
   const handleGenerateQuestions = async () => {
+    const actionVersion = actionVersionRef.current + 1;
+    actionVersionRef.current = actionVersion;
+
     if (!jobInfo.trim() || !resume.trim()) {
       setError('请先填写岗位信息和个人简历。');
       setQuestions([]);
@@ -347,12 +391,23 @@ export default function InterviewSimulator() {
 
     try {
       const generatedQuestions = await generateInterviewQuestions({ jobInfo, resume });
+
+      if (actionVersion !== actionVersionRef.current) {
+        return;
+      }
+
       setQuestions(generatedQuestions);
       setQuestionGenerationSource('ai');
     } catch (error) {
+      if (actionVersion !== actionVersionRef.current) {
+        return;
+      }
+
       setError(error.message);
     } finally {
-      setIsLoading(false);
+      if (actionVersion === actionVersionRef.current) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -386,6 +441,9 @@ export default function InterviewSimulator() {
 
   // 所有题目提交后，调用最终评价 API 生成整体报告和逐题反馈。
   const handleEvaluateInterview = async () => {
+    const actionVersion = actionVersionRef.current + 1;
+    actionVersionRef.current = actionVersion;
+
     if (!isReadyForEvaluation) {
       setEvaluationError('请先提交所有题目的回答。');
       return;
@@ -403,11 +461,22 @@ export default function InterviewSimulator() {
         resume,
         questionAnswers: submittedQuestionAnswers,
       });
+
+      if (actionVersion !== actionVersionRef.current) {
+        return;
+      }
+
       handleEvaluationGenerated(generatedEvaluation, 'ai');
     } catch (error) {
+      if (actionVersion !== actionVersionRef.current) {
+        return;
+      }
+
       setEvaluationError(error.message);
     } finally {
-      setIsEvaluating(false);
+      if (actionVersion === actionVersionRef.current) {
+        setIsEvaluating(false);
+      }
     }
   };
 
@@ -431,7 +500,16 @@ export default function InterviewSimulator() {
     <main className="page">
       {/* 输入区：收集岗位信息和个人简历。 */}
       <section className="panel">
-        <h1>AI 模拟面试</h1>
+        <div className="panel-heading">
+          <h1>AI 模拟面试</h1>
+          <button
+            type="button"
+            className="secondary-button compact-button"
+            onClick={handleResetInterview}
+          >
+            开始新一轮
+          </button>
+        </div>
         <p className="subtitle">
           粘贴岗位信息和个人简历，生成模拟问题；回答并提交所有题目后，可以获得一份最终面试评价。
         </p>
