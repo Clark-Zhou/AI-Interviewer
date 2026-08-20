@@ -221,6 +221,6 @@ components/InterviewSimulator.js
 
 具体阶段计划以 `docs/ROADMAP.md` 为准。可以小步考虑：
 
-- 为最终评价失败增加重试按钮
-- 将开发辅助示例数据拆到单独 fixture 文件
+- 一键提交全部回答，减少逐题提交的重复点击
 - 为最终评价失败增加更友好的重试能力
+- 将开发辅助示例数据拆到单独 fixture 文件
