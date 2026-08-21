@@ -211,8 +211,12 @@ export default function InterviewSimulator() {
   const selectedHistorySourceLabel = formatGenerationSource(
     selectedHistorySession?.generationSource
   );
+  const isQuestionGenerationDisabled = isLoading || isEvaluating;
   const canRetryGenerateQuestions =
-    Boolean(error) && Boolean(jobInfo.trim()) && Boolean(resume.trim()) && !isLoading;
+    Boolean(error) &&
+    Boolean(jobInfo.trim()) &&
+    Boolean(resume.trim()) &&
+    !isQuestionGenerationDisabled;
   const canRetryEvaluation = Boolean(evaluationError) && isReadyForEvaluation && !isEvaluating;
 
   const hasCurrentInterviewContent =
@@ -383,6 +387,10 @@ export default function InterviewSimulator() {
 
   // 点击按钮时先做前端校验，再调用 client API 获取问题数组。
   const handleGenerateQuestions = async () => {
+    if (isQuestionGenerationDisabled) {
+      return;
+    }
+
     const actionVersion = actionVersionRef.current + 1;
     actionVersionRef.current = actionVersion;
 
@@ -436,6 +444,10 @@ export default function InterviewSimulator() {
 
   // 开发辅助：使用本地固定问题快速进入答题流程，不调用后端 API。
   const handleUseMockQuestions = () => {
+    if (isQuestionGenerationDisabled) {
+      return;
+    }
+
     if (!jobInfo.trim() || !resume.trim()) {
       setError('请先填写岗位信息和个人简历，再使用 Mock 问题。');
       setQuestions([]);
@@ -570,7 +582,11 @@ export default function InterviewSimulator() {
         </div>
 
         <div className="button-row">
-          <button type="button" onClick={handleGenerateQuestions} disabled={isLoading}>
+          <button
+            type="button"
+            onClick={handleGenerateQuestions}
+            disabled={isQuestionGenerationDisabled}
+          >
             {isLoading ? '正在生成问题...' : 'AI 生成面试问题'}
           </button>
           {isDevelopment && (
@@ -578,7 +594,7 @@ export default function InterviewSimulator() {
               type="button"
               className="secondary-button"
               onClick={handleUseMockQuestions}
-              disabled={isLoading}
+              disabled={isQuestionGenerationDisabled}
             >
               使用 Mock 问题
             </button>
