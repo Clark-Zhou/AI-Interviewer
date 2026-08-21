@@ -14,14 +14,14 @@
 
 ## 当前推荐方向
 
-当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成本地历史记录、开发模式 Mock 流程、一键提交全部回答和开始新一轮面试。下一步建议做“阶段 11：错误恢复与文案小修”，让 AI 请求失败后可以更顺畅重试，并把关键提示文案打磨到更适合展示的状态。
+当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试，以及 AI 请求失败后的基础重试入口。下一步建议做人工回归测试和 PR 收尾，确认真实 AI、Mock、历史记录和错误恢复流程都稳定。
 
 原因：
 
-- AI 请求失败、网络波动或模型返回异常是高概率场景，MVP 需要基本恢复能力。
-- 重试按钮不改变 AI API、prompt、mock 流程或历史保存数据结构。
-- 文案小修能降低用户困惑，让当前功能更像一个可以展示的 MVP。
-- 这个阶段应严格收尾，不新增文件上传、登录、数据库、多轮追问等大功能。
+- 阶段 11 已完成，当前分支已经具备可演示的核心 MVP 闭环。
+- 真实 AI 请求、开发 Mock、历史保存和开始新一轮流程需要集中做一次人工回归。
+- PR 前应重点确认没有误改 AI API、prompt、mock 数据或历史保存数据结构。
+- 后续大功能仍应暂缓，不新增文件上传、登录、数据库、多轮追问等能力。
 
 ## 阶段计划
 
@@ -35,16 +35,16 @@
 - [x] 阶段 8：开发模式 Mock 问题与 Mock 评价
 - [x] 阶段 9：一键提交全部回答
 - [x] 阶段 10：开始新一轮面试
-- [ ] 阶段 11：错误恢复与文案小修
+- [x] 阶段 11：错误恢复与文案小修
 
 ## 当前优先级
 
 当前优先级：
 
-1. 在 `develop-improve-efficiency` 分支完成阶段 11。
-2. 为生成问题失败和最终评价失败提供明确的重试入口。
-3. 小范围打磨空状态、错误提示、保存提示和按钮文案。
-4. 不修改 AI API、prompt、mock 流程、历史保存数据结构或页面主流程。
+1. 在 `develop-improve-efficiency` 分支做阶段 11 后的人工回归测试。
+2. 确认生成问题、最终评价、错误重试、Mock 流程、历史保存和开始新一轮都稳定。
+3. 准备 PR 描述、测试记录和代码审查。
+4. 后续如继续开发，优先小步评估最终评价 prompt 质量或开发 fixture 拆分，不直接扩展大功能。
 
 推荐当前功能分支：
 
@@ -476,7 +476,7 @@ createInterviewSessionId()
 
 ## 阶段 11：错误恢复与文案小修
 
-阶段状态：计划中。当前分支为 `develop-improve-efficiency`。
+阶段状态：已完成。当前分支为 `develop-improve-efficiency`。
 
 ### 阶段目标
 
@@ -580,10 +580,10 @@ createInterviewSessionId()
 你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“[阶段名称]”阶段。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md；如果本阶段涉及开发测试流程，也阅读 docs/DEVELOPMENT_TESTING.md。然后按 ROADMAP 的任务拆分和验收标准实现。只有在需要改变产品范围或用户流程时才阅读 docs/PRD.md。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
 ```
 
-当前阶段开发 session 可以这样启动：
+当前阶段 11 已完成，建议优先启动代码审查或开发测试 session。开发测试 session 可以这样启动：
 
 ```text
-你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“阶段 11：错误恢复与文案小修”。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md；本阶段涉及测试流程，也请阅读 docs/DEVELOPMENT_TESTING.md。实现时只新增生成问题失败和最终评价失败后的重试入口，并小范围优化用户可见文案。不要改 AI API、prompt、mock 流程、历史保存逻辑或数据结构。不要安装依赖，不要启动 dev server，除非我明确要求。
+你是 AI Interview Simulator 的开发测试 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/DEVELOPMENT_TESTING.md。请按当前回归清单检查真实 AI、Mock、历史记录、开始新一轮和错误重试流程，并记录未覆盖的测试风险。不要安装依赖，不要启动 dev server，除非我明确要求。
 ```
 
 代码审查 session 用于检查阶段开发结果：

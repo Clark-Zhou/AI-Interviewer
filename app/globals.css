@@ -169,6 +169,19 @@ button:disabled {
   color: #6b7280;
 }
 
+.message-with-action {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.message-with-action .error-message,
+.message-with-action .answer-error {
+  margin: 0;
+}
+
 /* 问题列表展示区。 */
 .question-list {
   list-style: none;
@@ -523,6 +536,11 @@ button:disabled {
 
   .button-row button {
     width: 100%;
+  }
+
+  .message-with-action {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .history-layout {
