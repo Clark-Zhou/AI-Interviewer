@@ -57,6 +57,13 @@ h2 {
   font-size: 20px;
 }
 
+.panel-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
 .subtitle {
   margin: 0 0 24px;
   color: #4b5563;
@@ -144,6 +151,13 @@ button:disabled {
   opacity: 0.7;
 }
 
+.button-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .error-message {
   margin: 14px 0 0;
   color: #dc2626;
@@ -153,6 +167,19 @@ button:disabled {
 .empty-state {
   margin: 0;
   color: #6b7280;
+}
+
+.message-with-action {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.message-with-action .error-message,
+.message-with-action .answer-error {
+  margin: 0;
 }
 
 /* 问题列表展示区。 */
@@ -411,6 +438,17 @@ button:disabled {
   line-height: 1.4;
 }
 
+.history-source {
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.detail-source {
+  margin: 6px 0 0;
+}
+
 .history-detail {
   border-left: 1px solid #e5e7eb;
   min-height: 160px;
@@ -489,6 +527,19 @@ button:disabled {
 
   .evaluation-header {
     align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .panel-heading {
+    flex-direction: column;
+  }
+
+  .button-row button {
+    width: 100%;
+  }
+
+  .message-with-action {
+    align-items: stretch;
     flex-direction: column;
   }
 

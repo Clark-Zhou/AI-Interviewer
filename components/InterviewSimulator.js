@@ -4,6 +4,7 @@
  * 关联文件：
  * - lib/client/interviewApi.js：封装前端调用后端 API 的请求方法。
  * - lib/client/interviewHistoryStorage.js：保存和读取浏览器本地面试历史记录。
+ * - lib/dev/interviewMocks.js：提供开发环境使用的本地 mock 问题和 mock 评价。
  * - app/globals.css：提供本组件使用的页面、表单、按钮和结果区样式。
  * - app/api/generate-questions/route.js：前端通过请求层调用生成问题 API。
  * - app/api/evaluate-interview/route.js：前端通过请求层调用最终评价 API。
@@ -14,13 +15,17 @@
  */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { evaluateInterview, generateInterviewQuestions } from '../lib/client/interviewApi';
 import {
   createInterviewSessionId,
   getInterviewSessions,
   saveInterviewSession,
 } from '../lib/client/interviewHistoryStorage';
+import {
+  createMockInterviewEvaluation,
+  mockInterviewQuestions,
+} from '../lib/dev/interviewMocks';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -106,8 +111,30 @@ function formatHistoryTime(value) {
   });
 }
 
+function formatGenerationSource(generationSource) {
+  if (!generationSource) {
+    return '';
+  }
+
+  const questionSource = generationSource.questions === 'mock' ? 'Mock 问题' : 'AI 问题';
+  const evaluationSource = generationSource.evaluation === 'mock' ? 'Mock 评价' : 'AI 评价';
+
+  return `${questionSource} / ${evaluationSource}`;
+}
+
+function getRequestErrorMessage(prefix, error) {
+  const detail = error?.message || '请稍后重试。';
+
+  if (detail.includes(prefix)) {
+    return detail;
+  }
+
+  return `${prefix}：${detail}`;
+}
+
 // 前端主组件：负责收集输入、生成问题、提交回答，并展示最终评价。
 export default function InterviewSimulator() {
+  const actionVersionRef = useRef(0);
   const [jobInfo, setJobInfo] = useState('');
   const [resume, setResume] = useState('');
   const [questions, setQuestions] = useState([]);
@@ -123,6 +150,7 @@ export default function InterviewSimulator() {
   const [historySaveMessage, setHistorySaveMessage] = useState('');
   const [historySessions, setHistorySessions] = useState([]);
   const [selectedHistorySessionId, setSelectedHistorySessionId] = useState('');
+  const [questionGenerationSource, setQuestionGenerationSource] = useState('');
 
   // 首次进入页面时读取本地历史记录，只在浏览器端执行。
   useEffect(() => {
@@ -142,6 +170,7 @@ export default function InterviewSimulator() {
     setEvaluationError('');
     setHistorySaveStatus('');
     setHistorySaveMessage('');
+    setQuestionGenerationSource('');
   };
 
   // 开发辅助：为当前问题列表填入测试回答，但保留逐题手动提交动作。
@@ -179,6 +208,66 @@ export default function InterviewSimulator() {
     (session) => session.id === selectedHistorySessionId
   );
   const selectedHistoryScore = selectedHistorySession?.evaluation?.overallScore;
+  const selectedHistorySourceLabel = formatGenerationSource(
+    selectedHistorySession?.generationSource
+  );
+  const isQuestionGenerationDisabled = isLoading || isEvaluating;
+  const canRetryGenerateQuestions =
+    Boolean(error) &&
+    Boolean(jobInfo.trim()) &&
+    Boolean(resume.trim()) &&
+    !isQuestionGenerationDisabled;
+  const canRetryEvaluation = Boolean(evaluationError) && isReadyForEvaluation && !isEvaluating;
+
+  const hasCurrentInterviewContent =
+    Boolean(jobInfo.trim()) ||
+    Boolean(resume.trim()) ||
+    questions.length > 0 ||
+    Object.values(answers).some((answerText) => Boolean(answerText)) ||
+    Object.values(submittedAnswers).some((answerText) => Boolean(answerText)) ||
+    Object.values(answerErrors).some((errorText) => Boolean(errorText)) ||
+    Boolean(evaluation) ||
+    Boolean(error) ||
+    Boolean(evaluationError) ||
+    Boolean(historySaveMessage) ||
+    isLoading ||
+    isEvaluating;
+
+  // 清空当前面试状态，但保留 localStorage 历史记录和当前历史列表展示。
+  const handleResetInterview = () => {
+    if (
+      hasCurrentInterviewContent &&
+      !window.confirm('确定开始新一轮吗？当前页面中的输入、回答和评价会被清空，历史记录不会删除。')
+    ) {
+      return;
+    }
+
+    actionVersionRef.current += 1;
+    setJobInfo('');
+    setResume('');
+    setQuestions([]);
+    setAnswers({});
+    setSubmittedAnswers({});
+    setAnswerErrors({});
+    setEvaluation(null);
+    setIsLoading(false);
+    setIsEvaluating(false);
+    setError('');
+    setEvaluationError('');
+    setHistorySaveStatus('');
+    setHistorySaveMessage('');
+    setQuestionGenerationSource('');
+  };
+
+  const handleJobInfoChange = (nextJobInfo) => {
+    setJobInfo(nextJobInfo);
+    setError('');
+  };
+
+  const handleResumeChange = (nextResume) => {
+    setResume(nextResume);
+    setError('');
+  };
 
   // 按问题下标保存用户回答，提交整场评价时会使用这些回答。
   const handleAnswerChange = (questionIndex, answerText) => {
@@ -200,6 +289,41 @@ export default function InterviewSimulator() {
     setEvaluationError('');
     setHistorySaveStatus('');
     setHistorySaveMessage('');
+  };
+
+  // 统一处理评价展示和历史保存，保证真实 AI 和 Mock 评价复用同一条链路。
+  const handleEvaluationGenerated = (generatedEvaluation, evaluationGenerationSource) => {
+    setEvaluation(generatedEvaluation);
+
+    try {
+      const savedAt = new Date().toISOString();
+
+      const savedSession = saveInterviewSession({
+        id: createInterviewSessionId(),
+        version: 1,
+        source: 'localStorage',
+        generationSource: {
+          questions: questionGenerationSource || 'ai',
+          evaluation: evaluationGenerationSource,
+        },
+        jobInfo,
+        resume,
+        questions,
+        answers: submittedAnswers,
+        questionAnswers: submittedQuestionAnswers,
+        evaluation: generatedEvaluation,
+        createdAt: savedAt,
+        updatedAt: savedAt,
+      });
+
+      setHistorySessions(getInterviewSessions());
+      setSelectedHistorySessionId(savedSession.id);
+      setHistorySaveStatus('success');
+      setHistorySaveMessage('最终评价已生成，并已保存到本地历史记录。');
+    } catch {
+      setHistorySaveStatus('error');
+      setHistorySaveMessage('最终评价已生成，但暂时无法保存到本地历史记录。你仍可以先查看本次评价。');
+    }
   };
 
   // 单题提交：在前端记录已确认的回答，最终评价接口只使用已提交回答。
@@ -228,10 +352,50 @@ export default function InterviewSimulator() {
     setHistorySaveMessage('');
   };
 
+  // 一键提交：所有题都有回答时，把当前问题列表里的回答一次性纳入最终评价。
+  const handleSubmitAllAnswers = () => {
+    const nextErrors = {};
+    const nextSubmittedAnswers = {};
+    let hasEmptyAnswer = false;
+
+    questions.forEach((_, questionIndex) => {
+      const answerText = answers[questionIndex]?.trim();
+
+      if (!answerText) {
+        nextErrors[questionIndex] = '请先填写这道题的回答。';
+        hasEmptyAnswer = true;
+        return;
+      }
+
+      nextErrors[questionIndex] = '';
+      nextSubmittedAnswers[questionIndex] = answerText;
+    });
+
+    if (hasEmptyAnswer) {
+      setAnswerErrors(nextErrors);
+      setEvaluationError('请先填写所有题目的回答。');
+      return;
+    }
+
+    setAnswerErrors(nextErrors);
+    setSubmittedAnswers(nextSubmittedAnswers);
+    setEvaluation(null);
+    setEvaluationError('');
+    setHistorySaveStatus('');
+    setHistorySaveMessage('');
+  };
+
   // 点击按钮时先做前端校验，再调用 client API 获取问题数组。
   const handleGenerateQuestions = async () => {
+    if (isQuestionGenerationDisabled) {
+      return;
+    }
+
+    const actionVersion = actionVersionRef.current + 1;
+    actionVersionRef.current = actionVersion;
+
     if (!jobInfo.trim() || !resume.trim()) {
-      setError('请先填写岗位信息和个人简历。');
+      setError('请先填写岗位信息和个人简历，再生成面试问题。');
       setQuestions([]);
       setAnswers({});
       setSubmittedAnswers({});
@@ -240,6 +404,7 @@ export default function InterviewSimulator() {
       setEvaluationError('');
       setHistorySaveStatus('');
       setHistorySaveMessage('');
+      setQuestionGenerationSource('');
       return;
     }
 
@@ -252,20 +417,68 @@ export default function InterviewSimulator() {
     setEvaluationError('');
     setHistorySaveStatus('');
     setHistorySaveMessage('');
+    setQuestionGenerationSource('');
     setIsLoading(true);
 
     try {
       const generatedQuestions = await generateInterviewQuestions({ jobInfo, resume });
+
+      if (actionVersion !== actionVersionRef.current) {
+        return;
+      }
+
       setQuestions(generatedQuestions);
+      setQuestionGenerationSource('ai');
     } catch (error) {
-      setError(error.message);
+      if (actionVersion !== actionVersionRef.current) {
+        return;
+      }
+
+      setError(getRequestErrorMessage('生成问题失败', error));
     } finally {
-      setIsLoading(false);
+      if (actionVersion === actionVersionRef.current) {
+        setIsLoading(false);
+      }
     }
+  };
+
+  // 开发辅助：使用本地固定问题快速进入答题流程，不调用后端 API。
+  const handleUseMockQuestions = () => {
+    if (isQuestionGenerationDisabled) {
+      return;
+    }
+
+    if (!jobInfo.trim() || !resume.trim()) {
+      setError('请先填写岗位信息和个人简历，再使用 Mock 问题。');
+      setQuestions([]);
+      setAnswers({});
+      setSubmittedAnswers({});
+      setAnswerErrors({});
+      setEvaluation(null);
+      setEvaluationError('');
+      setHistorySaveStatus('');
+      setHistorySaveMessage('');
+      setQuestionGenerationSource('');
+      return;
+    }
+
+    setError('');
+    setQuestions(mockInterviewQuestions);
+    setAnswers({});
+    setSubmittedAnswers({});
+    setAnswerErrors({});
+    setEvaluation(null);
+    setEvaluationError('');
+    setHistorySaveStatus('');
+    setHistorySaveMessage('');
+    setQuestionGenerationSource('mock');
   };
 
   // 所有题目提交后，调用最终评价 API 生成整体报告和逐题反馈。
   const handleEvaluateInterview = async () => {
+    const actionVersion = actionVersionRef.current + 1;
+    actionVersionRef.current = actionVersion;
+
     if (!isReadyForEvaluation) {
       setEvaluationError('请先提交所有题目的回答。');
       return;
@@ -283,46 +496,55 @@ export default function InterviewSimulator() {
         resume,
         questionAnswers: submittedQuestionAnswers,
       });
-      setEvaluation(generatedEvaluation);
 
-      // 评价成功后保存完整本地 session；保存失败不能影响最终评价展示。
-      try {
-        const savedAt = new Date().toISOString();
-
-        const savedSession = saveInterviewSession({
-          id: createInterviewSessionId(),
-          version: 1,
-          source: 'localStorage',
-          jobInfo,
-          resume,
-          questions,
-          answers: submittedAnswers,
-          questionAnswers: submittedQuestionAnswers,
-          evaluation: generatedEvaluation,
-          createdAt: savedAt,
-          updatedAt: savedAt,
-        });
-
-        setHistorySessions(getInterviewSessions());
-        setSelectedHistorySessionId(savedSession.id);
-        setHistorySaveStatus('success');
-        setHistorySaveMessage('已保存到本地历史记录。');
-      } catch {
-        setHistorySaveStatus('error');
-        setHistorySaveMessage('最终评价已生成，但本地保存失败。');
+      if (actionVersion !== actionVersionRef.current) {
+        return;
       }
+
+      handleEvaluationGenerated(generatedEvaluation, 'ai');
     } catch (error) {
-      setEvaluationError(error.message);
+      if (actionVersion !== actionVersionRef.current) {
+        return;
+      }
+
+      setEvaluationError(getRequestErrorMessage('生成最终评价失败', error));
     } finally {
-      setIsEvaluating(false);
+      if (actionVersion === actionVersionRef.current) {
+        setIsEvaluating(false);
+      }
     }
+  };
+
+  // 开发辅助：使用当前已提交问答生成本地 mock 评价，并复用真实评价后的保存链路。
+  const handleUseMockEvaluation = () => {
+    if (!isReadyForEvaluation) {
+      setEvaluationError('请先提交所有题目的回答。');
+      return;
+    }
+
+    setEvaluation(null);
+    setEvaluationError('');
+    setHistorySaveStatus('');
+    setHistorySaveMessage('');
+
+    const generatedEvaluation = createMockInterviewEvaluation(submittedQuestionAnswers);
+    handleEvaluationGenerated(generatedEvaluation, 'mock');
   };
 
   return (
     <main className="page">
       {/* 输入区：收集岗位信息和个人简历。 */}
       <section className="panel">
-        <h1>AI 模拟面试</h1>
+        <div className="panel-heading">
+          <h1>AI 模拟面试</h1>
+          <button
+            type="button"
+            className="secondary-button compact-button"
+            onClick={handleResetInterview}
+          >
+            开始新一轮
+          </button>
+        </div>
         <p className="subtitle">
           粘贴岗位信息和个人简历，生成模拟问题；回答并提交所有题目后，可以获得一份最终面试评价。
         </p>
@@ -344,7 +566,7 @@ export default function InterviewSimulator() {
           <textarea
             id="job"
             value={jobInfo}
-            onChange={(event) => setJobInfo(event.target.value)}
+            onChange={(event) => handleJobInfoChange(event.target.value)}
             placeholder="粘贴岗位 JD，例如岗位职责、任职要求、技术栈等"
           />
         </div>
@@ -354,16 +576,46 @@ export default function InterviewSimulator() {
           <textarea
             id="resume"
             value={resume}
-            onChange={(event) => setResume(event.target.value)}
+            onChange={(event) => handleResumeChange(event.target.value)}
             placeholder="粘贴简历内容，例如工作经历、项目经历、技能栈等"
           />
         </div>
 
-        <button type="button" onClick={handleGenerateQuestions} disabled={isLoading}>
-          {isLoading ? '正在生成问题...' : '生成面试问题'}
-        </button>
+        <div className="button-row">
+          <button
+            type="button"
+            onClick={handleGenerateQuestions}
+            disabled={isQuestionGenerationDisabled}
+          >
+            {isLoading ? '正在生成问题...' : 'AI 生成面试问题'}
+          </button>
+          {isDevelopment && (
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={handleUseMockQuestions}
+              disabled={isQuestionGenerationDisabled}
+            >
+              使用 Mock 问题
+            </button>
+          )}
+        </div>
 
-        {error && <p className="error-message">{error}</p>}
+        {error && (
+          <div className="message-with-action">
+            <p className="error-message">{error}</p>
+            {canRetryGenerateQuestions && (
+              <button
+                type="button"
+                className="secondary-button compact-button"
+                onClick={handleGenerateQuestions}
+                disabled={isLoading}
+              >
+                重试生成问题
+              </button>
+            )}
+          </div>
+        )}
       </section>
 
       {/* 结果区：展示空状态、加载状态或结构化问题列表。 */}
@@ -384,12 +636,19 @@ export default function InterviewSimulator() {
                   填入测试回答
                 </button>
               )}
+              <button
+                type="button"
+                className="secondary-button compact-button"
+                onClick={handleSubmitAllAnswers}
+              >
+                提交全部回答
+              </button>
             </div>
           )}
         </div>
         {isLoading && <p className="empty-state">DeepSeek 正在生成问题，请稍等。</p>}
         {!isLoading && questions.length === 0 && (
-          <p className="empty-state">填写岗位信息和个人简历后，点击按钮生成面试问题。</p>
+          <p className="empty-state">填写岗位信息和个人简历后，点击「AI 生成面试问题」开始。</p>
         )}
         {!isLoading && questions.length > 0 && (
           <>
@@ -432,16 +691,42 @@ export default function InterviewSimulator() {
               <p>
                 {isReadyForEvaluation
                   ? '所有回答已提交，评价数据已经准备好。'
-                  : '提交所有题目的回答后，就可以准备生成最终评价。'}
+                  : '提交所有题目的回答后，就可以生成最终评价。'}
               </p>
-              <button
-                type="button"
-                disabled={!isReadyForEvaluation || isEvaluating}
-                onClick={handleEvaluateInterview}
-              >
-                {isEvaluating ? '正在生成最终评价...' : '生成最终评价'}
-              </button>
-              {evaluationError && <p className="answer-error">{evaluationError}</p>}
+              <div className="button-row">
+                <button
+                  type="button"
+                  disabled={!isReadyForEvaluation || isEvaluating}
+                  onClick={handleEvaluateInterview}
+                >
+                  {isEvaluating ? '正在生成最终评价...' : 'AI 生成最终评价'}
+                </button>
+                {isDevelopment && (
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    disabled={!isReadyForEvaluation || isEvaluating}
+                    onClick={handleUseMockEvaluation}
+                  >
+                    使用 Mock 评价
+                  </button>
+                )}
+              </div>
+              {evaluationError && (
+                <div className="message-with-action">
+                  <p className="answer-error">{evaluationError}</p>
+                  {canRetryEvaluation && (
+                    <button
+                      type="button"
+                      className="secondary-button compact-button"
+                      onClick={handleEvaluateInterview}
+                      disabled={isEvaluating}
+                    >
+                      重试生成评价
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </>
         )}
@@ -527,7 +812,7 @@ export default function InterviewSimulator() {
         </div>
 
         {historySessions.length === 0 && (
-          <p className="empty-state">完成一次最终评价后，这里会显示本地历史记录。</p>
+          <p className="empty-state">生成最终评价后，这里会保留最近的本地历史记录。</p>
         )}
 
         {historySessions.length > 0 && (
@@ -552,6 +837,11 @@ export default function InterviewSimulator() {
                           ? ` ｜ ${session.evaluation.overallScore} / 100`
                           : ''}
                       </span>
+                      {formatGenerationSource(session.generationSource) && (
+                        <span className="history-source">
+                          {formatGenerationSource(session.generationSource)}
+                        </span>
+                      )}
                     </span>
                   </button>
                 </li>
@@ -560,7 +850,7 @@ export default function InterviewSimulator() {
 
             <div className="history-detail">
               {!selectedHistorySession && (
-                <p className="empty-state">选择一条历史记录查看详情。</p>
+                <p className="empty-state">选择一条本地历史记录查看详情。</p>
               )}
 
               {selectedHistorySession && (
@@ -571,6 +861,11 @@ export default function InterviewSimulator() {
                         {formatHistoryTime(selectedHistorySession.createdAt)}
                       </p>
                       <h3>{getTextSummary(selectedHistorySession.jobInfo, 56)}</h3>
+                      {selectedHistorySourceLabel && (
+                        <p className="history-source detail-source">
+                          {selectedHistorySourceLabel}
+                        </p>
+                      )}
                     </div>
                     {typeof selectedHistoryScore === 'number' && (
                       <span className="evaluation-score">
