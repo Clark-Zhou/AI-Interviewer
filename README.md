@@ -10,12 +10,18 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前版本先验证最小可用闭环，不包含登录、数据库、文件上传、云端历史记录、语音或视频面试。当前已完成本地历史记录初始化、列表和详情查看，用于在浏览器保存并复盘完整面试 session。
+当前版本先验证最小可用闭环。当前已完成本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 路由拆分，以及 Supabase Auth 账号系统 MVP。云端历史记录、文件上传、语音或视频面试仍暂缓。
 
 ## 当前功能
 
 已经完成：
 
+- 登录入口页面壳
+- `/login` 和 `/interview` 前端路由拆分
+- 邮箱密码注册、登录和登出
+- 登录态保持
+- 未登录访问 `/interview` 时回到 `/login`
+- 登录成功后进入 `/interview` 模拟面试主界面
 - 输入岗位 JD
 - 输入个人简历
 - 前端空输入校验
@@ -46,14 +52,15 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 - Next.js App Router
 - React
 - DeepSeek API
+- Supabase Auth
 - 普通 CSS
 
 当前没有使用：
 
-- 数据库
-- 用户系统
+- 云端历史数据库
 - 文件上传
 - 云端历史记录
+- 完整用户资料系统
 - Tailwind CSS
 - UI 组件库
 - TypeScript
@@ -88,29 +95,40 @@ http://localhost:3000
 ```env
 DEEPSEEK_API_KEY=your_deepseek_api_key_here
 DEEPSEEK_MODEL=deepseek-v4-flash
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 ```
 
 说明：
 
 - `.env.local` 不应提交到 git。
 - `DEEPSEEK_MODEL` 可选，不配置时服务端会使用默认模型。
+- `NEXT_PUBLIC_SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` 用于 Supabase Auth 账号系统。
+- 不要把 Supabase `service_role` key 写进前端环境变量或提交到仓库。
 - 修改 `.env.local` 后通常需要重启 `npm run dev`。
 
 ## 目录结构
 
 ```text
 app/                              Next.js App Router 页面和 API route
-app/page.js                       首页入口
+app/page.js                       根路径入口，重定向到 /login
 app/layout.js                     全局布局和 metadata
 app/globals.css                   全局样式
+app/login/page.js                 登录入口页面壳路由
+app/interview/page.js             受保护的模拟面试主界面路由
 app/api/generate-questions/       生成面试问题 API
 app/api/evaluate-interview/       生成最终评价 API
+proxy.js                          Supabase Auth cookie 刷新和 /interview 访问保护
 
+components/LoginEntryShell.js     登录/注册入口页面壳
+components/AuthStatusBar.js       当前账号展示和登出入口
 components/InterviewSimulator.js  主前端组件
 
 lib/client/interviewApi.js        前端请求封装
 lib/client/interviewHistoryStorage.js 本地历史记录读写工具
 lib/dev/interviewMocks.js         开发环境本地 mock 问题和 mock 评价
+lib/supabase/browserClient.js     浏览器端 Supabase Auth client
+lib/supabase/serverClient.js      服务端 Supabase Auth client
 lib/server/deepseek.js            生成问题的 DeepSeek 服务端调用
 lib/server/interviewEvaluation.js 最终评价的 DeepSeek 服务端调用
 lib/server/parseAiQuestions.js    面试问题 JSON 解析和校验
@@ -167,17 +185,23 @@ components/InterviewSimulator.js
 
 推荐测试路径：
 
-1. 点击 `填入示例 JD/简历`。
-2. 点击 `生成面试问题`。
-3. 等待问题生成。
-4. 点击 `填入测试回答`。
-5. 点击 `提交全部回答`，或逐题点击 `提交本题回答`。
-6. 确认进度为 `已提交 6 / 6`。
-7. 点击 `生成最终评价`。
-8. 检查最终评价是否完整展示。
-9. 检查最终评价区是否提示已保存到本地历史记录。
-10. 检查页面底部历史记录区是否新增记录，点击后是否能查看详情。
-11. 点击 `开始新一轮`，确认当前输入、问题、回答和评价被清空，但历史记录仍保留。
+1. 打开根路径后确认会进入 `/login`。
+2. 使用新邮箱注册，或使用已注册邮箱登录。
+3. 登录成功后进入 `/interview`。
+4. 确认页面进入 `/interview`。
+5. 点击浏览器返回键，确认能回到 `/login`。
+6. 再次登录或直接访问 `/interview`，确认登录态仍可用。
+7. 点击 `填入示例 JD/简历`。
+8. 点击 `生成面试问题`。
+9. 等待问题生成。
+10. 点击 `填入测试回答`。
+11. 点击 `提交全部回答`，或逐题点击 `提交本题回答`。
+12. 确认进度为 `已提交 6 / 6`。
+13. 点击 `生成最终评价`。
+14. 检查最终评价是否完整展示。
+15. 检查最终评价区是否提示已保存到本地历史记录。
+16. 检查页面底部历史记录区是否新增记录，点击后是否能查看详情。
+17. 点击 `开始新一轮`，确认当前输入、问题、回答和评价被清空，但历史记录仍保留。
 
 如果真实 AI 请求失败，页面应显示对应错误提示：生成问题失败时可点击 `重试生成问题`，最终评价失败时可点击 `重试生成评价`。
 
@@ -224,10 +248,11 @@ components/InterviewSimulator.js
 
 当前 MVP 暂不做：
 
-- 登录注册
+- 云端历史记录和完整用户资料系统
 - 数据库存储
 - 文件上传解析简历或 JD
 - 云端/数据库历史面试记录
+- OAuth、支付或权限系统
 - 历史记录删除、编辑、搜索和恢复 session
 - 多轮追问
 - 语音或视频面试

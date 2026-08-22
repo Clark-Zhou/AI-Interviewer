@@ -24,8 +24,326 @@ body {
 }
 
 button,
+input,
 textarea {
   font: inherit;
+}
+
+/* 登录入口页壳：承载 Supabase Auth 登录/注册入口。 */
+.entry-page {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.entry-hero {
+  align-items: center;
+  background:
+    linear-gradient(112deg, rgba(210, 246, 242, 0.92) 0%, rgba(246, 250, 252, 0.95) 44%, rgba(230, 242, 255, 0.9) 100%),
+    linear-gradient(24deg, transparent 0 52%, rgba(174, 221, 218, 0.54) 52% 70%, transparent 70% 100%);
+  display: grid;
+  gap: 48px;
+  grid-template-columns: minmax(320px, 1fr) minmax(340px, 520px);
+  min-height: 100vh;
+  padding: 64px min(9vw, 120px);
+  position: relative;
+}
+
+.entry-hero::before {
+  background: rgba(173, 219, 216, 0.46);
+  bottom: -88px;
+  content: '';
+  height: 34vh;
+  left: 6vw;
+  position: absolute;
+  transform: skewY(-18deg);
+  width: 52vw;
+}
+
+.entry-brand {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  left: min(9vw, 120px);
+  position: absolute;
+  top: 52px;
+  z-index: 1;
+}
+
+.entry-logo-mark {
+  align-items: center;
+  background: #ffffff;
+  border: 2px solid #2bb8aa;
+  border-radius: 8px;
+  box-shadow: 0 16px 30px rgba(35, 95, 116, 0.14);
+  color: #1d4ed8;
+  display: flex;
+  font-weight: 800;
+  height: 48px;
+  justify-content: center;
+  width: 48px;
+}
+
+.entry-product-name {
+  color: #0f766e;
+  font-weight: 800;
+  margin: 0 0 3px;
+}
+
+.entry-product-tagline {
+  color: #4b5563;
+  font-size: 13px;
+  margin: 0;
+}
+
+.entry-visual {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  min-height: 460px;
+  position: relative;
+  z-index: 1;
+}
+
+.entry-visual-card {
+  background: linear-gradient(145deg, #ecfffb 0%, #c7f2ea 48%, #2bb8aa 100%);
+  border-radius: 8px;
+  box-shadow: 0 34px 80px rgba(32, 92, 112, 0.2);
+  height: min(46vw, 420px);
+  min-height: 300px;
+  position: relative;
+  transform: rotate(-8deg) skewY(-4deg);
+  width: min(46vw, 420px);
+}
+
+.entry-visual-card::before {
+  background: #0f766e;
+  border-radius: 8px;
+  bottom: 44px;
+  content: '';
+  height: 92px;
+  left: 56px;
+  opacity: 0.34;
+  position: absolute;
+  transform: skewY(-8deg) rotate(8deg);
+  width: 248px;
+}
+
+.entry-chart {
+  align-items: end;
+  background: rgba(255, 255, 255, 0.76);
+  border-radius: 8px;
+  box-shadow: 0 18px 36px rgba(22, 78, 99, 0.18);
+  display: flex;
+  gap: 18px;
+  height: 220px;
+  justify-content: center;
+  left: 98px;
+  padding: 28px;
+  position: absolute;
+  top: 64px;
+  transform: skewY(4deg) rotate(8deg);
+  width: 190px;
+}
+
+.entry-chart span {
+  background: linear-gradient(180deg, #60a5fa 0%, #2bb8aa 100%);
+  border-radius: 8px 8px 0 0;
+  display: block;
+  width: 28px;
+}
+
+.entry-chart span:nth-child(1) {
+  height: 72px;
+}
+
+.entry-chart span:nth-child(2) {
+  height: 124px;
+}
+
+.entry-chart span:nth-child(3) {
+  height: 164px;
+}
+
+.entry-check {
+  align-items: center;
+  background: #fff7ed;
+  border: 3px solid #fed7aa;
+  border-radius: 8px;
+  box-shadow: 0 14px 28px rgba(249, 115, 22, 0.2);
+  color: #fb7185;
+  display: flex;
+  font-size: 52px;
+  font-weight: 800;
+  height: 86px;
+  justify-content: center;
+  left: 68px;
+  position: absolute;
+  top: 38px;
+  transform: skewY(4deg) rotate(8deg);
+  width: 112px;
+}
+
+.entry-arrow {
+  border-bottom: 38px solid transparent;
+  border-left: 126px solid #1d4ed8;
+  border-top: 38px solid transparent;
+  bottom: 112px;
+  filter: drop-shadow(0 18px 24px rgba(29, 78, 216, 0.2));
+  position: absolute;
+  right: 50px;
+  transform: skewY(4deg) rotate(8deg);
+}
+
+.entry-card {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  border-radius: 8px;
+  box-shadow: 0 32px 80px rgba(17, 24, 39, 0.16);
+  padding: 52px;
+  position: relative;
+  width: 100%;
+  z-index: 1;
+}
+
+.entry-card-header {
+  margin-bottom: 32px;
+}
+
+.entry-eyebrow {
+  color: #0f766e;
+  font-size: 14px;
+  font-weight: 800;
+  margin: 0 0 10px;
+}
+
+.entry-card h1 {
+  font-size: 34px;
+  margin: 0 0 12px;
+}
+
+.entry-card-header p:last-child {
+  color: #4b5563;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.entry-mode-switch {
+  background: #f3f4f6;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 22px;
+  padding: 6px;
+}
+
+.entry-mode-switch button {
+  background: transparent;
+  color: #4b5563;
+  padding: 10px 12px;
+}
+
+.entry-mode-switch button:hover,
+.entry-mode-switch button.active {
+  background: #ffffff;
+  color: #0f766e;
+}
+
+.entry-field {
+  margin-bottom: 18px;
+}
+
+.entry-field input {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  color: #111827;
+  outline: none;
+  padding: 14px 16px;
+  width: 100%;
+}
+
+.entry-field input:focus {
+  border-color: #2bb8aa;
+  box-shadow: 0 0 0 3px rgba(43, 184, 170, 0.14);
+}
+
+.entry-error {
+  color: #dc2626;
+  font-size: 14px;
+  margin: 0 0 16px;
+}
+
+.entry-message {
+  background: #ecfdf5;
+  border-radius: 8px;
+  color: #047857;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+}
+
+.entry-submit {
+  background: #2bb8aa;
+  font-size: 16px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.entry-submit:hover {
+  background: #0f766e;
+}
+
+.entry-note {
+  border-top: 1px solid #e5e7eb;
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 28px 0 0;
+  padding-top: 22px;
+  text-align: center;
+}
+
+/* 账号状态条：面试主界面顶部展示当前登录用户和登出入口。 */
+.auth-status-bar {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 24px auto -16px;
+  padding: 14px 16px;
+  width: min(900px, calc(100% - 32px));
+}
+
+.auth-status-label {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.auth-status-email {
+  color: #111827;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.auth-status-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.auth-status-error {
+  color: #dc2626;
+  font-size: 13px;
+  margin: 0;
 }
 
 /* 页面布局：控制内容宽度和卡片外观。 */
@@ -506,6 +824,103 @@ button:disabled {
 }
 
 @media (max-width: 720px) {
+  .entry-hero {
+    gap: 24px;
+    grid-template-columns: 1fr;
+    padding: 132px 20px 32px;
+  }
+
+  .entry-hero::before {
+    bottom: auto;
+    height: 220px;
+    left: -34px;
+    top: 120px;
+    width: 88vw;
+  }
+
+  .entry-brand {
+    left: 20px;
+    right: 20px;
+    top: 28px;
+  }
+
+  .entry-visual {
+    min-height: 210px;
+  }
+
+  .entry-visual-card {
+    height: 210px;
+    min-height: 210px;
+    width: min(78vw, 280px);
+  }
+
+  .entry-visual-card::before {
+    bottom: 26px;
+    height: 50px;
+    left: 32px;
+    width: 154px;
+  }
+
+  .entry-chart {
+    gap: 10px;
+    height: 132px;
+    left: 64px;
+    padding: 18px;
+    top: 40px;
+    width: 116px;
+  }
+
+  .entry-chart span {
+    width: 18px;
+  }
+
+  .entry-chart span:nth-child(1) {
+    height: 42px;
+  }
+
+  .entry-chart span:nth-child(2) {
+    height: 74px;
+  }
+
+  .entry-chart span:nth-child(3) {
+    height: 96px;
+  }
+
+  .entry-check {
+    font-size: 32px;
+    height: 54px;
+    left: 42px;
+    top: 24px;
+    width: 72px;
+  }
+
+  .entry-arrow {
+    border-bottom-width: 24px;
+    border-left-width: 76px;
+    border-top-width: 24px;
+    bottom: 66px;
+    right: 28px;
+  }
+
+  .entry-card {
+    padding: 28px 22px;
+  }
+
+  .entry-card h1 {
+    font-size: 28px;
+  }
+
+  .auth-status-bar {
+    align-items: stretch;
+    flex-direction: column;
+    margin-top: 16px;
+  }
+
+  .auth-status-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .dev-helper {
     align-items: stretch;
     flex-direction: column;

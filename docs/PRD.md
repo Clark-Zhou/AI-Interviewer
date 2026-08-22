@@ -39,16 +39,41 @@ The first version should prioritize a complete, useful workflow over advanced fe
 ## 4. Core User Flow
 
 1. User opens the app.
-2. User pastes the job description.
-3. User pastes resume text.
-4. User clicks "Start Mock Interview".
-5. The system generates 6 interview questions.
-6. User answers questions one by one.
-7. User submits each answer separately.
-8. The system generates a final report.
-9. User reviews strengths, weaknesses, and improvement suggestions.
+2. User signs up or logs in through the `/login` page.
+3. After authentication, the user enters the `/interview` page.
+4. User pastes the job description.
+5. User pastes resume text.
+6. User clicks "Start Mock Interview".
+7. The system generates 6 interview questions.
+8. User answers questions one by one.
+9. User submits each answer separately.
+10. The system generates a final report.
+11. User reviews strengths, weaknesses, and improvement suggestions.
 
 ## 5. MVP Features
+
+### 5.0 Account Entry and Authentication
+
+The product uses Supabase Auth for the account-system MVP. Authentication exists to protect the interview workspace and prepare for later cloud history, not to change the core AI interview flow.
+
+MVP behavior:
+
+- Show a `/login` page with the current entry-page visual style.
+- Support email and password signup.
+- Support email and password login.
+- Keep the user signed in after refresh.
+- Redirect unauthenticated access to `/interview` back to `/login`.
+- Provide logout from the authenticated experience.
+
+Out of scope for this MVP stage:
+
+- Cloud-synced interview history
+- User profile page
+- Password reset customization
+- Third-party OAuth login
+- Roles or permissions
+- Payment or usage limits
+- Custom password storage or custom session implementation
 
 ### 5.1 Job Description Input
 
@@ -133,7 +158,6 @@ Report sections:
 
 The MVP will not include:
 
-- User accounts
 - Payment
 - Admin dashboard
 - Enterprise hiring workflow
@@ -227,7 +251,7 @@ The MVP is successful if:
 - Generated questions feel relevant to the job and resume.
 - Final feedback contains specific, actionable advice.
 - The whole session can be completed in less than 15 minutes.
-- The product is useful even without accounts, uploads, or voice features.
+- The product is useful even without cloud history, uploads, or voice features.
 
 ## 10. First Build Milestone
 
