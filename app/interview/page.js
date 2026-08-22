@@ -16,6 +16,8 @@ import AuthStatusBar from '../../components/AuthStatusBar';
 import InterviewSimulator from '../../components/InterviewSimulator';
 import { createSupabaseServerClient } from '../../lib/supabase/serverClient';
 
+export const dynamic = 'force-dynamic';
+
 // 面试主界面路由：服务端先确认 Supabase 登录态，再渲染现有模拟面试组件。
 export default async function InterviewPage() {
   const supabase = await createSupabaseServerClient();

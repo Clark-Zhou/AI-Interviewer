@@ -42,7 +42,15 @@ export default function LoginEntryShell() {
     setEntryError('');
     setEntryMessage('');
 
-    const supabase = createSupabaseBrowserClient();
+    let supabase;
+
+    try {
+      supabase = createSupabaseBrowserClient();
+    } catch (error) {
+      setIsSubmitting(false);
+      setEntryError(error.message || '账号系统配置异常，请检查 Supabase 环境变量。');
+      return;
+    }
 
     if (isRegisterMode) {
       const { data, error } = await supabase.auth.signUp({

@@ -12,6 +12,7 @@
  */
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
+import { getSupabaseConfig } from './lib/supabase/config';
 
 // proxy 负责刷新 Supabase cookie，避免刷新页面后登录态丢失。
 export async function proxy(request) {
@@ -19,9 +20,22 @@ export async function proxy(request) {
     request,
   });
 
+  const { supabaseUrl, publishableKey, isConfigured } = getSupabaseConfig();
+
+  if (!isConfigured) {
+    if (request.nextUrl.pathname.startsWith('/interview')) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = '/login';
+      redirectUrl.search = '';
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    return response;
+  }
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    supabaseUrl,
+    publishableKey,
     {
       cookies: {
         getAll() {
