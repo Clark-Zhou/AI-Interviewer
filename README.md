@@ -10,16 +10,18 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前版本先验证最小可用闭环。当前已完成本地历史记录初始化、列表和详情查看、登录入口页面壳，以及 `/login` 和 `/interview` 路由拆分。下一步计划接入 Supabase Auth 做账号系统 MVP，但云端历史记录、文件上传、语音或视频面试仍暂缓。
+当前版本先验证最小可用闭环。当前已完成本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 路由拆分，以及 Supabase Auth 账号系统 MVP。云端历史记录、文件上传、语音或视频面试仍暂缓。
 
 ## 当前功能
 
 已经完成：
 
 - 登录入口页面壳
-- 体验版邮箱和口令输入的前端空输入提示
 - `/login` 和 `/interview` 前端路由拆分
-- 点击 `进入体验版` 后进入 `/interview` 模拟面试主界面
+- 邮箱密码注册、登录和登出
+- 登录态保持
+- 未登录访问 `/interview` 时回到 `/login`
+- 登录成功后进入 `/interview` 模拟面试主界面
 - 输入岗位 JD
 - 输入个人简历
 - 前端空输入校验
@@ -50,14 +52,15 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 - Next.js App Router
 - React
 - DeepSeek API
+- Supabase Auth
 - 普通 CSS
 
 当前没有使用：
 
 - 云端历史数据库
-- 完整用户资料系统
 - 文件上传
 - 云端历史记录
+- 完整用户资料系统
 - Tailwind CSS
 - UI 组件库
 - TypeScript
@@ -112,16 +115,20 @@ app/page.js                       根路径入口，重定向到 /login
 app/layout.js                     全局布局和 metadata
 app/globals.css                   全局样式
 app/login/page.js                 登录入口页面壳路由
-app/interview/page.js             模拟面试主界面路由
+app/interview/page.js             受保护的模拟面试主界面路由
 app/api/generate-questions/       生成面试问题 API
 app/api/evaluate-interview/       生成最终评价 API
+proxy.js                          Supabase Auth cookie 刷新和 /interview 访问保护
 
-components/LoginEntryShell.js     登录入口页面壳
+components/LoginEntryShell.js     登录/注册入口页面壳
+components/AuthStatusBar.js       当前账号展示和登出入口
 components/InterviewSimulator.js  主前端组件
 
 lib/client/interviewApi.js        前端请求封装
 lib/client/interviewHistoryStorage.js 本地历史记录读写工具
 lib/dev/interviewMocks.js         开发环境本地 mock 问题和 mock 评价
+lib/supabase/browserClient.js     浏览器端 Supabase Auth client
+lib/supabase/serverClient.js      服务端 Supabase Auth client
 lib/server/deepseek.js            生成问题的 DeepSeek 服务端调用
 lib/server/interviewEvaluation.js 最终评价的 DeepSeek 服务端调用
 lib/server/parseAiQuestions.js    面试问题 JSON 解析和校验
@@ -179,11 +186,11 @@ components/InterviewSimulator.js
 推荐测试路径：
 
 1. 打开根路径后确认会进入 `/login`。
-2. 在入口页填写邮箱和体验口令。
-3. 点击 `进入体验版`。
+2. 使用新邮箱注册，或使用已注册邮箱登录。
+3. 登录成功后进入 `/interview`。
 4. 确认页面进入 `/interview`。
 5. 点击浏览器返回键，确认能回到 `/login`。
-6. 再次点击 `进入体验版` 回到 `/interview`。
+6. 再次登录或直接访问 `/interview`，确认登录态仍可用。
 7. 点击 `填入示例 JD/简历`。
 8. 点击 `生成面试问题`。
 9. 等待问题生成。
@@ -245,6 +252,7 @@ components/InterviewSimulator.js
 - 数据库存储
 - 文件上传解析简历或 JD
 - 云端/数据库历史面试记录
+- OAuth、支付或权限系统
 - 历史记录删除、编辑、搜索和恢复 session
 - 多轮追问
 - 语音或视频面试

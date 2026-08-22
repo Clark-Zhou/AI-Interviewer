@@ -10,7 +10,7 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前已经验证核心面试练习闭环，并已完成本地历史记录初始化、列表和详情查看。当前分支已完成登录入口页面壳和 `/login`、`/interview` 前端路由拆分；下一步计划接入 Supabase Auth，先做注册、登录、登出、登录态保持和 `/interview` 访问保护。云端历史记录、文件上传和复杂账号能力仍暂缓。
+当前已经验证核心面试练习闭环，并已完成本地历史记录初始化、列表和详情查看。当前分支已完成登录入口页面壳、`/login` 和 `/interview` 前端路由拆分，以及 Supabase Auth 账号系统 MVP：注册、登录、登出、登录态保持和 `/interview` 访问保护。云端历史记录、文件上传和复杂账号能力仍暂缓。
 
 ## 2. 当前阶段
 
@@ -20,14 +20,17 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 develop-login-page
 ```
 
-当前已经完成的是 MVP 的核心闭环、开发效率优化、登录入口页面壳和入口/主界面路由拆分。Supabase 依赖已经安装，项目所有者已配置 `.env.local`，但账号系统代码还未实现：
+当前已经完成的是 MVP 的核心闭环、开发效率优化、登录入口页面壳、入口/主界面路由拆分和 Supabase Auth 账号系统 MVP：
 
 ```text
 访问根路径后进入 /login
-用户打开 /login 后先看到登录入口页面壳
-用户填写体验版邮箱和口令
-点击进入体验版后进入 /interview 模拟面试主界面
-浏览器返回键可从 /interview 回到 /login
+用户打开 /login 后先看到登录/注册入口页面壳
+新用户可以使用邮箱密码注册
+已注册用户可以使用邮箱密码登录
+登录成功后进入 /interview 模拟面试主界面
+未登录直接访问 /interview 会回到 /login
+已登录用户刷新 /interview 后仍保持登录态
+用户可以从主界面登出，登出后回到 /login
 输入岗位信息
 输入个人简历
 点击生成面试问题
@@ -68,6 +71,7 @@ Mock 评价复用本地历史保存机制
 Next.js App Router
 React
 DeepSeek API
+Supabase Auth
 普通 CSS
 ```
 
@@ -75,7 +79,6 @@ DeepSeek API
 
 ```text
 数据库
-用户系统
 文件上传
 Tailwind CSS
 组件库
@@ -126,19 +129,31 @@ Next.js 根路径入口，当前重定向到 `/login`。
 app/login/page.js
 ```
 
-登录入口页面路由。挂载 `components/LoginEntryShell.js`，不做真实登录或鉴权。
+登录入口页面路由。挂载 `components/LoginEntryShell.js`，提供 Supabase Auth 邮箱密码登录和注册入口。
 
 ```text
 app/interview/page.js
 ```
 
-模拟面试主界面路由。挂载 `components/InterviewSimulator.js`，当前不做访问保护。
+模拟面试主界面路由。服务端读取 Supabase Auth 登录态；未登录用户会回到 `/login`，已登录用户进入 `components/InterviewSimulator.js`。
+
+```text
+proxy.js
+```
+
+Supabase Auth cookie 刷新和 `/interview` 访问保护。当前只匹配 `/login` 和 `/interview`，不改 DeepSeek API 路由边界。
 
 ```text
 components/LoginEntryShell.js
 ```
 
-登录入口页面壳。展示背景视觉、悬浮体验框、邮箱输入、体验口令输入和 `进入体验版` 按钮；不调用登录 API，不保存密码。
+登录/注册入口页面壳。展示背景视觉、悬浮账号框、邮箱密码输入、登录/注册切换、错误提示和 loading 状态；密码不写入 localStorage、日志或历史记录。
+
+```text
+components/AuthStatusBar.js
+```
+
+账号状态条。展示当前登录邮箱并提供登出入口；登出后回到 `/login`。
 
 ```text
 components/InterviewSimulator.js
@@ -163,6 +178,18 @@ lib/dev/interviewMocks.js
 ```
 
 开发环境本地 mock 数据。提供固定结构化面试问题和固定结构最终评价，不调用后端 API，也不读取 API Key。
+
+```text
+lib/supabase/browserClient.js
+```
+
+浏览器端 Supabase Auth client。用于登录、注册和登出，只使用 publishable/anon key。
+
+```text
+lib/supabase/serverClient.js
+```
+
+服务端 Supabase Auth client。用于服务端读取当前用户和刷新 Auth cookie，不使用 `service_role` key。
 
 ```text
 app/api/generate-questions/route.js
@@ -262,6 +289,20 @@ components/InterviewSimulator.js
 -> JSON 解析
 -> 前端展示
 ```
+
+账号认证链路：
+
+```text
+components/LoginEntryShell.js
+  -> lib/supabase/browserClient.js
+  -> Supabase Auth 注册或登录
+  -> /interview
+  -> proxy.js 刷新 Auth cookie 并保护 /interview
+  -> app/interview/page.js 服务端读取当前用户
+  -> components/AuthStatusBar.js 提供登出入口
+```
+
+账号认证只保护前端面试工作区，不改变 DeepSeek API route 调用边界；本地历史记录仍保存在浏览器 localStorage。
 
 ## 6. 当前 API 协议
 
@@ -400,10 +441,12 @@ http://localhost:3000
 - Next.js 页面结构
 - 登录入口页面壳
 - 背景视觉和悬浮体验框布局
-- 体验版邮箱和口令输入的前端空输入提示
+- 邮箱密码注册、登录和登出
+- 登录态保持
+- 未登录访问 `/interview` 时回到 `/login`
 - `/login` 和 `/interview` 前端路由拆分
 - 根路径 `/` 重定向到 `/login`
-- 点击 `进入体验版` 后进入 `/interview` 模拟面试主界面
+- 登录成功后进入 `/interview` 模拟面试主界面
 - 岗位信息输入框
 - 个人简历输入框
 - 前端空输入校验
@@ -453,9 +496,9 @@ http://localhost:3000
 - 文件上传解析简历或 JD
 - 恢复历史 session 到当前页面
 - 历史记录删除、编辑和搜索
-- Supabase Auth 账号系统 MVP
 - 数据库或云端同步历史记录
 - 部署配置
+- 用户资料页、OAuth、支付或权限系统
 - 多轮追问
 - 语音或视频面试
 - 单题即时 AI 批改
@@ -469,26 +512,25 @@ http://localhost:3000
 推荐下一步：
 
 ```text
-建议从当前分支切出 `develop-auth-mvp`，然后做阶段 14：Supabase Auth 账号系统 MVP。重点完成注册、登录、登出、登录态保持和 `/interview` 访问保护，同时不做云端历史记录。
+阶段 14 已完成。建议先做一次代码审查和本地回归测试，重点确认账号系统没有破坏真实 AI、Mock、本地历史记录、开始新一轮和错误重试流程。
 ```
 
 建议检查：
 
-1. `.env.local` 是否已配置 `NEXT_PUBLIC_SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`，且没有提交真实环境变量。
-2. 新邮箱是否可以注册。
-3. 已注册邮箱是否可以登录。
-4. 登录成功后是否进入 `/interview`。
-5. 未登录直接访问 `/interview` 是否回到 `/login`。
-6. 已登录时刷新 `/interview` 是否仍保持登录态。
-7. 登出后是否回到 `/login`，再次访问 `/interview` 是否被拦回登录页。
-8. 登录/注册失败时是否有清楚错误提示，loading 期间是否避免重复提交。
-9. 密码是否没有被写入 localStorage、历史记录、console log 或自定义数据结构。
-10. 代码中是否没有 Supabase `service_role` key。
-11. `/interview` 中真实 AI、Mock、本地历史记录、开始新一轮和错误重试流程是否仍可用。
+1. 新邮箱是否可以注册。
+2. 已注册邮箱是否可以登录。
+3. 登录成功后是否进入 `/interview`。
+4. 未登录直接访问 `/interview` 是否回到 `/login`。
+5. 已登录时刷新 `/interview` 是否仍保持登录态。
+6. 登出后是否回到 `/login`，再次访问 `/interview` 是否被拦回登录页。
+7. 登录/注册失败时是否有清楚错误提示，loading 期间是否避免重复提交。
+8. 密码是否没有被写入 localStorage、历史记录、console log 或自定义数据结构。
+9. 代码中是否没有 Supabase `service_role` key。
+10. `/interview` 中真实 AI、Mock、本地历史记录、开始新一轮和错误重试流程是否仍可用。
 
 后续可以优先考虑：
 
-- 阶段 14：Supabase Auth 账号系统 MVP。
+- 阶段 14 的代码审查和开发测试回归。
 - 账号系统稳定后，再评估云端历史记录。
 - 优化最终评价 prompt 的评分标准。
 

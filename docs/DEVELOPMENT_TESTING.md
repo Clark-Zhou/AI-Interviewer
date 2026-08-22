@@ -11,6 +11,9 @@
 - `lib/client/interviewApi.js`：前端真实 API 请求封装在这里。
 - `lib/client/interviewHistoryStorage.js`：最终评价成功后的本地历史记录读写工具在这里。
 - `lib/dev/interviewMocks.js`：开发环境 Mock 问题和 Mock 评价数据在这里。
+- `lib/supabase/browserClient.js`：浏览器端 Supabase Auth client。
+- `lib/supabase/serverClient.js`：服务端 Supabase Auth client。
+- `proxy.js`：Supabase Auth cookie 刷新和 `/interview` 访问保护。
 - `app/api/generate-questions/route.js`：生成问题的后端 API。
 - `app/api/evaluate-interview/route.js`：生成最终评价的后端 API。
 
@@ -39,11 +42,11 @@ process.env.NODE_ENV === 'development'
 
 1. 项目所有者运行 `npm run dev`。
 2. 打开 `http://localhost:3000`。
-3. 确认根路径会进入 `/login`，并看到登录入口页面壳。
-4. 填写邮箱和体验口令，点击 `进入体验版`。
-5. 确认浏览器地址进入 `/interview`。
-6. 点击浏览器返回键，确认能回到 `/login`。
-7. 再次点击 `进入体验版` 回到 `/interview`。
+3. 确认根路径会进入 `/login`，并看到登录/注册入口页面壳。
+4. 使用新邮箱注册，或使用已注册邮箱登录。
+5. 确认登录成功后浏览器地址进入 `/interview`。
+6. 刷新 `/interview`，确认仍保持登录态。
+7. 点击登出，确认回到 `/login`；再次登录后回到 `/interview`。
 8. 点击 `填入示例 JD/简历`。
 9. 点击真实 AI 问题按钮，等待 DeepSeek 返回问题列表。
 10. 点击 `填入测试回答`。
@@ -65,7 +68,7 @@ Mock 快速流程：
 
 1. 项目所有者运行 `npm run dev`。
 2. 打开 `http://localhost:3000/login`。
-3. 填写邮箱和体验口令，点击 `进入体验版`。
+3. 使用已注册邮箱登录。
 4. 确认浏览器地址进入 `/interview`。
 5. 点击 `填入示例 JD/简历`。
 6. 点击 `使用 Mock 问题`，应立即展示固定问题列表。
@@ -133,9 +136,11 @@ Mock 快速流程：
 - 刷新页面后的行为应符合当前实现说明，不应假装存在服务端登录态。
 - 生产环境不应出现开发 Mock 按钮，开发环境 Mock 按钮仍只在进入主界面后显示。
 
-## 阶段 13 检查点
+## 阶段 13 历史检查点
 
-登录入口和面试主界面路由拆分后，重点检查：
+登录入口和面试主界面路由拆分后，阶段 13 当时重点检查：
+
+说明：阶段 13 还没有真实账号系统，因此以下“不新增 session/token/cookie 逻辑”只适用于阶段 13 的历史验收语境。阶段 14 之后请以“阶段 14 检查点”和本文件前面的推荐测试流程为准。
 
 - 访问 `/login` 能看到登录入口页面壳。
 - 点击 `进入体验版` 后进入 `/interview`。

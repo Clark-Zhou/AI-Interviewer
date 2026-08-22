@@ -29,7 +29,7 @@ textarea {
   font: inherit;
 }
 
-/* 登录入口页壳：只做体验版入口，不代表真实账号系统。 */
+/* 登录入口页壳：承载 Supabase Auth 登录/注册入口。 */
 .entry-page {
   min-height: 100vh;
   overflow-x: hidden;
@@ -227,6 +227,28 @@ textarea {
   margin: 0;
 }
 
+.entry-mode-switch {
+  background: #f3f4f6;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 22px;
+  padding: 6px;
+}
+
+.entry-mode-switch button {
+  background: transparent;
+  color: #4b5563;
+  padding: 10px 12px;
+}
+
+.entry-mode-switch button:hover,
+.entry-mode-switch button.active {
+  background: #ffffff;
+  color: #0f766e;
+}
+
 .entry-field {
   margin-bottom: 18px;
 }
@@ -252,6 +274,16 @@ textarea {
   margin: 0 0 16px;
 }
 
+.entry-message {
+  background: #ecfdf5;
+  border-radius: 8px;
+  color: #047857;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+}
+
 .entry-submit {
   background: #2bb8aa;
   font-size: 16px;
@@ -271,6 +303,47 @@ textarea {
   margin: 28px 0 0;
   padding-top: 22px;
   text-align: center;
+}
+
+/* 账号状态条：面试主界面顶部展示当前登录用户和登出入口。 */
+.auth-status-bar {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 24px auto -16px;
+  padding: 14px 16px;
+  width: min(900px, calc(100% - 32px));
+}
+
+.auth-status-label {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.auth-status-email {
+  color: #111827;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.auth-status-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.auth-status-error {
+  color: #dc2626;
+  font-size: 13px;
+  margin: 0;
 }
 
 /* 页面布局：控制内容宽度和卡片外观。 */
@@ -835,6 +908,17 @@ button:disabled {
 
   .entry-card h1 {
     font-size: 28px;
+  }
+
+  .auth-status-bar {
+    align-items: stretch;
+    flex-direction: column;
+    margin-top: 16px;
+  }
+
+  .auth-status-actions {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .dev-helper {
