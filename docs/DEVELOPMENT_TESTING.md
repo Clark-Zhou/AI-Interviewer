@@ -166,6 +166,20 @@ Supabase Auth 账号系统 MVP 实现后，重点检查：
 - 代码中没有 Supabase `service_role` key。
 - `/interview` 中真实 AI、Mock、本地历史记录、开始新一轮和错误重试流程仍可用。
 
+## 阶段 15 检查点
+
+内部测试版上线准备完成后，重点检查：
+
+- Vercel 或选定部署平台可以成功构建和部署。
+- 部署环境已配置 `DEEPSEEK_API_KEY`、`DEEPSEEK_MODEL`、`NEXT_PUBLIC_SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`。
+- Supabase Auth 的 Site URL 和 Redirect URLs 包含生产域名，并保留 `http://localhost:3000/**`。
+- 生产环境新用户可以注册，已注册用户可以登录。
+- 生产环境刷新 `/interview` 后仍保持登录态。
+- 登出后回到 `/login`，未登录访问 `/interview` 会回到 `/login`。
+- 登录后真实 AI 问题生成和最终评价可以正常调用。
+- 生产环境不展示开发 Mock 按钮。
+- 本地历史记录仍可保存和查看。
+- README 或测试说明中包含“不要输入特别敏感信息”的内部测试提醒。
 ## 常见检查点
 
 开发测试时重点确认：

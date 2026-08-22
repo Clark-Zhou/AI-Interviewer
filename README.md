@@ -10,7 +10,7 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前版本先验证最小可用闭环。当前已完成本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 路由拆分，以及 Supabase Auth 账号系统 MVP。云端历史记录、文件上传、语音或视频面试仍暂缓。
+当前版本先验证最小可用闭环。当前已完成本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 路由拆分，以及 Supabase Auth 账号系统 MVP。下一步是准备内部测试版上线；云端历史记录、文件上传、语音或视频面试仍暂缓。
 
 ## 当前功能
 
@@ -107,6 +107,25 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 - 不要把 Supabase `service_role` key 写进前端环境变量或提交到仓库。
 - 修改 `.env.local` 后通常需要重启 `npm run dev`。
 
+## 内部测试版准备
+
+准备给少量同学或朋友测试前，需要确认：
+
+- 部署平台已配置 `DEEPSEEK_API_KEY`、`DEEPSEEK_MODEL`、`NEXT_PUBLIC_SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`。
+- Supabase Auth 的 Site URL 指向生产域名。
+- Supabase Auth 的 Redirect URLs 包含生产域名通配，例如 `https://your-project.vercel.app/**`。
+- 本地开发地址 `http://localhost:3000/**` 仍保留在 Redirect URLs 中。
+- 不要在仓库提交 `.env.local`、真实 DeepSeek key、Supabase `service_role` key 或其他敏感配置。
+
+内部测试用户提醒建议：
+
+```text
+这是我的 AI 模拟面试 MVP。你可以注册/登录，输入岗位 JD 和简历文本，生成面试问题，回答后生成最终评价。
+
+目前历史记录暂时保存在当前浏览器本地，没有云端同步。
+
+请不要输入身份证号、家庭住址、完整手机号、真实薪资流水、公司内部资料等特别敏感信息。
+```
 ## 目录结构
 
 ```text
