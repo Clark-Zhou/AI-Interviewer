@@ -39,16 +39,35 @@ The first version should prioritize a complete, useful workflow over advanced fe
 ## 4. Core User Flow
 
 1. User opens the app.
-2. User pastes the job description.
-3. User pastes resume text.
-4. User clicks "Start Mock Interview".
-5. The system generates 6 interview questions.
-6. User answers questions one by one.
-7. User submits each answer separately.
-8. The system generates a final report.
-9. User reviews strengths, weaknesses, and improvement suggestions.
+2. User may pass through a lightweight entry page that looks like a login screen, but does not perform real authentication in the current MVP.
+3. User pastes the job description.
+4. User pastes resume text.
+5. User clicks "Start Mock Interview".
+6. The system generates 6 interview questions.
+7. User answers questions one by one.
+8. User submits each answer separately.
+9. The system generates a final report.
+10. User reviews strengths, weaknesses, and improvement suggestions.
 
 ## 5. MVP Features
+
+### 5.0 Entry Page Shell
+
+The product may show a lightweight entry page before the main interview simulator.
+
+MVP behavior:
+
+- Present the product name and a short value statement.
+- Show a visual layout similar to a login screen.
+- Allow the user to enter the experience version without real authentication.
+
+Out of scope for this MVP stage:
+
+- Real login or registration
+- Password verification
+- Account database
+- Session, token, cookie, or API route protection
+- Saving or sending password input
 
 ### 5.1 Job Description Input
 
@@ -133,7 +152,7 @@ Report sections:
 
 The MVP will not include:
 
-- User accounts
+- Real user accounts
 - Payment
 - Admin dashboard
 - Enterprise hiring workflow
