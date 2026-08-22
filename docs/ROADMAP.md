@@ -14,13 +14,13 @@
 
 ## 当前推荐方向
 
-当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口，以及登录入口页面壳。下一步建议做人工回归测试和代码审查，确认入口页壳没有破坏现有面试主流程，也没有引入真实账号系统。
+当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳，以及 `/login` 和 `/interview` 前端路由拆分。下一步建议做人工回归测试和代码审查，确认路由导航、返回键、入口页和面试主流程都稳定。
 
 原因：
 
-- 阶段 12 已完成，当前第一屏已经有体验版入口展示。
-- 登录入口页壳只做前端状态切换，为后续真实账号系统预留产品位置。
-- 当前仍未实现账号、密码校验、session/token、数据库或 API 鉴权。
+- 阶段 13 已完成，当前入口页和面试主界面已经拆成清晰前端路由。
+- 根路径 `/` 当前重定向到 `/login`，点击 `进入体验版` 后进入 `/interview`。
+- 当前仍不引入真实账号系统、登录 API、数据库、session/token 或 API route 保护。
 - PR 前应重点确认现有 AI 生成问题、最终评价、Mock、历史记录和开始新一轮流程不受影响。
 
 ## 阶段计划
@@ -37,13 +37,14 @@
 - [x] 阶段 10：开始新一轮面试
 - [x] 阶段 11：错误恢复与文案小修
 - [x] 阶段 12：登录入口页面壳
+- [x] 阶段 13：登录入口和面试主界面路由拆分
 
 ## 当前优先级
 
 当前优先级：
 
-1. 在 `develop-login-page` 分支做阶段 12 后的人工回归测试。
-2. 确认入口页壳在桌面和移动端可用，点击 `进入体验版` 后进入现有模拟面试主界面。
+1. 在 `develop-login-page` 分支做阶段 13 后的人工回归测试。
+2. 确认 `/`、`/login`、`/interview` 导航行为清楚，浏览器返回键能从 `/interview` 回到 `/login`。
 3. 确认现有真实 AI、Mock、历史记录、开始新一轮和错误重试流程不受影响。
 4. 确认没有新增登录 API、密码保存、数据库、session/token 或 API route 保护。
 5. 准备代码审查和 PR 收尾。
@@ -626,6 +627,85 @@ createInterviewSessionId()
 - 页面文案是否没有误导用户以为账号系统已经完成。
 - 样式是否响应式可用，没有大范围无关 UI 重构。
 
+## 阶段 13：登录入口和面试主界面路由拆分
+
+阶段状态：已完成。当前已在不做真实账号系统的前提下，把登录入口页壳和模拟面试主界面拆成两个前端路由，让浏览器返回键行为符合用户直觉。
+
+### 背景问题
+
+阶段 12 曾采用 `components/AppEntry.js` 内部状态切换：用户点击 `进入体验版` 后只是从登录入口页壳切换到主界面，没有产生新的浏览器历史记录。因此用户在主界面点击浏览器返回键时，会回到打开本产品之前的页面，而不是回到产品登录入口页。
+
+这不是当前实现的 bug，但从产品体验上看，用户更自然的预期是：
+
+```text
+/login -> 点击进入体验版 -> /interview -> 浏览器返回 -> /login
+```
+
+### 阶段目标
+
+- 登录入口页壳使用独立路由，优先建议 `/login`。
+- 模拟面试主界面使用独立路由，优先建议 `/interview`。
+- 访问根路径 `/` 时应有清晰行为，优先建议重定向或跳转到 `/login`。
+- 点击 `进入体验版` 后使用 Next.js 路由导航进入 `/interview`。
+- 浏览器返回键应从 `/interview` 回到 `/login`。
+
+### MVP 范围
+
+本阶段建议包含：
+
+- 新增或调整 Next.js App Router 页面结构。
+- 复用现有 `LoginEntryShell` 和 `InterviewSimulator` 组件。
+- 移除或简化只用于首页状态切换的入口组件，例如 `AppEntry`；如果保留，需要更新 file header 说明新职责。
+- 更新相关 file header，说明 `/login`、`/interview`、`/` 的关系。
+- 更新 README、PROJECT_STATUS 或 DEVELOPMENT_TESTING 中已经过时的“首页状态切换”描述。
+
+本阶段暂不包含：
+
+- 真实登录。
+- 注册账号。
+- 登录 API。
+- 数据库。
+- session、token、cookie 鉴权。
+- API route 访问保护。
+- 保存、上传或打印用户密码。
+- 强制未登录用户无法访问 `/interview`。
+
+### 任务拆分建议
+
+1. 先阅读 `README.md`、`AGENTS.md`、`docs/PROJECT_STATUS.md`、`docs/ROADMAP.md` 和 `docs/PRD.md`。
+2. 检查 `app/page.js`、`components/AppEntry.js`、`components/LoginEntryShell.js` 和 `components/InterviewSimulator.js` 当前职责。
+3. 新增 `app/login/page.js` 挂载登录入口页壳。
+4. 新增 `app/interview/page.js` 挂载模拟面试主界面。
+5. 调整 `app/page.js`，让根路径有明确入口，优先跳转或重定向到 `/login`。
+6. 调整 `LoginEntryShell` 的进入动作，让它使用路由导航到 `/interview`。
+7. 删除或简化不再需要的首页状态切换组件，避免冗余代码。
+8. 更新相关中文 file header 和关键逻辑注释。
+9. 按 `docs/DEVELOPMENT_TESTING.md` 补充或执行路由回归检查。
+
+### 验收标准
+
+阶段 13 完成时，应满足：
+
+- 访问 `/login` 能看到登录入口页面壳。
+- 点击 `进入体验版` 后进入 `/interview`。
+- 在 `/interview` 点击浏览器返回键，会回到 `/login`。
+- 访问 `/` 时有明确行为，且不会出现空白页或重复状态切换。
+- `/interview` 中真实 AI、Mock、历史记录、开始新一轮和错误重试流程仍可用。
+- 没有新增真实登录、登录 API、数据库、session/token 或 API route 保护。
+- 没有保存、上传、打印或持久化密码输入。
+- 无冗余的旧入口状态组件或过时 file header。
+
+### 代码审查关注点
+
+代码审查 session 应重点检查：
+
+- 是否确实拆成清晰路由，而不是继续只做同页状态切换。
+- 浏览器返回键行为是否能从 `/interview` 回到 `/login`。
+- 根路径 `/` 的处理是否简单明确。
+- 是否没有把路由拆分误做成真实鉴权系统。
+- 是否没有破坏现有面试主流程和开发环境 Mock 按钮。
+- 是否清理或更新了 `AppEntry` 等可能过时的入口状态代码。
+- README、PROJECT_STATUS、DEVELOPMENT_TESTING 中是否还有“首页状态切换”的过时描述。
 ## 暂缓事项
 
 暂不优先做：
@@ -656,10 +736,10 @@ createInterviewSessionId()
 你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“[阶段名称]”阶段。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md；如果本阶段涉及开发测试流程，也阅读 docs/DEVELOPMENT_TESTING.md。然后按 ROADMAP 的任务拆分和验收标准实现。只有在需要改变产品范围或用户流程时才阅读 docs/PRD.md。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
 ```
 
-当前阶段 12 已完成，建议优先启动代码审查或开发测试 session。开发测试 session 可以这样启动：
+当前阶段 13 已完成，建议优先启动代码审查或开发测试 session。开发测试 session 可以这样启动：
 
 ```text
-你是 AI Interview Simulator 的开发测试 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/DEVELOPMENT_TESTING.md。请按当前回归清单检查登录入口页面壳、真实 AI、Mock、历史记录、开始新一轮和错误重试流程，并记录未覆盖的测试风险。不要安装依赖，不要启动 dev server，除非我明确要求。
+你是 AI Interview Simulator 的开发测试 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/DEVELOPMENT_TESTING.md。请按当前回归清单检查 `/`、`/login`、`/interview` 路由行为、登录入口页面壳、真实 AI、Mock、历史记录、开始新一轮和错误重试流程，并记录未覆盖的测试风险。不要安装依赖，不要启动 dev server，除非我明确要求。
 ```
 
 代码审查 session 用于检查阶段开发结果：

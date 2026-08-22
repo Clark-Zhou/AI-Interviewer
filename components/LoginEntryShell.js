@@ -2,7 +2,8 @@
  * 文件职责：登录入口页面壳组件。
  *
  * 关联文件：
- * - components/AppEntry.js：负责在入口页壳和模拟面试主流程之间切换。
+ * - app/login/page.js：挂载本入口页壳的 `/login` 路由。
+ * - app/interview/page.js：体验版入口点击后进入的 `/interview` 路由。
  * - app/globals.css：提供入口页背景、悬浮登录框和响应式样式。
  *
  * 说明：
@@ -11,10 +12,12 @@
  */
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 // 入口表单只做本地空输入提示，避免暗示真实账号系统已经存在。
-export default function LoginEntryShell({ onEnterExperience }) {
+export default function LoginEntryShell() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [accessCode, setAccessCode] = useState('');
   const [entryError, setEntryError] = useState('');
@@ -28,7 +31,7 @@ export default function LoginEntryShell({ onEnterExperience }) {
     }
 
     setEntryError('');
-    onEnterExperience();
+    router.push('/interview');
   };
 
   return (
