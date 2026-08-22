@@ -10,7 +10,7 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前版本先验证最小可用闭环，不包含真实登录、数据库、文件上传、云端历史记录、语音或视频面试。当前已完成本地历史记录初始化、列表和详情查看，用于在浏览器保存并复盘完整面试 session。当前还包含登录入口页面壳，用于体验版入口展示，不代表已经实现账号系统。
+当前版本先验证最小可用闭环。当前已完成本地历史记录初始化、列表和详情查看、登录入口页面壳，以及 `/login` 和 `/interview` 路由拆分。下一步计划接入 Supabase Auth 做账号系统 MVP，但云端历史记录、文件上传、语音或视频面试仍暂缓。
 
 ## 当前功能
 
@@ -54,8 +54,8 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 
 当前没有使用：
 
-- 数据库
-- 用户系统
+- 云端历史数据库
+- 完整用户资料系统
 - 文件上传
 - 云端历史记录
 - Tailwind CSS
@@ -92,12 +92,16 @@ http://localhost:3000
 ```env
 DEEPSEEK_API_KEY=your_deepseek_api_key_here
 DEEPSEEK_MODEL=deepseek-v4-flash
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 ```
 
 说明：
 
 - `.env.local` 不应提交到 git。
 - `DEEPSEEK_MODEL` 可选，不配置时服务端会使用默认模型。
+- `NEXT_PUBLIC_SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` 用于 Supabase Auth 账号系统。
+- 不要把 Supabase `service_role` key 写进前端环境变量或提交到仓库。
 - 修改 `.env.local` 后通常需要重启 `npm run dev`。
 
 ## 目录结构
@@ -237,7 +241,7 @@ components/InterviewSimulator.js
 
 当前 MVP 暂不做：
 
-- 真实登录注册和用户系统
+- 云端历史记录和完整用户资料系统
 - 数据库存储
 - 文件上传解析简历或 JD
 - 云端/数据库历史面试记录

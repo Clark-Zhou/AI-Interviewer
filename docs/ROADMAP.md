@@ -14,14 +14,14 @@
 
 ## 当前推荐方向
 
-当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳，以及 `/login` 和 `/interview` 前端路由拆分。下一步建议做人工回归测试和代码审查，确认路由导航、返回键、入口页和面试主流程都稳定。
+当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳，以及 `/login` 和 `/interview` 前端路由拆分。下一步建议在 Supabase 前置工作完成后，启动账号系统 MVP：注册、登录、登出、登录态保持和 `/interview` 访问保护。
 
 原因：
 
 - 阶段 13 已完成，当前入口页和面试主界面已经拆成清晰前端路由。
-- 根路径 `/` 当前重定向到 `/login`，点击 `进入体验版` 后进入 `/interview`。
-- 当前仍不引入真实账号系统、登录 API、数据库、session/token 或 API route 保护。
-- PR 前应重点确认现有 AI 生成问题、最终评价、Mock、历史记录和开始新一轮流程不受影响。
+- Supabase 项目、环境变量和依赖安装已由项目所有者完成。
+- 账号系统可以先做最小闭环，不做云端历史、用户资料页、OAuth、支付或权限系统。
+- PR 前应重点确认账号系统没有破坏现有 AI 生成问题、最终评价、Mock、历史记录和开始新一轮流程。
 
 ## 阶段计划
 
@@ -38,21 +38,22 @@
 - [x] 阶段 11：错误恢复与文案小修
 - [x] 阶段 12：登录入口页面壳
 - [x] 阶段 13：登录入口和面试主界面路由拆分
+- [ ] 阶段 14：Supabase Auth 账号系统 MVP
 
 ## 当前优先级
 
 当前优先级：
 
-1. 在 `develop-login-page` 分支做阶段 13 后的人工回归测试。
-2. 确认 `/`、`/login`、`/interview` 导航行为清楚，浏览器返回键能从 `/interview` 回到 `/login`。
-3. 确认现有真实 AI、Mock、历史记录、开始新一轮和错误重试流程不受影响。
-4. 确认没有新增登录 API、密码保存、数据库、session/token 或 API route 保护。
-5. 准备代码审查和 PR 收尾。
+1. 建议从当前分支切出新功能分支，例如 `develop-auth-mvp`。
+2. 完成阶段 14：Supabase Auth 账号系统 MVP。
+3. 登录页支持注册、登录和错误提示。
+4. `/interview` 需要登录后访问，未登录时回到 `/login`。
+5. 暂不做云端历史记录，当前历史记录仍保留 localStorage。
 
 推荐当前功能分支：
 
 ```text
-develop-login-page
+develop-auth-mvp
 ```
 
 ## 阶段 6：历史记录初始化
@@ -706,14 +707,101 @@ createInterviewSessionId()
 - 是否没有破坏现有面试主流程和开发环境 Mock 按钮。
 - 是否清理或更新了 `AppEntry` 等可能过时的入口状态代码。
 - README、PROJECT_STATUS、DEVELOPMENT_TESTING 中是否还有“首页状态切换”的过时描述。
+## 阶段 14：Supabase Auth 账号系统 MVP
+
+阶段状态：计划中。当前目标是在已有 `/login` 和 `/interview` 路由基础上接入 Supabase Auth，完成最小真实账号能力，但不做云端历史记录和复杂账号体系。
+
+### 阶段目标
+
+- `/login` 支持真实邮箱密码登录。
+- 支持用户注册，优先在登录页内切换登录/注册模式，避免新增复杂页面。
+- 登录成功后进入 `/interview`。
+- 未登录访问 `/interview` 时回到 `/login`。
+- 已登录用户刷新页面后仍保持登录态。
+- 用户可以从主界面登出，登出后回到 `/login`。
+
+### 产品边界
+
+本阶段开始做真实账号系统，但只做账号系统 MVP。账号能力用于保护体验入口和为后续云端历史记录打基础，不改变 AI 面试核心流程。
+
+本阶段建议包含：
+
+- 使用 Supabase Auth。
+- 使用已经安装的 `@supabase/supabase-js` 和 `@supabase/ssr`。
+- 使用 `.env.local` 中的 `NEXT_PUBLIC_SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`。
+- 登录、注册、登出、登录态保持。
+- `/interview` 的访问保护。
+- 清楚展示登录、注册、登出、认证失败和 loading 状态。
+- 保持当前本地历史记录仍使用 localStorage。
+
+本阶段暂不包含：
+
+- 云端历史记录。
+- 用户资料页。
+- 忘记密码。
+- 邮箱验证流程深度定制。
+- 第三方 OAuth 登录。
+- 角色权限系统。
+- 支付、订阅或额度系统。
+- 自建密码哈希、手写 session 或自建用户表。
+- 使用或提交 Supabase `service_role` key。
+- 修改 DeepSeek API 调用方式。
+
+### 技术原则
+
+- 前端可以使用 Supabase publishable/anon key，但不能使用 `service_role` key。
+- 不要把用户密码保存到 localStorage、sessionStorage、数据库、自定义日志或历史记录。
+- 不要在控制台打印密码、Supabase token 或完整 session。
+- DeepSeek API 仍只允许服务端 API route 调用，不能因为接入账号系统而改成前端直连。
+- 如果需要新增环境变量，必须告诉项目所有者手动配置，不要把真实值写进仓库。
+
+### 任务拆分建议
+
+1. 先阅读 `README.md`、`AGENTS.md`、`docs/PROJECT_STATUS.md`、`docs/ROADMAP.md`、`docs/PRD.md` 和 `docs/DEVELOPMENT_TESTING.md`。
+2. 检查当前 `/login`、`/interview` 和根路径 `/` 的实现方式。
+3. 新增 Supabase client/server/middleware 所需的最小封装文件，并写中文 file header。
+4. 将 `LoginEntryShell` 从体验入口表单升级为登录/注册 UI，保留当前视觉风格。
+5. 实现登录、注册、登出和错误提示。
+6. 保护 `/interview`：未登录时回到 `/login`，已登录时可进入主流程。
+7. 在主界面提供清楚的登出入口，不影响现有面试操作。
+8. 确认真实 AI、Mock、历史记录、开始新一轮和错误重试流程不受影响。
+9. 阶段完成或准备 PR 前，按 `AGENTS.md` 的分档收尾规则更新文档。
+
+### 验收标准
+
+阶段 14 完成时，应满足：
+
+- 新用户可以通过邮箱和密码注册。
+- 已注册用户可以登录。
+- 登录成功后进入 `/interview`。
+- 未登录访问 `/interview` 会回到 `/login`。
+- 已登录用户刷新 `/interview` 后仍保持登录态。
+- 用户可以登出，登出后回到 `/login`。
+- 登录/注册失败时有清楚错误提示。
+- localStorage 历史记录仍按当前机制工作，不要求按用户云端隔离。
+- 没有保存、打印或持久化用户密码。
+- 没有使用 Supabase `service_role` key。
+- 没有改 DeepSeek API 的前后端调用边界。
+
+### 代码审查关注点
+
+代码审查 session 应重点检查：
+
+- Supabase key 是否只使用 publishable/anon key，未出现 `service_role`。
+- 密码是否没有进入 localStorage、历史记录、日志或自定义数据库。
+- `/interview` 保护是否可靠，刷新和直接访问都符合预期。
+- 登录、注册、登出 loading 和错误状态是否清楚。
+- 是否没有把本阶段扩大到云端历史记录、用户资料页、OAuth 或权限系统。
+- 是否没有破坏真实 AI、Mock、历史保存和开发辅助流程。
+- README、PROJECT_STATUS、DEVELOPMENT_TESTING 和 PRD 是否同步了账号系统 MVP 的范围。
+
 ## 暂缓事项
 
 暂不优先做：
 
 - AI 逐步提问
 - 多轮追问
-- 真实登录注册和用户系统
-- 数据库存储
+- 云端历史记录和数据库存储
 - 文件上传解析简历或 JD
 - 语音或视频面试
 - 单题即时 AI 批改
@@ -736,10 +824,10 @@ createInterviewSessionId()
 你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“[阶段名称]”阶段。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md；如果本阶段涉及开发测试流程，也阅读 docs/DEVELOPMENT_TESTING.md。然后按 ROADMAP 的任务拆分和验收标准实现。只有在需要改变产品范围或用户流程时才阅读 docs/PRD.md。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
 ```
 
-当前阶段 13 已完成，建议优先启动代码审查或开发测试 session。开发测试 session 可以这样启动：
+当前阶段 14 计划中，建议启动阶段开发 session。阶段开发 session 可以这样启动：
 
 ```text
-你是 AI Interview Simulator 的开发测试 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/DEVELOPMENT_TESTING.md。请按当前回归清单检查 `/`、`/login`、`/interview` 路由行为、登录入口页面壳、真实 AI、Mock、历史记录、开始新一轮和错误重试流程，并记录未覆盖的测试风险。不要安装依赖，不要启动 dev server，除非我明确要求。
+你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“阶段 14：Supabase Auth 账号系统 MVP”。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/PRD.md、docs/DEVELOPMENT_TESTING.md。Supabase 项目和 .env.local 已由项目所有者配置，依赖也已安装。请只做账号系统 MVP：注册、登录、登出、登录态保持、未登录访问 /interview 回到 /login。不要做云端历史记录、用户资料页、OAuth、支付或权限系统。不要使用 service_role key，不要保存或打印密码，不要改 DeepSeek API 调用边界。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
 ```
 
 代码审查 session 用于检查阶段开发结果：

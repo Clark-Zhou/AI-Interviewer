@@ -39,35 +39,41 @@ The first version should prioritize a complete, useful workflow over advanced fe
 ## 4. Core User Flow
 
 1. User opens the app.
-2. User may pass through a lightweight entry page that looks like a login screen, but does not perform real authentication in the current MVP.
-3. User pastes the job description.
-4. User pastes resume text.
-5. User clicks "Start Mock Interview".
-6. The system generates 6 interview questions.
-7. User answers questions one by one.
-8. User submits each answer separately.
-9. The system generates a final report.
-10. User reviews strengths, weaknesses, and improvement suggestions.
+2. User signs up or logs in through the `/login` page.
+3. After authentication, the user enters the `/interview` page.
+4. User pastes the job description.
+5. User pastes resume text.
+6. User clicks "Start Mock Interview".
+7. The system generates 6 interview questions.
+8. User answers questions one by one.
+9. User submits each answer separately.
+10. The system generates a final report.
+11. User reviews strengths, weaknesses, and improvement suggestions.
 
 ## 5. MVP Features
 
-### 5.0 Entry Page Shell
+### 5.0 Account Entry and Authentication
 
-The product may show a lightweight entry page before the main interview simulator.
+The product uses Supabase Auth for the account-system MVP. Authentication exists to protect the interview workspace and prepare for later cloud history, not to change the core AI interview flow.
 
 MVP behavior:
 
-- Present the product name and a short value statement.
-- Show a visual layout similar to a login screen.
-- Allow the user to enter the experience version without real authentication.
+- Show a `/login` page with the current entry-page visual style.
+- Support email and password signup.
+- Support email and password login.
+- Keep the user signed in after refresh.
+- Redirect unauthenticated access to `/interview` back to `/login`.
+- Provide logout from the authenticated experience.
 
 Out of scope for this MVP stage:
 
-- Real login or registration
-- Password verification
-- Account database
-- Session, token, cookie, or API route protection
-- Saving or sending password input
+- Cloud-synced interview history
+- User profile page
+- Password reset customization
+- Third-party OAuth login
+- Roles or permissions
+- Payment or usage limits
+- Custom password storage or custom session implementation
 
 ### 5.1 Job Description Input
 
@@ -152,7 +158,6 @@ Report sections:
 
 The MVP will not include:
 
-- Real user accounts
 - Payment
 - Admin dashboard
 - Enterprise hiring workflow

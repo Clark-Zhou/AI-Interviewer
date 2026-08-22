@@ -145,6 +145,22 @@ Mock 快速流程：
 - 路由拆分不应变成真实鉴权：不新增登录 API，不保存密码，不新增 session/token/cookie 逻辑。
 - 如果删除或简化 `components/AppEntry.js`，确认相关 file header 和文档描述已经同步。
 
+## 阶段 14 检查点
+
+Supabase Auth 账号系统 MVP 实现后，重点检查：
+
+- `.env.local` 已配置 `NEXT_PUBLIC_SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`，且没有提交真实环境变量。
+- 新邮箱可以注册。
+- 已注册邮箱可以登录。
+- 登录成功后进入 `/interview`。
+- 未登录直接访问 `/interview` 时会回到 `/login`。
+- 已登录时刷新 `/interview` 仍保持登录态。
+- 登出后回到 `/login`，再次访问 `/interview` 会被拦回登录页。
+- 登录/注册失败时有清楚错误提示，loading 期间不重复提交。
+- 密码没有被写入 localStorage、历史记录、console log 或自定义数据结构。
+- 代码中没有 Supabase `service_role` key。
+- `/interview` 中真实 AI、Mock、本地历史记录、开始新一轮和错误重试流程仍可用。
+
 ## 常见检查点
 
 开发测试时重点确认：
