@@ -403,12 +403,16 @@ POST /api/evaluate-interview
 ```env
 DEEPSEEK_API_KEY=your_deepseek_api_key_here
 DEEPSEEK_MODEL=deepseek-v4-flash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_or_anon_key
 ```
 
 注意：
 
 - `.env.local` 不应提交到 git。
 - `.env.example` 只能放占位值，不能放真实 key。
+- `NEXT_PUBLIC_SUPABASE_URL` 必须是完整的 `http/https` URL，不能只填 Supabase project ref。
+- 不要把 Supabase `service_role` key 写进 `.env.local` 或 `.env.example`。
 - 修改 `.env.local` 后通常需要重启 `npm run dev`。
 
 ## 8. 本地运行方式

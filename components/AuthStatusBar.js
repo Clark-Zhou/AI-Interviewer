@@ -25,18 +25,22 @@ export default function AuthStatusBar({ userEmail }) {
     setIsSigningOut(true);
     setSignOutError('');
 
-    const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase.auth.signOut();
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { error } = await supabase.auth.signOut();
 
-    setIsSigningOut(false);
+      if (error) {
+        setSignOutError(error.message || '登出失败，请稍后重试。');
+        return;
+      }
 
-    if (error) {
-      setSignOutError(error.message || '登出失败，请稍后重试。');
-      return;
+      router.push('/login');
+      router.refresh();
+    } catch (error) {
+      setSignOutError(error.message || '账号系统配置异常，请检查 Supabase 环境变量。');
+    } finally {
+      setIsSigningOut(false);
     }
-
-    router.push('/login');
-    router.refresh();
   };
 
   return (

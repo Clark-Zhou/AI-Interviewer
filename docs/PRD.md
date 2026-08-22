@@ -251,7 +251,7 @@ The MVP is successful if:
 - Generated questions feel relevant to the job and resume.
 - Final feedback contains specific, actionable advice.
 - The whole session can be completed in less than 15 minutes.
-- The product is useful even without accounts, uploads, or voice features.
+- The product is useful even without cloud history, uploads, or voice features.
 
 ## 10. First Build Milestone
 
