@@ -14,6 +14,14 @@
 
 新的 AI agent 或新的对话 session 接手项目时，应先完成以下检查，再开始修改代码。
 
+本地项目主目录：
+
+```text
+/Users/a0000/personal-project/AI-Interview_Simulator
+```
+
+如果当前终端目录不确定，先用 `pwd` 和 `git rev-parse --show-toplevel` 确认自己在项目根目录。
+
 通用必读：
 
 1. 阅读 `README.md`，了解项目目标、运行方式和目录结构。
@@ -32,6 +40,29 @@
 2. 如果发现工作区有未提交改动，不要默认撤销；先判断是否与当前任务相关，必要时向用户确认。
 
 接手时不要假设上下文仍然完整，应以仓库内文档和当前 git 状态为准。
+
+## 新任务开始前的轻量同步规则
+
+同一个 session 可能连续处理多个任务，中间可能穿插产品助理 session 的文档调整、代码审查 session 的反馈、用户的新要求或一次新的 commit。不要把上一个任务的理解当成当前任务的默认前提。
+
+每次开始一个新任务前，先做轻量同步，不需要大量扫描：
+
+```bash
+git status --short
+git log --oneline -3
+```
+
+根据当前情况判断本轮应该看哪里：
+
+- 如果工作区有未提交改动，先看 `git diff`；如果用户说改动已放入 stage，也看 `git diff --staged`。
+- 如果工作区干净，但用户说产品助理刚提交了计划，先看 `git show --stat HEAD`，必要时看 `git show HEAD -- docs/ROADMAP.md docs/PROJECT_STATUS.md`。
+- 如果是代码审查任务，先判断审查对象是当前未提交 diff、staged diff、最近一次 commit，还是整个分支相对 main 的 diff。
+- 如果同一个开发 session 连续做多个任务，每个新任务开始前都重新做这次轻量同步，不要沿用上一个任务的计划记忆。
+
+同步后按任务需要阅读相关文档：通用优先看 `README.md`、`AGENTS.md`、`docs/PROJECT_STATUS.md`、`docs/ROADMAP.md`；涉及开发辅助、mock 或测试流程时，再看 `docs/DEVELOPMENT_TESTING.md`；涉及产品范围变化时，再看 `docs/PRD.md`。
+
+如果开发或审查时发现文档之间存在模糊、矛盾、过时或互相反作用的地方，应停下来向用户说明问题并询问如何处理，不要自己猜一个解释继续开发。
+
 
 ## 多 session 协作规则
 

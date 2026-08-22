@@ -185,6 +185,16 @@ components/InterviewSimulator.js
 
 更多开发测试边界见：`docs/DEVELOPMENT_TESTING.md`。
 
+## 本地项目位置
+
+常用本地路径：
+
+```text
+/Users/a0000/personal-project/AI-Interview_Simulator
+```
+
+新的 session 开始任务前，应先用 `pwd` 和 `git rev-parse --show-toplevel` 确认当前目录。更详细的多 session 协作和轻量同步规则见 `AGENTS.md`。
+
 ## 重要文档阅读顺序
 
 如果是新的开发者或 AI agent 接手，通用必读：
