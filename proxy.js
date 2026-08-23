@@ -73,5 +73,5 @@ export async function proxy(request) {
 }
 
 export const config = {
-  matcher: ['/login', '/interview/:path*'],
+  matcher: ['/', '/login', '/interview/:path*'],
 };

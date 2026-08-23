@@ -14,13 +14,12 @@
 
 ## 当前推荐方向
 
-当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步建议先优化产品入口：把根路径 `/` 做成最基础主页，保留登录入口、面试入口和登录状态展示。
+当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成基础主页框架、本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步建议按 `docs/INTERNAL_TESTING_RELEASE.md` 完成外部平台部署和生产 smoke test。
 
 原因：
 
-- 当前根路径直接进入 `/login`，不像一个完整产品的入口。
-- 在进入内测前，先让用户打开网站时看到主页，再选择登录或进入面试，体验更自然。
-- 主页只做基础框架，不做复杂营销页，也不新增云端历史、文件上传等大功能。
+- 阶段 16 已完成，根路径 `/` 现在展示基础主页、登录入口、面试入口和登录状态。
+- 主页只做基础框架，没有扩展成复杂营销页，也没有新增云端历史、文件上传等大功能。
 - `/interview` 仍必须保持受保护，未登录用户不能进入。
 
 ## 阶段计划
@@ -40,17 +39,15 @@
 - [x] 阶段 13：登录入口和面试主界面路由拆分
 - [x] 阶段 14：Supabase Auth 账号系统 MVP
 - [x] 阶段 15：内部测试版上线准备
-- [ ] 阶段 16：基础主页框架
+- [x] 阶段 16：基础主页框架
 
 ## 当前优先级
 
 当前优先级：
 
-1. 在当前分支完成阶段 16：基础主页框架。
-2. 根路径 `/` 展示基础主页，不再直接重定向到 `/login`。
-3. 主页保留 `/login` 和 `/interview` 入口。
-4. 主页显示登录状态；已登录时显示账号信息，未登录时显示未登录状态。
-5. 保证未登录用户不能进入 `/interview`。
+1. 按 `docs/INTERNAL_TESTING_RELEASE.md` 完成外部平台部署和生产 smoke test。
+2. 代码审查 session 检查阶段 16 主页入口、登录状态展示和 `/interview` 保护。
+3. 收集内部测试反馈后，再决定是否规划云端历史记录或其他下一阶段。
 
 推荐当前功能分支：
 
@@ -897,11 +894,11 @@ docs/INTERNAL_TESTING_RELEASE.md
 
 ## 阶段 16：基础主页框架
 
-阶段状态：计划中。当前目标是把根路径 `/` 从“直接进入登录页”调整为一个最基础的产品主页。主页只做信息架构和入口，不做复杂营销页、不做新功能组件、不做大范围视觉重构。
+阶段状态：已完成。当前已经把根路径 `/` 从“直接进入登录页”调整为最基础的产品主页。主页只做信息架构和入口，不做复杂营销页、不做新功能组件、不做大范围视觉重构。
 
 ### 背景问题
 
-当前用户输入网站根路径后会进入 `/login`。这对账号系统可用，但产品结构不够自然：用户应该先看到主页，主页再提供登录/注册入口、进入面试入口，以及当前账号状态。
+阶段 16 之前，用户输入网站根路径后会进入 `/login`。这对账号系统可用，但产品结构不够自然：用户应该先看到主页，主页再提供登录/注册入口、进入面试入口，以及当前账号状态。
 
 期望的新入口关系：
 
@@ -978,6 +975,7 @@ docs/INTERNAL_TESTING_RELEASE.md
 - 是否没有把主页做成复杂营销页或引入无关 UI 重构。
 - 是否没有破坏 Supabase Auth、DeepSeek API、本地历史记录或开发 Mock 流程。
 - README、PROJECT_STATUS、DEVELOPMENT_TESTING 和 PRD 是否同步了新的入口流程。
+
 ## 暂缓事项
 
 暂不优先做：
@@ -1007,10 +1005,10 @@ docs/INTERNAL_TESTING_RELEASE.md
 你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“[阶段名称]”阶段。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md；如果本阶段涉及开发测试流程，也阅读 docs/DEVELOPMENT_TESTING.md。然后按 ROADMAP 的任务拆分和验收标准实现。只有在需要改变产品范围或用户流程时才阅读 docs/PRD.md。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
 ```
 
-当前阶段 16 计划中，建议启动阶段开发 session。可以这样启动：
+当前阶段 16 已完成，建议启动代码审查 session 或部署测试 session。代码审查 session 可以这样启动：
 
 ```text
-你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“阶段 16：基础主页框架”。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/PRD.md、docs/DEVELOPMENT_TESTING.md。请把根路径 / 做成最基本主页，保留 /login 入口、/interview 入口，并显示当前登录状态或账号信息。未登录用户点击主页 /interview 入口应进入 /login，直接访问 /interview 也应回到 /login；现有 /login 注册登录、/interview 面试主流程、登出和登录态保持不能被破坏。不要做云端历史记录、文件上传、支付、复杂 landing page 或大范围 UI 重构；不要安装依赖。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
+你是 AI Interview Simulator 的代码审查 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/PRD.md、docs/DEVELOPMENT_TESTING.md，然后以 review 姿态检查阶段 16：基础主页框架的当前 diff。重点检查根路径 / 是否显示基础主页，/login 和 /interview 入口是否保留，未登录用户是否不能进入 /interview，登录状态展示是否不泄露敏感信息，以及现有注册登录、面试主流程、登出和登录态保持是否没有被破坏。
 ```
 
 代码审查 session 用于检查阶段开发结果:

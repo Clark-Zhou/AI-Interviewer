@@ -10,20 +10,23 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前已经验证核心面试练习闭环，并已完成本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步计划先优化产品入口：将根路径 `/` 做成基础主页，保留登录入口、面试入口和登录状态展示。云端历史记录、文件上传和复杂账号能力仍暂缓。
+当前已经验证核心面试练习闭环，并已完成基础主页框架、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。根路径 `/` 现在展示登录入口、面试入口和当前登录状态；未登录用户从主页点击面试入口会进入 `/login`，直接访问 `/interview` 也仍会回到 `/login`。云端历史记录、文件上传和复杂账号能力仍暂缓。
 
 ## 2. 当前阶段
 
 当前分支：
 
 ```text
-develop-login-page
+develop-private-test-version
 ```
 
-当前已经完成的是 MVP 的核心闭环、开发效率优化、登录入口页面壳、入口/主界面路由拆分、Supabase Auth 账号系统 MVP 和内部测试版上线准备文档：
+当前已经完成的是 MVP 的核心闭环、开发效率优化、基础主页框架、登录入口页面壳、入口/主界面路由拆分、Supabase Auth 账号系统 MVP 和内部测试版上线准备文档：
 
 ```text
-访问根路径后进入 /login
+访问根路径后看到基础主页
+主页展示登录入口、面试入口和登录状态
+未登录用户点击主页面试入口会进入 /login
+已登录用户可以从主页进入 /interview
 用户打开 /login 后先看到登录/注册入口页面壳
 新用户可以使用邮箱密码注册
 已注册用户可以使用邮箱密码登录
@@ -134,7 +137,7 @@ docs/INTERNAL_TESTING_RELEASE.md
 app/page.js
 ```
 
-Next.js 根路径入口，当前重定向到 `/login`。
+Next.js 基础主页。展示产品简短定位、登录入口、面试入口和当前登录状态；未登录用户点击主页面试入口会进入 `/login`。
 
 ```text
 app/login/page.js
@@ -152,7 +155,7 @@ app/interview/page.js
 proxy.js
 ```
 
-Supabase Auth cookie 刷新和 `/interview` 访问保护。当前只匹配 `/login` 和 `/interview`，不改 DeepSeek API 路由边界。
+Supabase Auth cookie 刷新和 `/interview` 访问保护。当前匹配 `/`、`/login` 和 `/interview`，用于主页和登录页刷新认证状态，并保护面试工作区；不改 DeepSeek API 路由边界。
 
 ```text
 components/LoginEntryShell.js
@@ -454,13 +457,15 @@ http://localhost:3000
 已经完成：
 
 - Next.js 页面结构
+- 根路径 `/` 基础主页
+- 主页展示登录入口、面试入口和登录状态
 - 登录入口页面壳
 - 背景视觉和悬浮体验框布局
 - 邮箱密码注册、登录和登出
 - 登录态保持
 - 未登录访问 `/interview` 时回到 `/login`
 - `/login` 和 `/interview` 前端路由拆分
-- 根路径 `/` 重定向到 `/login`
+- 未登录用户点击主页面试入口会进入 `/login`
 - 登录成功后进入 `/interview` 模拟面试主界面
 - 岗位信息输入框
 - 个人简历输入框
@@ -532,7 +537,7 @@ http://localhost:3000
 推荐下一步：
 
 ```text
-阶段 16：基础主页框架。根路径 / 显示主页，保留 /login 和 /interview 入口，并显示登录状态；未登录用户点击主页 /interview 入口会进入 /login，直接访问 /interview 也会回到 /login。
+阶段 16 已完成。下一步建议按 docs/INTERNAL_TESTING_RELEASE.md 完成外部平台部署和生产 smoke test，或启动代码审查 session 检查主页入口与登录保护。
 ```
 
 建议检查：
@@ -549,8 +554,8 @@ http://localhost:3000
 
 后续可以优先考虑:
 
-- 阶段 16：基础主页框架。
-- 阶段 16 完成后，再按 `docs/INTERNAL_TESTING_RELEASE.md` 完成外部平台部署和生产 smoke test。
+- 按 `docs/INTERNAL_TESTING_RELEASE.md` 完成外部平台部署和生产 smoke test。
+- 代码审查 session 检查阶段 16 主页入口和登录保护。
 - 部署后收集内部测试反馈。
 
 不建议马上做：
