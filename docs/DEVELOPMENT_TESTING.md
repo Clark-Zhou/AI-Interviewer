@@ -16,6 +16,7 @@
 - `proxy.js`：Supabase Auth cookie 刷新和 `/interview` 访问保护。
 - `app/api/generate-questions/route.js`：生成问题的后端 API。
 - `app/api/evaluate-interview/route.js`：生成最终评价的后端 API。
+- `docs/INTERNAL_TESTING_RELEASE.md`：内部测试版部署准备和生产 smoke test 清单。
 
 ## 当前开发辅助能力
 
@@ -42,21 +43,24 @@ process.env.NODE_ENV === 'development'
 
 1. 项目所有者运行 `npm run dev`。
 2. 打开 `http://localhost:3000`。
-3. 确认根路径会进入 `/login`，并看到登录/注册入口页面壳。
-4. 使用新邮箱注册，或使用已注册邮箱登录。
-5. 确认登录成功后浏览器地址进入 `/interview`。
-6. 刷新 `/interview`，确认仍保持登录态。
-7. 点击登出，确认回到 `/login`；再次登录后回到 `/interview`。
-8. 点击 `填入示例 JD/简历`。
-9. 点击真实 AI 问题按钮，等待 DeepSeek 返回问题列表。
-10. 点击 `填入测试回答`。
-11. 点击 `提交全部回答`，或逐题点击 `提交本题回答`。
-12. 确认答题进度显示为 `已提交 6 / 6`。
-13. 点击真实 AI 评价按钮，等待 DeepSeek 返回最终评价。
-14. 检查页面是否展示总分、总结、优势、风险点、改进建议、逐题反馈和后续练习题。
-15. 检查最终评价区是否显示 `最终评价已生成，并已保存到本地历史记录。`。
-16. 检查页面底部历史记录区是否新增记录，点击后能看到详情。
-17. 点击 `开始新一轮`，确认当前岗位 JD、简历、问题、回答、提交状态、评价和提示信息被清空，历史记录仍保留。
+3. 确认根路径显示基础主页，而不是直接进入 `/login`。
+4. 确认主页展示登录入口、面试入口和未登录状态。
+5. 未登录时点击主页的面试入口，确认进入 `/login`。
+6. 使用新邮箱注册，或使用已注册邮箱登录。
+7. 确认登录成功后浏览器地址进入 `/interview`。
+8. 回到 `/`，确认主页显示当前账号信息，并且可以从主页进入 `/interview`。
+9. 刷新 `/interview`，确认仍保持登录态。
+10. 点击登出，确认回到 `/login`；再次登录后回到 `/interview`。
+11. 点击 `填入示例 JD/简历`。
+12. 点击真实 AI 问题按钮，等待 DeepSeek 返回问题列表。
+13. 点击 `填入测试回答`。
+14. 点击 `提交全部回答`，或逐题点击 `提交本题回答`。
+15. 确认答题进度显示为 `已提交 6 / 6`。
+16. 点击真实 AI 评价按钮，等待 DeepSeek 返回最终评价。
+17. 检查页面是否展示总分、总结、优势、风险点、改进建议、逐题反馈和后续练习题。
+18. 检查最终评价区是否显示 `最终评价已生成，并已保存到本地历史记录。`。
+19. 检查页面底部历史记录区是否新增记录，点击后能看到详情。
+20. 点击 `开始新一轮`，确认当前岗位 JD、简历、问题、回答、提交状态、评价和提示信息被清空，历史记录仍保留。
 
 错误恢复检查：
 
@@ -165,6 +169,38 @@ Supabase Auth 账号系统 MVP 实现后，重点检查：
 - 密码没有被写入 localStorage、历史记录、console log 或自定义数据结构。
 - 代码中没有 Supabase `service_role` key。
 - `/interview` 中真实 AI、Mock、本地历史记录、开始新一轮和错误重试流程仍可用。
+
+## 阶段 15 检查点
+
+内部测试版上线准备完成后，重点检查：
+
+- 已阅读 `docs/INTERNAL_TESTING_RELEASE.md`。
+- Vercel 或选定部署平台可以成功构建和部署。
+- 部署环境已配置 `DEEPSEEK_API_KEY`、`DEEPSEEK_MODEL`、`NEXT_PUBLIC_SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`。
+- Supabase Auth 的 Site URL 和 Redirect URLs 包含生产域名，并保留 `http://localhost:3000/**`。
+- 生产环境新用户可以注册，已注册用户可以登录。
+- 生产环境刷新 `/interview` 后仍保持登录态。
+- 登出后回到 `/login`，未登录访问 `/interview` 会回到 `/login`。
+- 登录后真实 AI 问题生成和最终评价可以正常调用。
+- 生产环境不展示开发 Mock 按钮。
+- 本地历史记录仍可保存和查看。
+- README 或测试说明中包含“不要输入特别敏感信息”的内部测试提醒。
+- 如果无法访问 Vercel 或 Supabase Dashboard，应至少完成本地 `npm run build`，并把未执行的外部平台 smoke test 明确记录给项目所有者。
+
+生产 smoke test 的详细步骤见 `docs/INTERNAL_TESTING_RELEASE.md`。
+
+## 阶段 16 检查点
+
+基础主页框架实现后，重点检查：
+
+- 访问 `/` 显示基础主页，而不是直接跳到 `/login`。
+- 主页展示 `/login` 入口和 `/interview` 入口。
+- 未登录状态下，主页显示未登录状态。
+- 已登录状态下，主页显示当前账号信息，例如邮箱。
+- 未登录时点击主页的 `/interview` 入口会直接进入 `/login`；未登录直接访问 `/interview` 也会回到 `/login`。
+- 已登录时可以从主页进入 `/interview`。
+- `/login` 注册/登录、`/interview` 面试主流程、登出和登录态保持仍可用。
+- 生产环境不展示开发 Mock 按钮，开发环境 Mock 流程不受影响。
 
 ## 常见检查点
 

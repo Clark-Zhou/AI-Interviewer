@@ -14,14 +14,13 @@
 
 ## 当前推荐方向
 
-当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分，以及 Supabase Auth 账号系统 MVP。下一步建议先做代码审查和本地回归测试，确认账号系统没有破坏现有面试主流程。
+当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成基础主页框架、本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步建议按 `docs/INTERNAL_TESTING_RELEASE.md` 完成外部平台部署和生产 smoke test。
 
 原因：
 
-- 阶段 14 已完成，当前 `/login` 支持注册和登录，`/interview` 已有登录保护和登出入口。
-- Supabase 项目、环境变量和依赖安装已由项目所有者完成，代码只使用 publishable/anon key。
-- 账号系统只做最小闭环，没有扩展到云端历史、用户资料页、OAuth、支付或权限系统。
-- PR 前应重点确认账号系统没有破坏现有 AI 生成问题、最终评价、Mock、历史记录和开始新一轮流程。
+- 阶段 16 已完成，根路径 `/` 现在展示基础主页、登录入口、面试入口和登录状态。
+- 主页只做基础框架，没有扩展成复杂营销页，也没有新增云端历史、文件上传等大功能。
+- `/interview` 仍必须保持受保护，未登录用户不能进入。
 
 ## 阶段计划
 
@@ -39,20 +38,21 @@
 - [x] 阶段 12：登录入口页面壳
 - [x] 阶段 13：登录入口和面试主界面路由拆分
 - [x] 阶段 14：Supabase Auth 账号系统 MVP
+- [x] 阶段 15：内部测试版上线准备
+- [x] 阶段 16：基础主页框架
 
 ## 当前优先级
 
 当前优先级：
 
-1. 对阶段 14 做代码审查，重点检查 Supabase Auth 边界、密码处理和路由保护。
-2. 做本地回归测试：注册、登录、登出、登录态保持、未登录访问 `/interview` 回到 `/login`。
-3. 回归 `/interview` 内真实 AI、Mock、本地历史记录、开始新一轮和错误重试流程。
-4. 暂不做云端历史记录，当前历史记录仍保留 localStorage。
+1. 按 `docs/INTERNAL_TESTING_RELEASE.md` 完成外部平台部署和生产 smoke test。
+2. 代码审查 session 检查阶段 16 主页入口、登录状态展示和 `/interview` 保护。
+3. 收集内部测试反馈后，再决定是否规划云端历史记录或其他下一阶段。
 
 推荐当前功能分支：
 
 ```text
-develop-login-page
+develop-private-test-version
 ```
 
 ## 阶段 6：历史记录初始化
@@ -794,6 +794,188 @@ createInterviewSessionId()
 - 是否没有破坏真实 AI、Mock、历史保存和开发辅助流程。
 - README、PROJECT_STATUS、DEVELOPMENT_TESTING 和 PRD 是否同步了账号系统 MVP 的范围。
 
+## 阶段 15：内部测试版上线准备
+
+阶段状态：已完成。当前已经把已完成的核心 MVP 和 Supabase Auth 账号系统准备成可部署、可给少量同学试用的内部测试版文档。仓库侧已补齐部署、环境变量、Supabase Auth URL 配置、内部测试说明和隐私提醒；实际 Vercel 部署、Supabase Dashboard 配置和生产 smoke test 需要项目所有者在外部平台执行。
+
+### 阶段目标
+
+- 选择并配置部署平台，优先建议 Vercel。
+- 在部署环境配置 DeepSeek 和 Supabase 所需环境变量。
+- 在 Supabase Dashboard 配置生产域名的 Site URL 和 Redirect URLs。
+- 明确内部测试版本的用户提示：不要输入特别敏感的个人信息。
+- 准备内部测试 checklist，覆盖账号系统、AI 面试主流程、Mock 流程和本地历史记录。
+- 确认部署版本能完成从注册登录到生成最终评价的完整流程。
+
+### 产品边界
+
+本阶段是上线准备，不是新功能扩展。目标是让当前产品可以被少量真实用户试用，并暴露真实使用问题。
+
+本阶段建议包含：
+
+- Vercel 项目导入和部署说明。
+- 生产环境变量清单。
+- Supabase Auth URL 配置说明。
+- 内部测试用户说明文案。
+- 隐私和敏感信息提醒。
+- 部署后 smoke test / 回归测试清单。
+- README、PROJECT_STATUS、ROADMAP 和 DEVELOPMENT_TESTING 的必要同步。
+- 新增 `docs/INTERNAL_TESTING_RELEASE.md`，集中放内部测试版上线步骤。
+
+本阶段暂不包含：
+
+- 云端历史记录。
+- 数据库 schema 设计。
+- 历史记录按用户隔离。
+- 文件上传。
+- 支付、订阅或额度系统。
+- App Store 或移动端原生应用。
+- 大范围 UI 重构。
+
+### 项目所有者前置准备
+
+开发或部署 session 开始前，项目所有者需要准备：
+
+1. 确认阶段 14 PR 已合并到 `main`，本地 `main` 已更新。
+2. 准备 Vercel 账号，并允许 Vercel 访问 GitHub 仓库。
+3. 准备生产环境变量：
+   - `DEEPSEEK_API_KEY`
+   - `DEEPSEEK_MODEL`
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+4. 等 Vercel 生成域名后，在 Supabase Auth URL Configuration 中配置：
+   - Site URL：生产域名，例如 `https://your-project.vercel.app`
+   - Redirect URLs：生产域名通配，例如 `https://your-project.vercel.app/**`
+   - 保留本地开发地址：`http://localhost:3000/**`
+5. 准备一个测试邮箱，用于注册、登录和验证邮件流程。
+
+详细操作清单见：
+
+```text
+docs/INTERNAL_TESTING_RELEASE.md
+```
+
+### 内部测试提醒文案
+
+给同学或内部测试用户的说明建议：
+
+```text
+这是我的 AI 模拟面试 MVP。你可以注册/登录，输入岗位 JD 和简历文本，生成面试问题，回答后生成最终评价。
+
+目前历史记录暂时保存在当前浏览器本地，没有云端同步。
+
+请不要输入身份证号、家庭住址、完整手机号、真实薪资流水、公司内部资料等特别敏感信息。
+```
+
+### 验收标准
+
+阶段 15 完成时，应满足：
+
+- 项目可以在 Vercel 或选定平台成功部署。
+- 生产环境变量配置完整，且没有把真实密钥提交到仓库。
+- Supabase Auth 生产 URL 和 Redirect URLs 配置正确。
+- 生产环境可以注册、登录、刷新保持登录态、登出。
+- 未登录访问 `/interview` 会回到 `/login`。
+- 登录后可以完整跑通生成问题、回答、最终评价。
+- Mock 流程在开发环境仍可用，生产环境不展示开发 Mock 按钮。
+- 本地历史记录仍可保存和查看。
+- README 或测试文档中有内部测试和隐私提醒。
+- `docs/INTERNAL_TESTING_RELEASE.md` 包含部署准备、生产环境变量、Supabase Auth URL 配置、内部测试 checklist、敏感信息提醒和常见问题。
+
+### 代码审查关注点
+
+如果本阶段涉及代码或配置文件改动，代码审查 session 应重点检查：
+
+- 是否没有提交 `.env.local` 或真实密钥。
+- 是否没有使用 Supabase `service_role` key。
+- 是否没有把部署准备误扩展成云端历史记录或数据库改造。
+- 是否没有破坏本地开发流程。
+- 文档里的部署步骤、环境变量和隐私提醒是否清楚。
+
+## 阶段 16：基础主页框架
+
+阶段状态：已完成。当前已经把根路径 `/` 从“直接进入登录页”调整为最基础的产品主页。主页只做信息架构和入口，不做复杂营销页、不做新功能组件、不做大范围视觉重构。
+
+### 背景问题
+
+阶段 16 之前，用户输入网站根路径后会进入 `/login`。这对账号系统可用，但产品结构不够自然：用户应该先看到主页，主页再提供登录/注册入口、进入面试入口，以及当前账号状态。
+
+期望的新入口关系：
+
+```text
+/ -> 主页
+/login -> 登录/注册
+/interview -> 受保护的模拟面试工作区
+```
+
+### 阶段目标
+
+- 根路径 `/` 展示最基本主页框架。
+- 主页保留 `/login` 入口。
+- 主页保留 `/interview` 入口。
+- 主页显示当前是否处于登录状态；如果已登录，显示账号信息，例如邮箱。
+- 未登录时点击主页的 `/interview` 入口，应直接进入 `/login`；未登录直接访问 `/interview` 也必须回到 `/login`。
+- 已登录时可以从主页进入 `/interview`。
+
+### MVP 范围
+
+本阶段建议包含：
+
+- 调整 `app/page.js`，让根路径渲染基础主页，而不是直接重定向到 `/login`。
+- 主页包含产品名或简短定位、登录/注册入口、进入面试入口、账号状态信息。
+- 复用现有 Supabase Auth 登录态读取能力。
+- 保留 `/login` 和 `/interview` 的独立路由。
+- 保留 `/interview` 的访问保护，未登录用户不能进入。
+- 更新相关中文 file header。
+- 小范围补充样式即可，避免大范围 UI 重构。
+
+本阶段暂不包含：
+
+- 营销型 landing page。
+- 复杂首页组件。
+- 用户资料页。
+- 云端历史记录。
+- 文件上传。
+- 支付、订阅或额度系统。
+- 改动 DeepSeek API、prompt 或历史记录数据结构。
+
+### 任务拆分建议
+
+1. 先阅读 `README.md`、`AGENTS.md`、`docs/PROJECT_STATUS.md`、`docs/ROADMAP.md`、`docs/PRD.md` 和 `docs/DEVELOPMENT_TESTING.md`。
+2. 检查当前 `app/page.js`、`app/login/page.js`、`app/interview/page.js`、`proxy.js` 和 Supabase server client 的职责。
+3. 将根路径 `/` 改为基础主页。
+4. 在主页读取当前登录状态；已登录时显示账号信息，未登录时显示未登录状态。
+5. 主页提供 `/login` 和 `/interview` 两个清晰入口。
+6. 保证未登录用户无法进入 `/interview`：主页点击 `/interview` 入口时直接进入 `/login`，直接访问 `/interview` 时也由路由保护回到 `/login`。
+7. 更新 README、PROJECT_STATUS、DEVELOPMENT_TESTING 和 PRD 中关于根路径的描述。
+8. 阶段完成或准备 PR 前，按 `AGENTS.md` 的分档收尾规则更新文档。
+
+### 验收标准
+
+阶段 16 完成时，应满足：
+
+- 访问 `/` 看到基础主页，而不是直接进入 `/login`。
+- 主页能看到登录/注册入口。
+- 主页能看到进入面试入口。
+- 未登录时主页明确显示未登录状态。
+- 已登录时主页显示当前账号信息，例如邮箱。
+- 未登录时点击主页的 `/interview` 入口会直接进入 `/login`；未登录直接访问 `/interview` 也会回到 `/login`。
+- 已登录时可以从主页进入 `/interview`。
+- `/login` 注册/登录、`/interview` 面试主流程、登出和登录态保持不受影响。
+- 没有新增依赖，没有改 DeepSeek API、prompt 或历史记录数据结构。
+
+### 代码审查关注点
+
+代码审查 session 应重点检查：
+
+- 根路径是否不再直接重定向到 `/login`。
+- `/login` 和 `/interview` 入口是否都保留。
+- 未登录用户点击主页 `/interview` 入口是否直接进入 `/login`，且直接访问 `/interview` 时路由保护仍然有效。
+- 登录状态显示是否不泄露敏感信息，只显示必要账号信息。
+- 是否没有把主页做成复杂营销页或引入无关 UI 重构。
+- 是否没有破坏 Supabase Auth、DeepSeek API、本地历史记录或开发 Mock 流程。
+- README、PROJECT_STATUS、DEVELOPMENT_TESTING 和 PRD 是否同步了新的入口流程。
+
 ## 暂缓事项
 
 暂不优先做：
@@ -823,13 +1005,13 @@ createInterviewSessionId()
 你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“[阶段名称]”阶段。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md；如果本阶段涉及开发测试流程，也阅读 docs/DEVELOPMENT_TESTING.md。然后按 ROADMAP 的任务拆分和验收标准实现。只有在需要改变产品范围或用户流程时才阅读 docs/PRD.md。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
 ```
 
-当前阶段 14 已完成，建议先启动代码审查 session 或开发测试 session。代码审查 session 可以这样启动：
+当前阶段 16 已完成，建议启动代码审查 session 或部署测试 session。代码审查 session 可以这样启动：
 
 ```text
-你是 AI Interview Simulator 的代码审查 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/PRD.md、docs/DEVELOPMENT_TESTING.md，然后以 review 姿态检查阶段 14：Supabase Auth 账号系统 MVP 的当前 diff。重点检查注册、登录、登出、登录态保持、/interview 访问保护、密码处理、Supabase key 使用边界，以及是否没有改 DeepSeek API、本地历史记录或扩展到云端历史。
+你是 AI Interview Simulator 的代码审查 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/PRD.md、docs/DEVELOPMENT_TESTING.md，然后以 review 姿态检查阶段 16：基础主页框架的当前 diff。重点检查根路径 / 是否显示基础主页，/login 和 /interview 入口是否保留，未登录用户是否不能进入 /interview，登录状态展示是否不泄露敏感信息，以及现有注册登录、面试主流程、登出和登录态保持是否没有被破坏。
 ```
 
-代码审查 session 用于检查阶段开发结果：
+代码审查 session 用于检查阶段开发结果:
 
 ```text
 你是 AI Interview Simulator 的代码审查 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md，然后以 review 姿态检查当前 diff。只有在 diff 涉及产品范围或用户流程时才阅读 docs/PRD.md。优先指出 bug、风险、遗漏测试和文档未同步的问题；不要主动做大范围重构。

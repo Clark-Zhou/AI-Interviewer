@@ -10,13 +10,15 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前版本先验证最小可用闭环。当前已完成本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 路由拆分，以及 Supabase Auth 账号系统 MVP。云端历史记录、文件上传、语音或视频面试仍暂缓。
+当前版本先验证最小可用闭环。当前已完成基础主页框架、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。云端历史记录、文件上传、语音或视频面试仍暂缓。
 
 ## 当前功能
 
 已经完成：
 
 - 登录入口页面壳
+- 根路径 `/` 基础主页
+- 主页展示登录入口、面试入口和当前登录状态
 - `/login` 和 `/interview` 前端路由拆分
 - 邮箱密码注册、登录和登出
 - 登录态保持
@@ -95,8 +97,8 @@ http://localhost:3000
 ```env
 DEEPSEEK_API_KEY=your_deepseek_api_key_here
 DEEPSEEK_MODEL=deepseek-v4-flash
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_or_anon_key
 ```
 
 说明：
@@ -104,14 +106,32 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 - `.env.local` 不应提交到 git。
 - `DEEPSEEK_MODEL` 可选，不配置时服务端会使用默认模型。
 - `NEXT_PUBLIC_SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` 用于 Supabase Auth 账号系统。
+- `NEXT_PUBLIC_SUPABASE_URL` 必须是完整 `http/https` URL，不能只填 Supabase project ref。
 - 不要把 Supabase `service_role` key 写进前端环境变量或提交到仓库。
 - 修改 `.env.local` 后通常需要重启 `npm run dev`。
+
+## 内部测试版准备
+
+准备给少量同学或朋友测试前，优先阅读：
+
+```text
+docs/INTERNAL_TESTING_RELEASE.md
+```
+
+核心检查：
+
+- 部署平台已配置 `DEEPSEEK_API_KEY`、`DEEPSEEK_MODEL`、`NEXT_PUBLIC_SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`。
+- Supabase Auth 的 Site URL 指向生产域名。
+- Supabase Auth 的 Redirect URLs 包含生产域名通配，例如 `https://your-project.vercel.app/**`。
+- 本地开发地址 `http://localhost:3000/**` 仍保留在 Redirect URLs 中。
+- 不要在仓库提交 `.env.local`、真实 DeepSeek key、Supabase `service_role` key 或其他敏感配置。
+- 内部测试用户需要知道：历史记录只保存在当前浏览器本地，不要输入特别敏感信息。
 
 ## 目录结构
 
 ```text
 app/                              Next.js App Router 页面和 API route
-app/page.js                       根路径入口，重定向到 /login
+app/page.js                       基础主页，展示登录入口、面试入口和登录状态
 app/layout.js                     全局布局和 metadata
 app/globals.css                   全局样式
 app/login/page.js                 登录入口页面壳路由
@@ -140,6 +160,7 @@ docs/PRD.md                       MVP 产品需求文档
 docs/PROJECT_STATUS.md            当前项目状态文档
 docs/ROADMAP.md                   阶段计划和优先级
 docs/DEVELOPMENT_TESTING.md       开发测试说明
+docs/INTERNAL_TESTING_RELEASE.md  内部测试版部署和 smoke test 清单
 AGENTS.md                         AI agent 和开发协作规范
 index.html                        旧版静态原型，仅供参考
 ```
@@ -185,23 +206,24 @@ components/InterviewSimulator.js
 
 推荐测试路径：
 
-1. 打开根路径后确认会进入 `/login`。
-2. 使用新邮箱注册，或使用已注册邮箱登录。
-3. 登录成功后进入 `/interview`。
-4. 确认页面进入 `/interview`。
-5. 点击浏览器返回键，确认能回到 `/login`。
-6. 再次登录或直接访问 `/interview`，确认登录态仍可用。
-7. 点击 `填入示例 JD/简历`。
-8. 点击 `生成面试问题`。
-9. 等待问题生成。
-10. 点击 `填入测试回答`。
-11. 点击 `提交全部回答`，或逐题点击 `提交本题回答`。
-12. 确认进度为 `已提交 6 / 6`。
-13. 点击 `生成最终评价`。
-14. 检查最终评价是否完整展示。
-15. 检查最终评价区是否提示已保存到本地历史记录。
-16. 检查页面底部历史记录区是否新增记录，点击后是否能查看详情。
-17. 点击 `开始新一轮`，确认当前输入、问题、回答和评价被清空，但历史记录仍保留。
+1. 打开根路径后确认会看到基础主页。
+2. 未登录时确认主页显示未登录状态，并展示登录入口和面试入口。
+3. 点击主页的面试入口，确认会进入 `/login`。
+4. 使用新邮箱注册，或使用已注册邮箱登录。
+5. 登录成功后进入 `/interview`。
+6. 回到 `/`，确认主页显示当前账号信息，并且可以从主页进入 `/interview`。
+7. 再次登录或直接访问 `/interview`，确认登录态仍可用。
+8. 点击 `填入示例 JD/简历`。
+9. 点击 `生成面试问题`。
+10. 等待问题生成。
+11. 点击 `填入测试回答`。
+12. 点击 `提交全部回答`，或逐题点击 `提交本题回答`。
+13. 确认进度为 `已提交 6 / 6`。
+14. 点击 `生成最终评价`。
+15. 检查最终评价是否完整展示。
+16. 检查最终评价区是否提示已保存到本地历史记录。
+17. 检查页面底部历史记录区是否新增记录，点击后是否能查看详情。
+18. 点击 `开始新一轮`，确认当前输入、问题、回答和评价被清空，但历史记录仍保留。
 
 如果真实 AI 请求失败，页面应显示对应错误提示：生成问题失败时可点击 `重试生成问题`，最终评价失败时可点击 `重试生成评价`。
 

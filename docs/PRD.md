@@ -38,35 +38,39 @@ The first version should prioritize a complete, useful workflow over advanced fe
 
 ## 4. Core User Flow
 
-1. User opens the app.
-2. User signs up or logs in through the `/login` page.
-3. After authentication, the user enters the `/interview` page.
-4. User pastes the job description.
-5. User pastes resume text.
-6. User clicks "Start Mock Interview".
-7. The system generates 6 interview questions.
-8. User answers questions one by one.
-9. User submits each answer separately.
-10. The system generates a final report.
-11. User reviews strengths, weaknesses, and improvement suggestions.
+1. User opens the app homepage at `/`.
+2. The homepage shows the product entry, login/register entry, interview entry, and current authentication status.
+3. If the user is not logged in, the user goes to `/login` to sign up or log in.
+4. After authentication, the user can enter `/interview` from the homepage or direct route.
+5. User pastes the job description.
+6. User pastes resume text.
+7. User clicks "Start Mock Interview".
+8. The system generates 6 interview questions.
+9. User answers questions one by one.
+10. User submits each answer separately.
+11. The system generates a final report.
+12. User reviews strengths, weaknesses, and improvement suggestions.
 
 ## 5. MVP Features
 
-### 5.0 Account Entry and Authentication
+### 5.0 Homepage, Entry, and Authentication
 
-The product uses Supabase Auth for the account-system MVP. Authentication exists to protect the interview workspace and prepare for later cloud history, not to change the core AI interview flow.
+The product uses a basic homepage as the first product entry. Supabase Auth protects the interview workspace and prepares for later cloud history, without changing the core AI interview flow.
 
 MVP behavior:
 
-- Show a `/login` page with the current entry-page visual style.
-- Support email and password signup.
-- Support email and password login.
+- Show a `/` homepage with basic product entry information.
+- Show `/login` and `/interview` entry points on the homepage.
+- Show whether the user is logged in; if logged in, show basic account information such as email.
+- Support email and password signup on `/login`.
+- Support email and password login on `/login`.
 - Keep the user signed in after refresh.
-- Redirect unauthenticated access to `/interview` back to `/login`.
+- When an unauthenticated user clicks the homepage `/interview` entry, send them directly to `/login`; direct unauthenticated access to `/interview` should also return to `/login`.
 - Provide logout from the authenticated experience.
 
 Out of scope for this MVP stage:
 
+- Complex marketing landing page
 - Cloud-synced interview history
 - User profile page
 - Password reset customization

@@ -29,6 +29,132 @@ textarea {
   font: inherit;
 }
 
+/* 基础主页：只提供产品入口和登录状态，不做复杂营销页。 */
+.home-page {
+  min-height: 100vh;
+  padding: 48px 16px;
+}
+
+.home-shell {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 24px 64px rgba(17, 24, 39, 0.08);
+  margin: 0 auto;
+  max-width: 960px;
+  padding: 36px;
+}
+
+.home-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+}
+
+.home-kicker {
+  color: #0f766e;
+  font-size: 14px;
+  font-weight: 800;
+  margin: 0 0 12px;
+}
+
+.home-header h1 {
+  font-size: 34px;
+  line-height: 1.25;
+  margin: 0;
+  max-width: 680px;
+}
+
+.home-status {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #4b5563;
+  flex-shrink: 0;
+  min-width: 220px;
+  padding: 14px 16px;
+}
+
+.home-status.logged-in {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #047857;
+}
+
+.home-status span {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.home-status strong {
+  color: #111827;
+  display: block;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.home-summary {
+  border-top: 1px solid #e5e7eb;
+  color: #4b5563;
+  display: grid;
+  gap: 14px;
+  line-height: 1.7;
+  margin-top: 28px;
+  padding-top: 24px;
+}
+
+.home-summary p {
+  margin: 0;
+}
+
+.home-warning {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  color: #9a3412;
+  line-height: 1.6;
+  margin: 22px 0 0;
+  padding: 12px 14px;
+}
+
+.home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.home-primary-link,
+.home-secondary-link {
+  border-radius: 8px;
+  display: inline-flex;
+  font-weight: 800;
+  justify-content: center;
+  padding: 13px 18px;
+  text-decoration: none;
+}
+
+.home-primary-link {
+  background: #2bb8aa;
+  color: #ffffff;
+}
+
+.home-primary-link:hover {
+  background: #0f766e;
+}
+
+.home-secondary-link {
+  background: #111827;
+  color: #ffffff;
+}
+
+.home-secondary-link:hover {
+  background: #374151;
+}
+
 /* 登录入口页壳：承载 Supabase Auth 登录/注册入口。 */
 .entry-page {
   min-height: 100vh;
@@ -824,6 +950,35 @@ button:disabled {
 }
 
 @media (max-width: 720px) {
+  .home-page {
+    padding: 20px 16px;
+  }
+
+  .home-shell {
+    padding: 24px;
+  }
+
+  .home-header {
+    flex-direction: column;
+  }
+
+  .home-header h1 {
+    font-size: 28px;
+  }
+
+  .home-status {
+    width: 100%;
+  }
+
+  .home-actions {
+    flex-direction: column;
+  }
+
+  .home-primary-link,
+  .home-secondary-link {
+    width: 100%;
+  }
+
   .entry-hero {
     gap: 24px;
     grid-template-columns: 1fr;

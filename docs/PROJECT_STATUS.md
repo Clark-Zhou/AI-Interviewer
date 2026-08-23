@@ -10,20 +10,23 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前已经验证核心面试练习闭环，并已完成本地历史记录初始化、列表和详情查看。当前分支已完成登录入口页面壳、`/login` 和 `/interview` 前端路由拆分，以及 Supabase Auth 账号系统 MVP：注册、登录、登出、登录态保持和 `/interview` 访问保护。云端历史记录、文件上传和复杂账号能力仍暂缓。
+当前已经验证核心面试练习闭环，并已完成基础主页框架、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。根路径 `/` 现在展示登录入口、面试入口和当前登录状态；未登录用户从主页点击面试入口会进入 `/login`，直接访问 `/interview` 也仍会回到 `/login`。云端历史记录、文件上传和复杂账号能力仍暂缓。
 
 ## 2. 当前阶段
 
 当前分支：
 
 ```text
-develop-login-page
+develop-private-test-version
 ```
 
-当前已经完成的是 MVP 的核心闭环、开发效率优化、登录入口页面壳、入口/主界面路由拆分和 Supabase Auth 账号系统 MVP：
+当前已经完成的是 MVP 的核心闭环、开发效率优化、基础主页框架、登录入口页面壳、入口/主界面路由拆分、Supabase Auth 账号系统 MVP 和内部测试版上线准备文档：
 
 ```text
-访问根路径后进入 /login
+访问根路径后看到基础主页
+主页展示登录入口、面试入口和登录状态
+未登录用户点击主页面试入口会进入 /login
+已登录用户可以从主页进入 /interview
 用户打开 /login 后先看到登录/注册入口页面壳
 新用户可以使用邮箱密码注册
 已注册用户可以使用邮箱密码登录
@@ -61,6 +64,11 @@ develop-login-page
 开发环境独立 Mock 评价按钮
 Mock 评价复用本地历史保存机制
 本地历史记录保存 AI / Mock 来源标记
+内部测试版部署准备文档
+生产环境变量说明
+Supabase Auth URL 配置说明
+部署后 smoke test 清单
+内部测试用户说明和敏感信息提醒
 ```
 
 ## 3. 技术栈
@@ -120,10 +128,16 @@ docs/DEVELOPMENT_TESTING.md
 开发测试说明文档，记录本地开发辅助按钮、测试流程和后续 AI agent 修改边界。
 
 ```text
+docs/INTERNAL_TESTING_RELEASE.md
+```
+
+内部测试版上线准备文档，记录 Vercel 部署建议、生产环境变量、Supabase Auth URL 配置、部署后 smoke test、内部测试 checklist 和敏感信息提醒。
+
+```text
 app/page.js
 ```
 
-Next.js 根路径入口，当前重定向到 `/login`。
+Next.js 基础主页。展示产品简短定位、登录入口、面试入口和当前登录状态；未登录用户点击主页面试入口会进入 `/login`。
 
 ```text
 app/login/page.js
@@ -141,7 +155,7 @@ app/interview/page.js
 proxy.js
 ```
 
-Supabase Auth cookie 刷新和 `/interview` 访问保护。当前只匹配 `/login` 和 `/interview`，不改 DeepSeek API 路由边界。
+Supabase Auth cookie 刷新和 `/interview` 访问保护。当前匹配 `/`、`/login` 和 `/interview`，用于主页和登录页刷新认证状态，并保护面试工作区；不改 DeepSeek API 路由边界。
 
 ```text
 components/LoginEntryShell.js
@@ -443,13 +457,15 @@ http://localhost:3000
 已经完成：
 
 - Next.js 页面结构
+- 根路径 `/` 基础主页
+- 主页展示登录入口、面试入口和登录状态
 - 登录入口页面壳
 - 背景视觉和悬浮体验框布局
 - 邮箱密码注册、登录和登出
 - 登录态保持
 - 未登录访问 `/interview` 时回到 `/login`
 - `/login` 和 `/interview` 前端路由拆分
-- 根路径 `/` 重定向到 `/login`
+- 未登录用户点击主页面试入口会进入 `/login`
 - 登录成功后进入 `/interview` 模拟面试主界面
 - 岗位信息输入框
 - 个人简历输入框
@@ -489,6 +505,12 @@ http://localhost:3000
 - Mock 评价不调用后端 API
 - Mock 评价成功后复用本地历史保存机制
 - 本地历史记录支持 `generationSource` 标记 AI / Mock 来源
+- 内部测试版上线准备文档
+- Vercel 部署准备说明
+- 生产环境变量说明
+- Supabase Auth URL 配置说明
+- 内部测试 checklist
+- 敏感信息提醒
 - 代码分层
 - 中文 file header 和关键逻辑注释
 - 项目协作规范 `AGENTS.md`
@@ -501,7 +523,6 @@ http://localhost:3000
 - 恢复历史 session 到当前页面
 - 历史记录删除、编辑和搜索
 - 数据库或云端同步历史记录
-- 部署配置
 - 用户资料页、OAuth、支付或权限系统
 - 多轮追问
 - 语音或视频面试
@@ -516,27 +537,26 @@ http://localhost:3000
 推荐下一步：
 
 ```text
-阶段 14 已完成。建议先做一次代码审查和本地回归测试，重点确认账号系统没有破坏真实 AI、Mock、本地历史记录、开始新一轮和错误重试流程。
+阶段 16 已完成。下一步建议按 docs/INTERNAL_TESTING_RELEASE.md 完成外部平台部署和生产 smoke test，或启动代码审查 session 检查主页入口与登录保护。
 ```
 
 建议检查：
 
-1. 新邮箱是否可以注册。
-2. 已注册邮箱是否可以登录。
-3. 登录成功后是否进入 `/interview`。
-4. 未登录直接访问 `/interview` 是否回到 `/login`。
-5. 已登录时刷新 `/interview` 是否仍保持登录态。
-6. 登出后是否回到 `/login`，再次访问 `/interview` 是否被拦回登录页。
-7. 登录/注册失败时是否有清楚错误提示，loading 期间是否避免重复提交。
-8. 密码是否没有被写入 localStorage、历史记录、console log 或自定义数据结构。
-9. 代码中是否没有 Supabase `service_role` key。
-10. `/interview` 中真实 AI、Mock、本地历史记录、开始新一轮和错误重试流程是否仍可用。
+1. 访问 `/` 是否看到基础主页，而不是直接进入 `/login`。
+2. 主页是否展示 `/login` 入口和 `/interview` 入口。
+3. 未登录状态下，主页是否显示未登录状态。
+4. 已登录状态下，主页是否显示当前账号信息，例如邮箱。
+5. 未登录时点击主页的 `/interview` 入口是否直接进入 `/login`。
+6. 未登录时直接访问 `/interview` 是否也回到 `/login`。
+7. 已登录时是否可以从主页进入 `/interview`。
+8. `/login` 注册/登录、`/interview` 面试主流程、登出和登录态保持是否仍可用。
+9. 是否没有新增云端历史、文件上传、复杂 landing page 或大范围 UI 重构。
 
-后续可以优先考虑：
+后续可以优先考虑:
 
-- 阶段 14 的代码审查和开发测试回归。
-- 账号系统稳定后，再评估云端历史记录。
-- 优化最终评价 prompt 的评分标准。
+- 按 `docs/INTERNAL_TESTING_RELEASE.md` 完成外部平台部署和生产 smoke test。
+- 代码审查 session 检查阶段 16 主页入口和登录保护。
+- 部署后收集内部测试反馈。
 
 不建议马上做：
 
