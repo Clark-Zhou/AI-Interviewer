@@ -10,7 +10,7 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前版本先验证最小可用闭环。当前已完成基础主页框架、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步计划参考 `temp_pics/main_page_reference.png` 优化主页封面视觉；云端历史记录、文件上传、语音或视频面试仍暂缓。
+当前版本先验证最小可用闭环。当前已完成基础主页框架、主页封面视觉优化、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。云端历史记录、文件上传、语音或视频面试仍暂缓。
 
 ## 当前功能
 
@@ -18,8 +18,7 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 
 - 登录入口页面壳
 - 根路径 `/` 基础主页
-- 主页展示登录入口、面试入口和当前登录状态
-- 主页封面视觉优化参考图：`temp_pics/main_page_reference.png`
+- 主页展示顶栏、hero cover、登录入口、面试入口和当前登录状态
 - `/login` 和 `/interview` 前端路由拆分
 - 邮箱密码注册、登录和登出
 - 登录态保持
@@ -132,7 +131,7 @@ docs/INTERNAL_TESTING_RELEASE.md
 
 ```text
 app/                              Next.js App Router 页面和 API route
-app/page.js                       基础主页，展示登录入口、面试入口和登录状态
+app/page.js                       基础主页，展示顶栏、hero cover、登录入口、面试入口和登录状态
 app/layout.js                     全局布局和 metadata
 app/globals.css                   全局样式
 app/login/page.js                 登录入口页面壳路由

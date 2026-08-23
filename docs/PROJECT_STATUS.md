@@ -10,7 +10,7 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前已经验证核心面试练习闭环，并已完成基础主页框架、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步计划优化主页封面视觉：参考 `temp_pics/main_page_reference.png`，在现有主页上做顶栏和 hero 首屏。云端历史记录、文件上传和复杂账号能力仍暂缓。
+当前已经验证核心面试练习闭环，并已完成基础主页框架、主页封面视觉优化、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。云端历史记录、文件上传和复杂账号能力仍暂缓。
 
 ## 2. 当前阶段
 
@@ -20,11 +20,11 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 develop-private-test-version
 ```
 
-当前已经完成的是 MVP 的核心闭环、开发效率优化、基础主页框架、登录入口页面壳、入口/主界面路由拆分、Supabase Auth 账号系统 MVP 和内部测试版上线准备文档：
+当前已经完成的是 MVP 的核心闭环、开发效率优化、基础主页框架、主页封面视觉优化、登录入口页面壳、入口/主界面路由拆分、Supabase Auth 账号系统 MVP 和内部测试版上线准备文档：
 
 ```text
 访问根路径后看到基础主页
-主页展示登录入口、面试入口和登录状态
+主页展示顶栏、hero cover、登录入口、面试入口和登录状态
 未登录用户点击主页面试入口会进入 /login
 已登录用户可以从主页进入 /interview
 用户打开 /login 后先看到登录/注册入口页面壳
@@ -137,7 +137,7 @@ docs/INTERNAL_TESTING_RELEASE.md
 app/page.js
 ```
 
-Next.js 基础主页。展示产品简短定位、登录入口、面试入口和当前登录状态；未登录用户点击主页面试入口会进入 `/login`。
+Next.js 基础主页。展示产品简短定位、顶栏、青色系 hero cover、登录入口、面试入口和当前登录状态；未登录用户点击主页面试入口会进入 `/login`。
 
 ```text
 app/login/page.js
@@ -458,7 +458,7 @@ http://localhost:3000
 
 - Next.js 页面结构
 - 根路径 `/` 基础主页
-- 主页展示登录入口、面试入口和登录状态
+- 主页展示顶栏、hero cover、登录入口、面试入口和登录状态
 - 登录入口页面壳
 - 背景视觉和悬浮体验框布局
 - 邮箱密码注册、登录和登出
@@ -511,6 +511,7 @@ http://localhost:3000
 - Supabase Auth URL 配置说明
 - 内部测试 checklist
 - 敏感信息提醒
+- 主页封面视觉优化
 - 代码分层
 - 中文 file header 和关键逻辑注释
 - 项目协作规范 `AGENTS.md`
@@ -534,13 +535,7 @@ http://localhost:3000
 
 建议下一步继续小步推进，不要一次做太大。
 
-推荐下一步：
-
-```text
-阶段 17：主页封面视觉优化。参考 temp_pics/main_page_reference.png，在现有主页上做顶栏、大图 hero 和真实入口按钮。
-```
-
-建议检查：
+阶段 17 已完成。建议检查：
 
 1. 主页是否保留顶栏。
 2. 主页首屏是否有大图 / hero cover 区域。
@@ -554,8 +549,6 @@ http://localhost:3000
 后续可以优先考虑:
 
 - 按 `docs/INTERNAL_TESTING_RELEASE.md` 完成外部平台部署和生产 smoke test。
-- 阶段 17：主页封面视觉优化。
-- 阶段 17 完成后，再按 `docs/INTERNAL_TESTING_RELEASE.md` 完成外部平台部署和生产 smoke test。
 
 不建议马上做：
 

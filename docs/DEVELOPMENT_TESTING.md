@@ -43,7 +43,7 @@ process.env.NODE_ENV === 'development'
 
 1. 项目所有者运行 `npm run dev`。
 2. 打开 `http://localhost:3000`。
-3. 确认根路径显示基础主页，而不是直接进入 `/login`。
+3. 确认根路径显示带顶栏和 hero cover 的主页，而不是直接进入 `/login`。
 4. 确认主页展示登录入口、面试入口和未登录状态。
 5. 未登录时点击主页的面试入口，确认进入 `/login`。
 6. 使用新邮箱注册，或使用已注册邮箱登录。
@@ -215,6 +215,7 @@ Supabase Auth 账号系统 MVP 实现后，重点检查：
 - 页面视觉是否参考 `temp_pics/main_page_reference.png`，但没有做像素级硬还原。
 - 是否没有新增假按钮、复杂 landing page 或不可用功能入口。
 - 桌面和移动端是否不遮挡、不溢出、按钮可点击。
+
 ## 常见检查点
 
 开发测试时重点确认：

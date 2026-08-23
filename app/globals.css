@@ -29,56 +29,131 @@ textarea {
   font: inherit;
 }
 
-/* 基础主页：只提供产品入口和登录状态，不做复杂营销页。 */
+/* 基础主页：首屏封面、真实入口和登录状态，不做复杂营销页。 */
 .home-page {
   min-height: 100vh;
-  padding: 48px 16px;
+  background: #f8fafc;
 }
 
-.home-shell {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  box-shadow: 0 24px 64px rgba(17, 24, 39, 0.08);
-  margin: 0 auto;
-  max-width: 960px;
-  padding: 36px;
+.home-hero {
+  background:
+    linear-gradient(105deg, rgba(230, 255, 251, 0.96) 0%, rgba(222, 251, 248, 0.88) 38%, rgba(246, 250, 252, 0.94) 100%),
+    linear-gradient(160deg, transparent 0 50%, rgba(15, 118, 110, 0.12) 50% 100%);
+  min-height: 100vh;
+  overflow: hidden;
 }
 
-.home-header {
-  align-items: flex-start;
+.home-nav {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid rgba(203, 213, 225, 0.7);
   display: flex;
-  gap: 24px;
+  gap: 20px;
   justify-content: space-between;
+  min-height: 84px;
+  padding: 0 min(5vw, 72px);
+  position: relative;
+  z-index: 2;
+}
+
+.home-brand {
+  align-items: center;
+  color: #111827;
+  display: inline-flex;
+  font-size: 18px;
+  font-weight: 800;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.home-brand-mark {
+  align-items: center;
+  background: #0f766e;
+  border-radius: 8px;
+  color: #ffffff;
+  display: inline-flex;
+  font-size: 13px;
+  height: 40px;
+  justify-content: center;
+  width: 40px;
+}
+
+.home-nav-links {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: flex-end;
+}
+
+.home-nav-links a {
+  color: #334155;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.home-nav-links a:hover {
+  color: #0f766e;
+}
+
+.home-hero-grid {
+  align-items: stretch;
+  display: grid;
+  gap: 40px;
+  grid-template-columns: minmax(320px, 0.92fr) minmax(360px, 1.08fr);
+  min-height: calc(100vh - 84px);
+  padding: 52px min(5vw, 72px) 64px;
+}
+
+.home-copy {
+  align-self: center;
+  max-width: 720px;
 }
 
 .home-kicker {
   color: #0f766e;
   font-size: 14px;
   font-weight: 800;
+  letter-spacing: 0;
   margin: 0 0 12px;
 }
 
-.home-header h1 {
-  font-size: 34px;
-  line-height: 1.25;
+.home-copy h1 {
+  color: #0f172a;
+  font-size: 56px;
+  line-height: 1.08;
+  margin: 0 0 24px;
+  max-width: 760px;
+}
+
+.home-lede,
+.home-note {
+  color: #334155;
+  font-size: 17px;
+  line-height: 1.75;
   margin: 0;
-  max-width: 680px;
+  max-width: 620px;
+}
+
+.home-note {
+  color: #64748b;
+  font-size: 15px;
+  margin-top: 12px;
 }
 
 .home-status {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(148, 163, 184, 0.38);
   border-radius: 8px;
-  color: #4b5563;
-  flex-shrink: 0;
-  min-width: 220px;
+  color: #475569;
+  margin-top: 24px;
+  max-width: 460px;
   padding: 14px 16px;
 }
 
 .home-status.logged-in {
-  background: #ecfdf5;
-  border-color: #a7f3d0;
+  background: rgba(236, 253, 245, 0.86);
+  border-color: rgba(16, 185, 129, 0.46);
   color: #047857;
 }
 
@@ -96,27 +171,14 @@ textarea {
   overflow-wrap: anywhere;
 }
 
-.home-summary {
-  border-top: 1px solid #e5e7eb;
-  color: #4b5563;
-  display: grid;
-  gap: 14px;
-  line-height: 1.7;
-  margin-top: 28px;
-  padding-top: 24px;
-}
-
-.home-summary p {
-  margin: 0;
-}
-
 .home-warning {
   background: #fff7ed;
   border: 1px solid #fed7aa;
   border-radius: 8px;
   color: #9a3412;
   line-height: 1.6;
-  margin: 22px 0 0;
+  margin: 18px 0 0;
+  max-width: 560px;
   padding: 12px 14px;
 }
 
@@ -133,26 +195,171 @@ textarea {
   display: inline-flex;
   font-weight: 800;
   justify-content: center;
-  padding: 13px 18px;
+  min-width: 148px;
+  padding: 14px 20px;
   text-decoration: none;
 }
 
 .home-primary-link {
-  background: #2bb8aa;
+  background: #0f766e;
   color: #ffffff;
+  box-shadow: 0 16px 32px rgba(15, 118, 110, 0.22);
 }
 
 .home-primary-link:hover {
-  background: #0f766e;
+  background: #115e59;
 }
 
 .home-secondary-link {
-  background: #111827;
-  color: #ffffff;
+  background: #ffffff;
+  border: 1px solid rgba(15, 118, 110, 0.34);
+  color: #0f766e;
 }
 
 .home-secondary-link:hover {
-  background: #374151;
+  background: #ecfeff;
+}
+
+.home-cover {
+  align-self: center;
+  background:
+    linear-gradient(135deg, rgba(12, 74, 110, 0.2) 0 16%, transparent 16% 100%),
+    linear-gradient(28deg, #d4fbf4 0%, #8de2d8 42%, #f3fbfd 43%, #e0f2fe 100%);
+  border: 1px solid rgba(14, 116, 144, 0.16);
+  border-radius: 8px;
+  box-shadow: 0 34px 90px rgba(15, 82, 98, 0.18);
+  min-height: 560px;
+  overflow: hidden;
+  position: relative;
+}
+
+.home-cover::before {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.34) 0 1px, transparent 1px 100%),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.34) 0 1px, transparent 1px 100%);
+  background-size: 54px 54px;
+  content: '';
+  inset: 0;
+  opacity: 0.5;
+  position: absolute;
+}
+
+.home-cover::after {
+  background: rgba(255, 255, 255, 0.34);
+  content: '';
+  height: 150%;
+  position: absolute;
+  right: 16%;
+  top: -26%;
+  transform: rotate(28deg);
+  width: 160px;
+}
+
+.home-cover-card {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 8px;
+  box-shadow: 0 24px 50px rgba(15, 82, 98, 0.18);
+  position: absolute;
+  z-index: 1;
+}
+
+.home-cover-card-main {
+  bottom: 82px;
+  left: 12%;
+  padding: 24px;
+  width: min(60%, 380px);
+}
+
+.home-cover-card-side {
+  padding: 18px;
+  right: 10%;
+  top: 88px;
+  width: min(38%, 250px);
+}
+
+.home-cover-label {
+  color: #0f766e;
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.home-cover-lines {
+  display: grid;
+  gap: 12px;
+}
+
+.home-cover-lines span {
+  background: #94a3b8;
+  border-radius: 8px;
+  display: block;
+  height: 12px;
+}
+
+.home-cover-lines span:nth-child(1) {
+  background: #0f766e;
+  width: 88%;
+}
+
+.home-cover-lines span:nth-child(2) {
+  background: #38bdf8;
+  width: 64%;
+}
+
+.home-cover-lines span:nth-child(3) {
+  background: #fb7185;
+  width: 48%;
+}
+
+.home-cover-dots {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.home-cover-dots span {
+  background: rgba(15, 118, 110, 0.16);
+  border: 1px solid rgba(15, 118, 110, 0.22);
+  border-radius: 8px;
+  display: block;
+  height: 74px;
+}
+
+.home-cover-dots span:nth-child(2),
+.home-cover-dots span:nth-child(3) {
+  background: rgba(56, 189, 248, 0.16);
+  border-color: rgba(56, 189, 248, 0.22);
+}
+
+.home-cover-nodes {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(3, 54px);
+  left: 13%;
+  position: absolute;
+  top: 104px;
+  transform: rotate(-9deg);
+  z-index: 1;
+}
+
+.home-cover-nodes span {
+  background: rgba(15, 23, 42, 0.68);
+  border: 6px solid rgba(255, 255, 255, 0.78);
+  border-radius: 8px;
+  box-shadow: 0 16px 28px rgba(15, 82, 98, 0.18);
+  display: block;
+  height: 54px;
+}
+
+.home-cover-nodes span:nth-child(2) {
+  background: #0f766e;
+  margin-top: 38px;
+}
+
+.home-cover-nodes span:nth-child(3) {
+  background: #fb7185;
 }
 
 /* 登录入口页壳：承载 Supabase Auth 登录/注册入口。 */
@@ -950,23 +1157,36 @@ button:disabled {
 }
 
 @media (max-width: 720px) {
-  .home-page {
-    padding: 20px 16px;
-  }
-
-  .home-shell {
-    padding: 24px;
-  }
-
-  .home-header {
+  .home-nav {
+    align-items: flex-start;
     flex-direction: column;
+    min-height: auto;
+    padding: 18px 20px;
   }
 
-  .home-header h1 {
-    font-size: 28px;
+  .home-brand {
+    font-size: 16px;
+  }
+
+  .home-nav-links {
+    gap: 16px;
+    justify-content: flex-start;
+  }
+
+  .home-hero-grid {
+    gap: 28px;
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding: 36px 20px 48px;
+  }
+
+  .home-copy h1 {
+    font-size: 36px;
+    line-height: 1.16;
   }
 
   .home-status {
+    max-width: none;
     width: 100%;
   }
 
@@ -977,6 +1197,33 @@ button:disabled {
   .home-primary-link,
   .home-secondary-link {
     width: 100%;
+  }
+
+  .home-cover {
+    min-height: 360px;
+  }
+
+  .home-cover-card-main {
+    bottom: 34px;
+    left: 8%;
+    width: 76%;
+  }
+
+  .home-cover-card-side {
+    right: 8%;
+    top: 34px;
+    width: 48%;
+  }
+
+  .home-cover-nodes {
+    gap: 12px;
+    grid-template-columns: repeat(3, 42px);
+    left: 8%;
+    top: 58px;
+  }
+
+  .home-cover-nodes span {
+    height: 42px;
   }
 
   .entry-hero {
