@@ -10,7 +10,7 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前已经验证核心面试练习闭环，并已完成本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分，以及 Supabase Auth 账号系统 MVP。下一步计划准备内部测试版上线，重点是部署、生产环境变量、Supabase Auth URL 配置、内部测试说明和隐私提醒。云端历史记录、文件上传和复杂账号能力仍暂缓。
+当前已经验证核心面试练习闭环，并已完成本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。当前仓库侧已经补齐部署准备、生产环境变量、Supabase Auth URL 配置、内部测试 checklist 和敏感信息提醒；实际 Vercel 部署、Supabase Dashboard 配置和生产 smoke test 仍需项目所有者在外部平台执行。云端历史记录、文件上传和复杂账号能力仍暂缓。
 
 ## 2. 当前阶段
 
@@ -20,7 +20,7 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 develop-login-page
 ```
 
-当前已经完成的是 MVP 的核心闭环、开发效率优化、登录入口页面壳、入口/主界面路由拆分和 Supabase Auth 账号系统 MVP：
+当前已经完成的是 MVP 的核心闭环、开发效率优化、登录入口页面壳、入口/主界面路由拆分、Supabase Auth 账号系统 MVP 和内部测试版上线准备文档：
 
 ```text
 访问根路径后进入 /login
@@ -61,6 +61,11 @@ develop-login-page
 开发环境独立 Mock 评价按钮
 Mock 评价复用本地历史保存机制
 本地历史记录保存 AI / Mock 来源标记
+内部测试版部署准备文档
+生产环境变量说明
+Supabase Auth URL 配置说明
+部署后 smoke test 清单
+内部测试用户说明和敏感信息提醒
 ```
 
 ## 3. 技术栈
@@ -118,6 +123,12 @@ docs/DEVELOPMENT_TESTING.md
 ```
 
 开发测试说明文档，记录本地开发辅助按钮、测试流程和后续 AI agent 修改边界。
+
+```text
+docs/INTERNAL_TESTING_RELEASE.md
+```
+
+内部测试版上线准备文档，记录 Vercel 部署建议、生产环境变量、Supabase Auth URL 配置、部署后 smoke test、内部测试 checklist 和敏感信息提醒。
 
 ```text
 app/page.js
@@ -489,6 +500,12 @@ http://localhost:3000
 - Mock 评价不调用后端 API
 - Mock 评价成功后复用本地历史保存机制
 - 本地历史记录支持 `generationSource` 标记 AI / Mock 来源
+- 内部测试版上线准备文档
+- Vercel 部署准备说明
+- 生产环境变量说明
+- Supabase Auth URL 配置说明
+- 内部测试 checklist
+- 敏感信息提醒
 - 代码分层
 - 中文 file header 和关键逻辑注释
 - 项目协作规范 `AGENTS.md`
@@ -501,7 +518,6 @@ http://localhost:3000
 - 恢复历史 session 到当前页面
 - 历史记录删除、编辑和搜索
 - 数据库或云端同步历史记录
-- 部署配置
 - 用户资料页、OAuth、支付或权限系统
 - 多轮追问
 - 语音或视频面试
@@ -516,7 +532,7 @@ http://localhost:3000
 推荐下一步：
 
 ```text
-阶段 15：内部测试版上线准备。重点处理部署、生产环境变量、Supabase Auth URL 配置、内部测试 checklist 和敏感信息提醒。
+仓库侧阶段 15 已完成。下一步由项目所有者按 docs/INTERNAL_TESTING_RELEASE.md 在 Vercel 和 Supabase Dashboard 完成外部平台配置，并执行生产 smoke test。
 ```
 
 建议检查：
@@ -530,11 +546,11 @@ http://localhost:3000
 7. 登出后是否回到 `/login`，未登录访问 `/interview` 是否回到 `/login`。
 8. 登录后真实 AI 问题生成和最终评价是否可以正常调用。
 9. 生产环境是否不展示开发 Mock 按钮。
-10. README 或测试说明是否包含“不要输入特别敏感信息”的内部测试提醒。
+10. 内部测试用户是否已收到“本地历史不云同步”和“不要输入特别敏感信息”的提醒。
 
 后续可以优先考虑:
 
-- 阶段 15：内部测试版上线准备。
+- 按 `docs/INTERNAL_TESTING_RELEASE.md` 完成外部平台部署和生产 smoke test。
 - 部署后收集内部测试反馈。
 - 云端历史记录方案设计。
 

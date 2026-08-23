@@ -14,13 +14,13 @@
 
 ## 当前推荐方向
 
-当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分，以及 Supabase Auth 账号系统 MVP。下一步建议准备内部测试版上线：部署、生产环境变量、Supabase Auth URL 配置、内部测试说明和隐私提醒。
+当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步建议由项目所有者按文档完成 Vercel / Supabase 外部平台配置，并执行生产 smoke test。
 
 原因：
 
 - 阶段 14 已完成并合并到 `main`，当前 `/login` 支持注册和登录，`/interview` 已有登录保护和登出入口。
-- 当前产品已经可以进入小范围内部测试准备阶段。
-- 上线准备优先处理部署配置、环境变量、Supabase Auth 回调地址和隐私提醒。
+- 阶段 15 的仓库侧准备已经完成，新增了内部测试版部署和 smoke test 文档。
+- 上线准备文档已经覆盖部署配置、环境变量、Supabase Auth 回调地址和隐私提醒。
 - 下一步仍不建议马上做云端历史记录，先让真实用户能打开网站并完整走通。
 
 ## 阶段计划
@@ -39,17 +39,17 @@
 - [x] 阶段 12：登录入口页面壳
 - [x] 阶段 13：登录入口和面试主界面路由拆分
 - [x] 阶段 14：Supabase Auth 账号系统 MVP
-- [ ] 阶段 15：内部测试版上线准备
+- [x] 阶段 15：内部测试版上线准备
 
 ## 当前优先级
 
 当前优先级：
 
-1. 做阶段 15：内部测试版上线准备。
-2. 准备 Vercel 或选定部署平台。
-3. 配置生产环境变量和 Supabase Auth URL。
-4. 补充内部测试说明和敏感信息提醒。
-5. 部署后做生产 smoke test。
+1. 项目所有者按 `docs/INTERNAL_TESTING_RELEASE.md` 准备 Vercel 或选定部署平台。
+2. 配置生产环境变量和 Supabase Auth URL。
+3. 部署后做生产 smoke test。
+4. 给少量内部测试用户发送测试说明和敏感信息提醒。
+5. 收集内部测试反馈后，再决定是否规划云端历史记录或其他下一阶段。
 
 推荐当前功能分支：
 
@@ -798,7 +798,7 @@ createInterviewSessionId()
 
 ## 阶段 15：内部测试版上线准备
 
-阶段状态：计划中。当前目标是把已完成的核心 MVP 和 Supabase Auth 账号系统准备成可部署、可给少量同学试用的内部测试版。这个阶段优先解决部署、环境变量、Supabase Auth URL 配置、内部测试说明和隐私提醒，不新增云端历史记录。
+阶段状态：已完成。当前已经把已完成的核心 MVP 和 Supabase Auth 账号系统准备成可部署、可给少量同学试用的内部测试版文档。仓库侧已补齐部署、环境变量、Supabase Auth URL 配置、内部测试说明和隐私提醒；实际 Vercel 部署、Supabase Dashboard 配置和生产 smoke test 需要项目所有者在外部平台执行。
 
 ### 阶段目标
 
@@ -822,6 +822,7 @@ createInterviewSessionId()
 - 隐私和敏感信息提醒。
 - 部署后 smoke test / 回归测试清单。
 - README、PROJECT_STATUS、ROADMAP 和 DEVELOPMENT_TESTING 的必要同步。
+- 新增 `docs/INTERNAL_TESTING_RELEASE.md`，集中放内部测试版上线步骤。
 
 本阶段暂不包含：
 
@@ -850,6 +851,12 @@ createInterviewSessionId()
    - 保留本地开发地址：`http://localhost:3000/**`
 5. 准备一个测试邮箱，用于注册、登录和验证邮件流程。
 
+详细操作清单见：
+
+```text
+docs/INTERNAL_TESTING_RELEASE.md
+```
+
 ### 内部测试提醒文案
 
 给同学或内部测试用户的说明建议：
@@ -875,6 +882,7 @@ createInterviewSessionId()
 - Mock 流程在开发环境仍可用，生产环境不展示开发 Mock 按钮。
 - 本地历史记录仍可保存和查看。
 - README 或测试文档中有内部测试和隐私提醒。
+- `docs/INTERNAL_TESTING_RELEASE.md` 包含部署准备、生产环境变量、Supabase Auth URL 配置、内部测试 checklist、敏感信息提醒和常见问题。
 
 ### 代码审查关注点
 
@@ -885,6 +893,7 @@ createInterviewSessionId()
 - 是否没有把部署准备误扩展成云端历史记录或数据库改造。
 - 是否没有破坏本地开发流程。
 - 文档里的部署步骤、环境变量和隐私提醒是否清楚。
+
 ## 暂缓事项
 
 暂不优先做：
@@ -914,10 +923,10 @@ createInterviewSessionId()
 你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“[阶段名称]”阶段。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md；如果本阶段涉及开发测试流程，也阅读 docs/DEVELOPMENT_TESTING.md。然后按 ROADMAP 的任务拆分和验收标准实现。只有在需要改变产品范围或用户流程时才阅读 docs/PRD.md。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
 ```
 
-当前阶段 15 计划中，建议启动阶段开发或部署准备 session。可以这样启动：
+当前阶段 15 的仓库侧准备已完成，建议启动部署执行或生产 smoke test session。可以这样启动：
 
 ```text
-你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“阶段 15：内部测试版上线准备”。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/DEVELOPMENT_TESTING.md。请优先完善部署准备、生产环境变量说明、Supabase Auth URL 配置说明、内部测试 checklist 和敏感信息提醒。不要做云端历史记录、数据库 schema、文件上传、支付或大范围 UI 重构。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
+你是 AI Interview Simulator 的部署测试 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/DEVELOPMENT_TESTING.md 和 docs/INTERNAL_TESTING_RELEASE.md。请按 docs/INTERNAL_TESTING_RELEASE.md 协助项目所有者完成 Vercel/Supabase 外部平台配置检查和生产 smoke test 记录。不要做云端历史记录、数据库 schema、文件上传、支付或大范围 UI 重构；不要安装依赖或启动 dev server，除非我明确要求。
 ```
 
 代码审查 session 用于检查阶段开发结果:

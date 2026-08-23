@@ -16,6 +16,7 @@
 - `proxy.js`：Supabase Auth cookie 刷新和 `/interview` 访问保护。
 - `app/api/generate-questions/route.js`：生成问题的后端 API。
 - `app/api/evaluate-interview/route.js`：生成最终评价的后端 API。
+- `docs/INTERNAL_TESTING_RELEASE.md`：内部测试版部署准备和生产 smoke test 清单。
 
 ## 当前开发辅助能力
 
@@ -170,6 +171,7 @@ Supabase Auth 账号系统 MVP 实现后，重点检查：
 
 内部测试版上线准备完成后，重点检查：
 
+- 已阅读 `docs/INTERNAL_TESTING_RELEASE.md`。
 - Vercel 或选定部署平台可以成功构建和部署。
 - 部署环境已配置 `DEEPSEEK_API_KEY`、`DEEPSEEK_MODEL`、`NEXT_PUBLIC_SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`。
 - Supabase Auth 的 Site URL 和 Redirect URLs 包含生产域名，并保留 `http://localhost:3000/**`。
@@ -180,6 +182,9 @@ Supabase Auth 账号系统 MVP 实现后，重点检查：
 - 生产环境不展示开发 Mock 按钮。
 - 本地历史记录仍可保存和查看。
 - README 或测试说明中包含“不要输入特别敏感信息”的内部测试提醒。
+- 如果无法访问 Vercel 或 Supabase Dashboard，应至少完成本地 `npm run build`，并把未执行的外部平台 smoke test 明确记录给项目所有者。
+
+生产 smoke test 的详细步骤见 `docs/INTERNAL_TESTING_RELEASE.md`。
 ## 常见检查点
 
 开发测试时重点确认：
