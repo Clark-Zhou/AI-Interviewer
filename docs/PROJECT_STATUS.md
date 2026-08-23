@@ -10,7 +10,7 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前已经验证核心面试练习闭环，并已完成基础主页框架、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。根路径 `/` 现在展示登录入口、面试入口和当前登录状态；未登录用户从主页点击面试入口会进入 `/login`，直接访问 `/interview` 也仍会回到 `/login`。云端历史记录、文件上传和复杂账号能力仍暂缓。
+当前已经验证核心面试练习闭环，并已完成基础主页框架、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步计划优化主页封面视觉：参考 `temp_pics/main_page_reference.png`，在现有主页上做顶栏和 hero 首屏。云端历史记录、文件上传和复杂账号能力仍暂缓。
 
 ## 2. 当前阶段
 
@@ -537,26 +537,25 @@ http://localhost:3000
 推荐下一步：
 
 ```text
-阶段 16 已完成。下一步建议按 docs/INTERNAL_TESTING_RELEASE.md 完成外部平台部署和生产 smoke test，或启动代码审查 session 检查主页入口与登录保护。
+阶段 17：主页封面视觉优化。参考 temp_pics/main_page_reference.png，在现有主页上做顶栏、大图 hero 和真实入口按钮。
 ```
 
 建议检查：
 
-1. 访问 `/` 是否看到基础主页，而不是直接进入 `/login`。
-2. 主页是否展示 `/login` 入口和 `/interview` 入口。
-3. 未登录状态下，主页是否显示未登录状态。
-4. 已登录状态下，主页是否显示当前账号信息，例如邮箱。
-5. 未登录时点击主页的 `/interview` 入口是否直接进入 `/login`。
-6. 未登录时直接访问 `/interview` 是否也回到 `/login`。
-7. 已登录时是否可以从主页进入 `/interview`。
-8. `/login` 注册/登录、`/interview` 面试主流程、登出和登录态保持是否仍可用。
-9. 是否没有新增云端历史、文件上传、复杂 landing page 或大范围 UI 重构。
+1. 主页是否保留顶栏。
+2. 主页首屏是否有大图 / hero cover 区域。
+3. Hero 区域是否保留 `/login` 和 `/interview` 两个真实入口。
+4. 是否显示登录状态；已登录时是否显示必要账号信息。
+5. 未登录点击主页 `/interview` 入口是否进入 `/login`。
+6. 已登录点击主页 `/interview` 入口是否进入 `/interview`。
+7. 页面视觉是否参考 `temp_pics/main_page_reference.png`，但没有做像素级硬还原。
+8. 是否没有新增假按钮、复杂 landing page 或不可用功能入口。
 
 后续可以优先考虑:
 
 - 按 `docs/INTERNAL_TESTING_RELEASE.md` 完成外部平台部署和生产 smoke test。
-- 代码审查 session 检查阶段 16 主页入口和登录保护。
-- 部署后收集内部测试反馈。
+- 阶段 17：主页封面视觉优化。
+- 阶段 17 完成后，再按 `docs/INTERNAL_TESTING_RELEASE.md` 完成外部平台部署和生产 smoke test。
 
 不建议马上做：
 

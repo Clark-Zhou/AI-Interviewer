@@ -59,9 +59,10 @@ The product uses a basic homepage as the first product entry. Supabase Auth prot
 
 MVP behavior:
 
-- Show a `/` homepage with basic product entry information.
-- Show `/login` and `/interview` entry points on the homepage.
+- Show a `/` homepage with basic product entry information and a polished first-screen hero.
+- Show `/login` and `/interview` entry points on the homepage hero.
 - Show whether the user is logged in; if logged in, show basic account information such as email.
+- Keep homepage navigation limited to real available destinations; do not show fake future-feature buttons.
 - Support email and password signup on `/login`.
 - Support email and password login on `/login`.
 - Keep the user signed in after refresh.

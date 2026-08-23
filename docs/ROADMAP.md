@@ -14,13 +14,14 @@
 
 ## 当前推荐方向
 
-当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成基础主页框架、本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步建议按 `docs/INTERNAL_TESTING_RELEASE.md` 完成外部平台部署和生产 smoke test。
+当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成基础主页框架、本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步建议优化主页封面视觉：参考 `temp_pics/main_page_reference.png`，在现有主页上做顶栏和 hero 首屏。
 
 原因：
 
-- 阶段 16 已完成，根路径 `/` 现在展示基础主页、登录入口、面试入口和登录状态。
-- 主页只做基础框架，没有扩展成复杂营销页，也没有新增云端历史、文件上传等大功能。
-- `/interview` 仍必须保持受保护，未登录用户不能进入。
+- 阶段 16 已完成，根路径 `/` 已经有基础主页、登录入口、面试入口和登录状态。
+- 在内测或部署前，主页首屏需要更像一个产品封面。
+- 参考图提供了顶栏、大图和按钮位置的方向，但本阶段不做复杂 landing page。
+- 当前只有 `/login`、`/interview` 和登录状态是真实入口，其他未来按钮先不做。
 
 ## 阶段计划
 
@@ -40,19 +41,22 @@
 - [x] 阶段 14：Supabase Auth 账号系统 MVP
 - [x] 阶段 15：内部测试版上线准备
 - [x] 阶段 16：基础主页框架
+- [ ] 阶段 17：主页封面视觉优化
 
 ## 当前优先级
 
 当前优先级：
 
-1. 按 `docs/INTERNAL_TESTING_RELEASE.md` 完成外部平台部署和生产 smoke test。
-2. 代码审查 session 检查阶段 16 主页入口、登录状态展示和 `/interview` 保护。
-3. 收集内部测试反馈后，再决定是否规划云端历史记录或其他下一阶段。
+1. 在当前分支完成阶段 17：主页封面视觉优化。
+2. 参考 `temp_pics/main_page_reference.png` 的顶栏、大图 hero 和按钮结构。
+3. 保留当前真实入口：`/login`、`/interview` 和登录状态显示。
+4. 不新增未来功能按钮、复杂 landing page 或大范围业务改动。
+5. 确认 `/login`、`/interview`、认证状态和面试主流程不受影响。
 
 推荐当前功能分支：
 
 ```text
-develop-private-test-version
+optimiaze-main-page
 ```
 
 ## 阶段 6：历史记录初始化
@@ -976,6 +980,95 @@ docs/INTERNAL_TESTING_RELEASE.md
 - 是否没有破坏 Supabase Auth、DeepSeek API、本地历史记录或开发 Mock 流程。
 - README、PROJECT_STATUS、DEVELOPMENT_TESTING 和 PRD 是否同步了新的入口流程。
 
+## 阶段 17：主页封面视觉优化
+
+阶段状态：计划中。当前目标是在已完成的基础主页上优化首屏视觉，让主页更像一个可展示的产品入口。参考图路径为 `temp_pics/main_page_reference.png`。本阶段只做主页首屏视觉和入口呈现，不新增复杂功能。
+
+### 参考图
+
+- 参考图路径：`temp_pics/main_page_reference.png`。
+- 参考图特征：有顶栏、有大图 hero、有大图中的主要按钮。
+- 参考图只用于布局气质和首屏结构参考，不要求像素级还原。
+
+### 阶段目标
+
+- 主页保留顶栏。
+- 主页首屏增加一个大图 / hero cover 区域。
+- 大图区域内保留当前真实可用入口：`/login` 和 `/interview`。
+- 保留登录状态 / 账号信息显示。
+- 未登录用户点击主页 `/interview` 入口仍进入 `/login`。
+- 已登录用户可以从主页进入 `/interview`。
+- 整体风格以青色为主，和 AI、面试、工作、求职准备有隐约关联，但不要太直白。
+
+### 视觉方向
+
+本阶段建议视觉方向：
+
+- 青色或青绿色为主色，但避免整页只有单一青色。
+- Hero 图像可以带有抽象的工作流、光线、桌面、准备、数据、对话或职业成长意象。
+- 避免过度直白的西装面试官、握手、简历图标堆叠、夸张机器人等素材。
+- 页面应显得清爽、可信、轻量，不要像模板化 SaaS 营销页。
+- 按钮只保留当前真实可用入口；未来功能按钮先不要做出来。
+
+### MVP 范围
+
+本阶段建议包含：
+
+- 调整 `app/page.js` 的主页结构。
+- 调整 `app/globals.css` 中主页相关样式。
+- 顶栏保留产品名和必要入口，不做复杂导航。
+- Hero 区域包含主标题、简短说明、登录/注册入口、进入面试入口和登录状态。
+- 如果使用图片资源，应使用项目内可追踪资源或后续明确的图片路径；不要引用本地临时绝对路径。
+- 更新中文 file header 或相关注释。
+
+本阶段暂不包含：
+
+- 生成或接入最终 hero 图片。
+- 复杂 landing page 多 section。
+- 假的未来功能按钮。
+- 用户资料页。
+- 云端历史记录。
+- 文件上传。
+- 支付、订阅或额度系统。
+- 改动 DeepSeek API、prompt、Supabase Auth 逻辑或历史记录数据结构。
+
+### 任务拆分建议
+
+1. 先阅读 `README.md`、`AGENTS.md`、`docs/PROJECT_STATUS.md`、`docs/ROADMAP.md`、`docs/PRD.md` 和 `docs/DEVELOPMENT_TESTING.md`。
+2. 查看参考图 `temp_pics/main_page_reference.png`，理解“顶栏 + 大图 hero + 大图中的按钮”的首屏结构。
+3. 检查当前 `app/page.js` 的基础主页结构和 `app/globals.css` 的主页样式。
+4. 优化主页首屏布局，但保留当前 `/login`、`/interview` 和登录状态逻辑。
+5. 未登录点击主页 `/interview` 入口仍进入 `/login`，不要破坏 `/interview` 路由保护。
+6. 不新增不可用按钮；如果需要暗示未来能力，用非按钮文案或留白，不做可点击假入口。
+7. 更新相关文档和测试点。
+
+### 验收标准
+
+阶段 17 完成时，应满足：
+
+- 主页有清晰顶栏。
+- 主页首屏有大图 / hero cover 区域。
+- Hero 区域保留 `/login` 和 `/interview` 真实入口。
+- 页面显示登录状态；已登录时显示必要账号信息，例如邮箱。
+- 未登录点击主页 `/interview` 入口进入 `/login`。
+- 已登录点击主页 `/interview` 入口进入 `/interview`。
+- 视觉风格参考 `temp_pics/main_page_reference.png` 的首屏结构，但不要求像素级还原。
+- 风格以青色为主，并与面试、工作或职业准备有隐约关联，不直白堆砌面试元素。
+- 没有新增假按钮、复杂 landing page、多余功能入口或大范围业务改动。
+- `/login`、`/interview`、Supabase Auth、DeepSeek API、本地历史记录和开发 Mock 流程不受影响。
+
+### 代码审查关注点
+
+代码审查 session 应重点检查：
+
+- 是否参考了 `temp_pics/main_page_reference.png` 的顶栏、hero 和按钮结构。
+- 是否只优化主页首屏，没有做复杂 landing page。
+- 是否没有新增不可用按钮或假功能入口。
+- 未登录与已登录点击 `/interview` 入口的行为是否符合预期。
+- 登录状态显示是否不泄露敏感信息。
+- 移动端和桌面端是否不出现明显遮挡、溢出或按钮不可点击。
+- 是否没有破坏 `/login`、`/interview`、Supabase Auth、DeepSeek API、本地历史记录或开发 Mock 流程。
+- 相关文档是否同步，尤其是参考图路径和阶段范围。
 ## 暂缓事项
 
 暂不优先做：
@@ -1005,10 +1098,10 @@ docs/INTERNAL_TESTING_RELEASE.md
 你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“[阶段名称]”阶段。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md；如果本阶段涉及开发测试流程，也阅读 docs/DEVELOPMENT_TESTING.md。然后按 ROADMAP 的任务拆分和验收标准实现。只有在需要改变产品范围或用户流程时才阅读 docs/PRD.md。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
 ```
 
-当前阶段 16 已完成，建议启动代码审查 session 或部署测试 session。代码审查 session 可以这样启动：
+当前阶段 17 计划中，建议启动阶段开发 session。可以这样启动：
 
 ```text
-你是 AI Interview Simulator 的代码审查 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/PRD.md、docs/DEVELOPMENT_TESTING.md，然后以 review 姿态检查阶段 16：基础主页框架的当前 diff。重点检查根路径 / 是否显示基础主页，/login 和 /interview 入口是否保留，未登录用户是否不能进入 /interview，登录状态展示是否不泄露敏感信息，以及现有注册登录、面试主流程、登出和登录态保持是否没有被破坏。
+你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“阶段 17：主页封面视觉优化”。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/PRD.md、docs/DEVELOPMENT_TESTING.md，并参考 temp_pics/main_page_reference.png。请在现有主页基础上优化首屏视觉：保留顶栏，增加大图 / hero cover 区域，在 hero 中保留真实可用的 /login 和 /interview 入口以及登录状态显示。整体风格以青色为主，和 AI、面试、工作或求职准备有隐约关联，但不要太直白。不要新增假按钮、复杂 landing page、云端历史记录、文件上传、支付或大范围业务改动；不要安装依赖。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
 ```
 
 代码审查 session 用于检查阶段开发结果:
