@@ -10,7 +10,7 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前已经验证核心面试练习闭环，并已完成本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。当前仓库侧已经补齐部署准备、生产环境变量、Supabase Auth URL 配置、内部测试 checklist 和敏感信息提醒；实际 Vercel 部署、Supabase Dashboard 配置和生产 smoke test 仍需项目所有者在外部平台执行。云端历史记录、文件上传和复杂账号能力仍暂缓。
+当前已经验证核心面试练习闭环，并已完成本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步计划先优化产品入口：将根路径 `/` 做成基础主页，保留登录入口、面试入口和登录状态展示。云端历史记录、文件上传和复杂账号能力仍暂缓。
 
 ## 2. 当前阶段
 
@@ -532,27 +532,26 @@ http://localhost:3000
 推荐下一步：
 
 ```text
-仓库侧阶段 15 已完成。下一步由项目所有者按 docs/INTERNAL_TESTING_RELEASE.md 在 Vercel 和 Supabase Dashboard 完成外部平台配置，并执行生产 smoke test。
+阶段 16：基础主页框架。根路径 / 显示主页，保留 /login 和 /interview 入口，并显示登录状态；未登录用户点击主页 /interview 入口会进入 /login，直接访问 /interview 也会回到 /login。
 ```
 
 建议检查：
 
-1. Vercel 或选定部署平台是否可以成功构建和部署。
-2. 部署环境是否配置 `DEEPSEEK_API_KEY`、`DEEPSEEK_MODEL`、`NEXT_PUBLIC_SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`。
-3. Supabase Auth 的 Site URL 和 Redirect URLs 是否包含生产域名。
-4. Supabase Auth 是否仍保留 `http://localhost:3000/**` 用于本地开发。
-5. 生产环境新用户是否可以注册，已注册用户是否可以登录。
-6. 生产环境刷新 `/interview` 后是否仍保持登录态。
-7. 登出后是否回到 `/login`，未登录访问 `/interview` 是否回到 `/login`。
-8. 登录后真实 AI 问题生成和最终评价是否可以正常调用。
-9. 生产环境是否不展示开发 Mock 按钮。
-10. 内部测试用户是否已收到“本地历史不云同步”和“不要输入特别敏感信息”的提醒。
+1. 访问 `/` 是否看到基础主页，而不是直接进入 `/login`。
+2. 主页是否展示 `/login` 入口和 `/interview` 入口。
+3. 未登录状态下，主页是否显示未登录状态。
+4. 已登录状态下，主页是否显示当前账号信息，例如邮箱。
+5. 未登录时点击主页的 `/interview` 入口是否直接进入 `/login`。
+6. 未登录时直接访问 `/interview` 是否也回到 `/login`。
+7. 已登录时是否可以从主页进入 `/interview`。
+8. `/login` 注册/登录、`/interview` 面试主流程、登出和登录态保持是否仍可用。
+9. 是否没有新增云端历史、文件上传、复杂 landing page 或大范围 UI 重构。
 
 后续可以优先考虑:
 
-- 按 `docs/INTERNAL_TESTING_RELEASE.md` 完成外部平台部署和生产 smoke test。
+- 阶段 16：基础主页框架。
+- 阶段 16 完成后，再按 `docs/INTERNAL_TESTING_RELEASE.md` 完成外部平台部署和生产 smoke test。
 - 部署后收集内部测试反馈。
-- 云端历史记录方案设计。
 
 不建议马上做：
 

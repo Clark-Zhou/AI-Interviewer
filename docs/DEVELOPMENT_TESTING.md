@@ -185,6 +185,18 @@ Supabase Auth 账号系统 MVP 实现后，重点检查：
 - 如果无法访问 Vercel 或 Supabase Dashboard，应至少完成本地 `npm run build`，并把未执行的外部平台 smoke test 明确记录给项目所有者。
 
 生产 smoke test 的详细步骤见 `docs/INTERNAL_TESTING_RELEASE.md`。
+## 阶段 16 检查点
+
+基础主页框架实现后，重点检查：
+
+- 访问 `/` 显示基础主页，而不是直接跳到 `/login`。
+- 主页展示 `/login` 入口和 `/interview` 入口。
+- 未登录状态下，主页显示未登录状态。
+- 已登录状态下，主页显示当前账号信息，例如邮箱。
+- 未登录时点击主页的 `/interview` 入口会直接进入 `/login`；未登录直接访问 `/interview` 也会回到 `/login`。
+- 已登录时可以从主页进入 `/interview`。
+- `/login` 注册/登录、`/interview` 面试主流程、登出和登录态保持仍可用。
+- 生产环境不展示开发 Mock 按钮，开发环境 Mock 流程不受影响。
 ## 常见检查点
 
 开发测试时重点确认：
