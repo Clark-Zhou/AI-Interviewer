@@ -10,7 +10,7 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前版本先验证最小可用闭环。当前已完成基础主页框架、主页封面视觉优化、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。云端历史记录、文件上传、语音或视频面试仍暂缓。
+当前版本先验证最小可用闭环。当前已完成基础主页框架、主页封面视觉优化、主页登录流修正、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。云端历史记录、文件上传、语音或视频面试仍暂缓。
 
 ## 当前功能
 
@@ -18,12 +18,13 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 
 - 登录入口页面壳
 - 根路径 `/` 基础主页
-- 主页展示顶栏、hero cover、登录入口、面试入口和当前登录状态
+- 主页展示顶栏、hero cover、登录入口或登出入口、面试入口和当前登录状态
 - `/login` 和 `/interview` 前端路由拆分
 - 邮箱密码注册、登录和登出
 - 登录态保持
 - 未登录访问 `/interview` 时回到 `/login`
-- 登录成功后进入 `/interview` 模拟面试主界面
+- 登录或注册成功后回到主页 `/`
+- 已登录用户可从主页进入 `/interview` 模拟面试主界面
 - 输入岗位 JD
 - 输入个人简历
 - 前端空输入校验
@@ -131,7 +132,7 @@ docs/INTERNAL_TESTING_RELEASE.md
 
 ```text
 app/                              Next.js App Router 页面和 API route
-app/page.js                       基础主页，展示顶栏、hero cover、登录入口、面试入口和登录状态
+app/page.js                       基础主页，展示顶栏、hero cover、登录入口或登出入口、面试入口和登录状态
 app/layout.js                     全局布局和 metadata
 app/globals.css                   全局样式
 app/login/page.js                 登录入口页面壳路由
@@ -141,6 +142,7 @@ app/api/evaluate-interview/       生成最终评价 API
 proxy.js                          Supabase Auth cookie 刷新和 /interview 访问保护
 
 components/LoginEntryShell.js     登录/注册入口页面壳
+components/HomeSignOutButton.js   主页已登录状态下的登出按钮
 components/AuthStatusBar.js       当前账号展示和登出入口
 components/InterviewSimulator.js  主前端组件
 
@@ -210,9 +212,9 @@ components/InterviewSimulator.js
 2. 未登录时确认主页显示未登录状态，并展示登录入口和面试入口。
 3. 点击主页的面试入口，确认会进入 `/login`。
 4. 使用新邮箱注册，或使用已注册邮箱登录。
-5. 登录成功后进入 `/interview`。
-6. 回到 `/`，确认主页显示当前账号信息，并且可以从主页进入 `/interview`。
-7. 再次登录或直接访问 `/interview`，确认登录态仍可用。
+5. 登录或注册成功后回到 `/`。
+6. 确认主页显示当前账号信息，把登录入口替换为 `登出`，并且可以从主页进入 `/interview`。
+7. 在主页点击 `登出` 后确认回到未登录状态；再次登录或直接访问 `/interview`，确认登录态和路由保护仍可用。
 8. 点击 `填入示例 JD/简历`。
 9. 点击 `生成面试问题`。
 10. 等待问题生成。

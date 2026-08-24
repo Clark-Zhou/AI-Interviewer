@@ -14,13 +14,13 @@
 
 ## 当前推荐方向
 
-当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成基础主页框架、主页封面视觉优化、本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步建议先做阶段 18：修正主页登录流，让用户登录后回到主页，并让主页已登录状态直接提供登出入口。
+当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成基础主页框架、主页封面视觉优化、主页登录流修正、本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步建议先做阶段 18 的代码审查，并按 `docs/INTERNAL_TESTING_RELEASE.md` 做部署和生产 smoke test。
 
 原因：
 
 - 阶段 17 已完成，根路径 `/` 已经有顶栏、青色系 hero cover、登录入口、面试入口和登录状态。
-- 当前发现登录流需要小修：登录成功后应回到主页，而不是直接进入 `/interview`。
-- 主页已登录时应把登录入口替换为登出入口，并继续显示当前账号邮箱。
+- 阶段 18 已完成：登录或注册成功后回到主页 `/`，不再直接进入 `/interview`。
+- 主页已登录时会把登录入口替换为登出入口，并继续显示当前账号邮箱。
 - 当前只有 `/login`、`/interview`、登录状态和登出是真实入口，其他未来按钮先不做。
 
 ## 阶段计划
@@ -42,17 +42,17 @@
 - [x] 阶段 15：内部测试版上线准备
 - [x] 阶段 16：基础主页框架
 - [x] 阶段 17：主页封面视觉优化
-- [ ] 阶段 18：主页登录流修正
+- [x] 阶段 18：主页登录流修正
 
 ## 当前优先级
 
 当前优先级：
 
-1. 完成阶段 18：主页登录流修正。
-2. 登录或注册成功后返回根路径 `/`，不要直接进入 `/interview`。
-3. 主页已登录时展示当前账号邮箱，并把登录入口替换为 `登出`。
-4. 未登录点击主页面试入口仍进入 `/login`；已登录点击主页面试入口进入 `/interview`。
-5. 不新增未来功能按钮、复杂 landing page、账号资料页或大范围业务改动。
+1. 对阶段 18 进行代码审查，重点检查登录/注册成功跳转、主页登出和入口行为。
+2. 按 `docs/INTERNAL_TESTING_RELEASE.md` 做部署和生产 smoke test。
+3. 继续保留当前真实入口：`/login`、`/interview`、登录状态和登出。
+4. 不新增未来功能按钮、复杂 landing page、账号资料页或大范围业务改动。
+5. 确认 `/interview` 路由保护、Supabase Auth、DeepSeek API、本地历史记录和开发 Mock 流程不受影响。
 
 推荐当前功能分支：
 
@@ -1073,7 +1073,7 @@ docs/INTERNAL_TESTING_RELEASE.md
 
 ## 阶段 18：主页登录流修正
 
-阶段状态：未完成。当前发现阶段 17 后的入口行为还不完全符合新的产品期望：登录成功后仍直接进入 `/interview`，主页已登录状态也仍保留登录入口。本阶段只做登录流和主页入口的小修正。
+阶段状态：已完成。当前已经修正阶段 17 后的入口行为：登录或注册成功后回到主页 `/`，主页已登录状态把登录入口替换为可用的 `登出`。本阶段只做登录流和主页入口的小修正。
 
 ### 阶段目标
 
@@ -1169,13 +1169,7 @@ docs/INTERNAL_TESTING_RELEASE.md
 你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“[阶段名称]”阶段。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md；如果本阶段涉及开发测试流程，也阅读 docs/DEVELOPMENT_TESTING.md。然后按 ROADMAP 的任务拆分和验收标准实现。只有在需要改变产品范围或用户流程时才阅读 docs/PRD.md。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
 ```
 
-当前建议先启动阶段开发 session 完成阶段 18。可以这样启动：
-
-```text
-你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“阶段 18：主页登录流修正”。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md 和 docs/DEVELOPMENT_TESTING.md。重点实现：登录或注册成功后回到主页 `/`；主页已登录时显示当前账号邮箱并把登录入口替换为可用的 `登出`；未登录点击主页面试入口仍进入 `/login`；已登录点击主页面试入口进入 `/interview`。不要安装依赖；不要新增复杂账号资料页、OAuth、云端历史记录或假按钮。完成后按 AGENTS.md 的分档收尾规则更新必要文档，并说明测试情况。
-```
-
-阶段 18 完成后，代码审查可以这样启动：
+当前阶段 18 已完成，建议先启动代码审查 session。可以这样启动：
 
 ```text
 你是 AI Interview Simulator 的代码审查 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/DEVELOPMENT_TESTING.md，然后以 review 姿态检查阶段 18 的当前 diff。重点检查登录/注册成功后是否回到主页 `/`，主页已登录时是否显示账号邮箱并提供真正可用的 `登出`，主页未登录时点击面试入口是否进入 `/login`，已登录时点击面试入口是否进入 `/interview`，以及是否没有破坏 `/interview` 路由保护、Supabase Auth、DeepSeek API、本地历史记录和开发 Mock 流程。

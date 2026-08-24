@@ -92,8 +92,25 @@ textarea {
   text-decoration: none;
 }
 
-.home-nav-links a:hover {
+.home-nav-links a:hover,
+.home-nav-sign-out:hover {
   color: #0f766e;
+}
+
+button.home-nav-sign-out {
+  background: transparent;
+  color: #334155;
+  font-weight: 800;
+  padding: 0;
+}
+
+button.home-nav-sign-out:hover {
+  background: transparent;
+  color: #0f766e;
+}
+
+button.home-nav-sign-out:disabled {
+  color: #64748b;
 }
 
 .home-hero-grid {
@@ -218,6 +235,24 @@ textarea {
 
 .home-secondary-link:hover {
   background: #ecfeff;
+}
+
+button.home-secondary-link:hover {
+  background: #ecfeff;
+  color: #0f766e;
+}
+
+.home-sign-out {
+  align-items: center;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.home-sign-out-error {
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .home-cover {
@@ -1210,6 +1245,10 @@ button:disabled {
 
   .home-actions {
     flex-direction: column;
+  }
+
+  .home-sign-out {
+    width: 100%;
   }
 
   .home-primary-link,

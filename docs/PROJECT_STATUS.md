@@ -10,7 +10,7 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前已经验证核心面试练习闭环，并已完成基础主页框架、主页封面视觉优化、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。云端历史记录、文件上传和复杂账号能力仍暂缓。
+当前已经验证核心面试练习闭环，并已完成基础主页框架、主页封面视觉优化、主页登录流修正、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。云端历史记录、文件上传和复杂账号能力仍暂缓。
 
 ## 2. 当前阶段
 
@@ -20,17 +20,18 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 optimiaze-main-page
 ```
 
-当前已经完成的是 MVP 的核心闭环、开发效率优化、基础主页框架、主页封面视觉优化、登录入口页面壳、入口/主界面路由拆分、Supabase Auth 账号系统 MVP 和内部测试版上线准备文档。下一步计划见 `docs/ROADMAP.md` 的阶段 18：主页登录流修正。当前代码事实仍是：
+当前已经完成的是 MVP 的核心闭环、开发效率优化、基础主页框架、主页封面视觉优化、主页登录流修正、登录入口页面壳、入口/主界面路由拆分、Supabase Auth 账号系统 MVP 和内部测试版上线准备文档。当前代码事实是：
 
 ```text
 访问根路径后看到基础主页
-主页展示顶栏、hero cover、登录入口、面试入口和登录状态
+主页展示顶栏、hero cover、登录入口或登出入口、面试入口和登录状态
 未登录用户点击主页面试入口会进入 /login
 已登录用户可以从主页进入 /interview
 用户打开 /login 后先看到登录/注册入口页面壳
 新用户可以使用邮箱密码注册
 已注册用户可以使用邮箱密码登录
-登录成功后进入 /interview 模拟面试主界面（阶段 18 计划改为登录后回到主页 /）
+登录或注册成功后回到主页 /
+主页已登录状态显示当前账号邮箱，并提供可用的登出入口
 未登录直接访问 /interview 会回到 /login
 已登录用户刷新 /interview 后仍保持登录态
 用户可以从主界面登出，登出后回到 /login
@@ -137,7 +138,7 @@ docs/INTERNAL_TESTING_RELEASE.md
 app/page.js
 ```
 
-Next.js 基础主页。展示产品简短定位、顶栏、青色系 hero cover、登录入口、面试入口和当前登录状态；未登录用户点击主页面试入口会进入 `/login`。
+Next.js 基础主页。展示产品简短定位、顶栏、青色系 hero cover、登录入口或登出入口、面试入口和当前登录状态；未登录用户点击主页面试入口会进入 `/login`，已登录用户可从主页进入 `/interview` 或登出。
 
 ```text
 app/login/page.js
@@ -161,7 +162,13 @@ Supabase Auth cookie 刷新和 `/interview` 访问保护。当前匹配 `/`、`/
 components/LoginEntryShell.js
 ```
 
-登录/注册入口页面壳。展示背景视觉、悬浮账号框、邮箱密码输入、登录/注册切换、错误提示和 loading 状态；密码不写入 localStorage、日志或历史记录。
+登录/注册入口页面壳。展示背景视觉、悬浮账号框、邮箱密码输入、登录/注册切换、错误提示和 loading 状态；登录或注册成功后回到主页 `/`；密码不写入 localStorage、日志或历史记录。
+
+```text
+components/HomeSignOutButton.js
+```
+
+主页登出按钮。主页已登录状态下展示可用的 `登出`，登出成功后刷新并停留在根路径 `/`，不读取、不保存、不打印密码或 token。
 
 ```text
 components/AuthStatusBar.js
@@ -310,7 +317,9 @@ components/InterviewSimulator.js
 components/LoginEntryShell.js
   -> lib/supabase/browserClient.js
   -> Supabase Auth 注册或登录
-  -> /interview
+  -> /
+  -> app/page.js 展示已登录主页、账号邮箱、面试入口和登出入口
+  -> 已登录点击主页面试入口进入 /interview
   -> proxy.js 刷新 Auth cookie 并保护 /interview
   -> app/interview/page.js 服务端读取当前用户
   -> components/AuthStatusBar.js 提供登出入口
@@ -458,7 +467,7 @@ http://localhost:3000
 
 - Next.js 页面结构
 - 根路径 `/` 基础主页
-- 主页展示顶栏、hero cover、登录入口、面试入口和登录状态
+- 主页展示顶栏、hero cover、登录入口或登出入口、面试入口和登录状态
 - 登录入口页面壳
 - 背景视觉和悬浮体验框布局
 - 邮箱密码注册、登录和登出
@@ -466,7 +475,9 @@ http://localhost:3000
 - 未登录访问 `/interview` 时回到 `/login`
 - `/login` 和 `/interview` 前端路由拆分
 - 未登录用户点击主页面试入口会进入 `/login`
-- 登录成功后进入 `/interview` 模拟面试主界面
+- 登录或注册成功后回到主页 `/`
+- 已登录用户可以从主页进入 `/interview` 模拟面试主界面
+- 已登录用户可以在主页点击 `登出`
 - 岗位信息输入框
 - 个人简历输入框
 - 前端空输入校验
@@ -512,6 +523,7 @@ http://localhost:3000
 - 内部测试 checklist
 - 敏感信息提醒
 - 主页封面视觉优化
+- 主页登录流修正
 - 代码分层
 - 中文 file header 和关键逻辑注释
 - 项目协作规范 `AGENTS.md`
@@ -535,16 +547,15 @@ http://localhost:3000
 
 建议下一步继续小步推进，不要一次做太大。
 
-阶段 17 已完成。建议检查：
+阶段 18 已完成。建议检查：
 
-1. 主页是否保留顶栏。
-2. 主页首屏是否有大图 / hero cover 区域。
-3. Hero 区域是否保留 `/login` 和 `/interview` 两个真实入口。
-4. 是否显示登录状态；已登录时是否显示必要账号信息。
-5. 未登录点击主页 `/interview` 入口是否进入 `/login`。
-6. 已登录点击主页 `/interview` 入口是否进入 `/interview`。
-7. 页面视觉是否参考 `temp_pics/main_page_reference.png`，但没有做像素级硬还原。
-8. 是否没有新增假按钮、复杂 landing page 或不可用功能入口。
+1. 登录或注册成功后是否回到主页 `/`。
+2. 已登录时主页是否显示当前账号邮箱。
+3. 已登录时主页是否把登录入口替换为可用的 `登出`。
+4. 未登录点击主页面试入口是否进入 `/login`。
+5. 已登录点击主页面试入口是否进入 `/interview`。
+6. 主页点击 `登出` 后是否回到未登录状态。
+7. `/interview` 路由保护、Supabase Auth、DeepSeek API、本地历史记录和开发 Mock 流程是否不受影响。
 
 后续可以优先考虑:
 

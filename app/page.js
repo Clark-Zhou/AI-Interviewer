@@ -12,6 +12,7 @@
  * - 未登录用户不能从主页直接进入 `/interview`。
  */
 import Link from 'next/link';
+import HomeSignOutButton from '../components/HomeSignOutButton';
 import { getSupabaseConfig } from '../lib/supabase/config';
 import { createSupabaseServerClient } from '../lib/supabase/serverClient';
 
@@ -62,7 +63,11 @@ export default async function Home() {
             <span>AI Interview Simulator</span>
           </Link>
           <nav className="home-nav-links" aria-label="主页导航">
-            <Link href="/login">登录入口</Link>
+            {isLoggedIn ? (
+              <HomeSignOutButton className="home-nav-sign-out" />
+            ) : (
+              <Link href="/login">登录入口</Link>
+            )}
             <Link href={interviewHref}>{isLoggedIn ? '进入面试' : '面试入口'}</Link>
           </nav>
         </header>
@@ -97,9 +102,13 @@ export default async function Home() {
               <Link className="home-primary-link" href={interviewHref}>
                 {isLoggedIn ? '进入模拟面试' : '登录后进入面试'}
               </Link>
-              <Link className="home-secondary-link" href="/login">
-                {isLoggedIn ? '查看账号入口' : '登录 / 注册'}
-              </Link>
+              {isLoggedIn ? (
+                <HomeSignOutButton />
+              ) : (
+                <Link className="home-secondary-link" href="/login">
+                  登录 / 注册
+                </Link>
+              )}
             </div>
           </div>
 
