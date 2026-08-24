@@ -10,7 +10,7 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前版本先验证最小可用闭环。当前已完成基础主页框架、主页封面视觉优化、主页登录流修正、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。云端历史记录、文件上传、语音或视频面试仍暂缓。
+当前版本先验证最小可用闭环。当前已完成基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。云端历史记录、文件上传、语音或视频面试仍暂缓。
 
 ## 当前功能
 
@@ -20,11 +20,14 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 - 根路径 `/` 基础主页
 - 主页展示顶栏、hero cover、登录入口或登出入口、面试入口和当前登录状态
 - `/login` 和 `/interview` 前端路由拆分
+- `/interview` 受保护面试工作台入口
+- `/interview/new` 新面试完整流程
+- `/interview/history` 本地历史记录列表和详情
 - 邮箱密码注册、登录和登出
 - 登录态保持
 - 未登录访问 `/interview` 时回到 `/login`
 - 登录或注册成功后回到主页 `/`
-- 已登录用户可从主页进入 `/interview` 模拟面试主界面
+- 已登录用户可从主页进入 `/interview` 面试工作台
 - 输入岗位 JD
 - 输入个人简历
 - 前端空输入校验
@@ -136,7 +139,9 @@ app/page.js                       基础主页，展示顶栏、hero cover、登
 app/layout.js                     全局布局和 metadata
 app/globals.css                   全局样式
 app/login/page.js                 登录入口页面壳路由
-app/interview/page.js             受保护的模拟面试主界面路由
+app/interview/page.js             受保护的面试工作台入口页
+app/interview/new/page.js         受保护的新面试流程页
+app/interview/history/page.js     受保护的本地历史记录页
 app/api/generate-questions/       生成面试问题 API
 app/api/evaluate-interview/       生成最终评价 API
 proxy.js                          Supabase Auth cookie 刷新和 /interview 访问保护
@@ -145,6 +150,7 @@ components/LoginEntryShell.js     登录/注册入口页面壳
 components/HomeSignOutButton.js   主页已登录状态下的登出按钮
 components/AuthStatusBar.js       当前账号展示和登出入口
 components/InterviewSimulator.js  主前端组件
+components/InterviewHistoryPanel.js 本地历史记录列表和详情组件
 
 lib/client/interviewApi.js        前端请求封装
 lib/client/interviewHistoryStorage.js 本地历史记录读写工具
@@ -213,19 +219,20 @@ components/InterviewSimulator.js
 3. 点击主页的面试入口，确认会进入 `/login`。
 4. 使用新邮箱注册，或使用已注册邮箱登录。
 5. 登录或注册成功后回到 `/`。
-6. 确认主页显示当前账号信息，把登录入口替换为 `登出`，并且可以从主页进入 `/interview`。
+6. 确认主页显示当前账号信息，把登录入口替换为 `登出`，并且可以从主页进入 `/interview` 工作台。
 7. 在主页点击 `登出` 后确认回到未登录状态；再次登录或直接访问 `/interview`，确认登录态和路由保护仍可用。
-8. 点击 `填入示例 JD/简历`。
-9. 点击 `生成面试问题`。
-10. 等待问题生成。
-11. 点击 `填入测试回答`。
-12. 点击 `提交全部回答`，或逐题点击 `提交本题回答`。
-13. 确认进度为 `已提交 6 / 6`。
-14. 点击 `生成最终评价`。
-15. 检查最终评价是否完整展示。
-16. 检查最终评价区是否提示已保存到本地历史记录。
-17. 检查页面底部历史记录区是否新增记录，点击后是否能查看详情。
-18. 点击 `开始新一轮`，确认当前输入、问题、回答和评价被清空，但历史记录仍保留。
+8. 在 `/interview` 点击 `开始新的面试`，确认进入 `/interview/new`。
+9. 点击 `填入示例 JD/简历`。
+10. 点击 `生成面试问题`。
+11. 等待问题生成。
+12. 点击 `填入测试回答`。
+13. 点击 `提交全部回答`，或逐题点击 `提交本题回答`。
+14. 确认进度为 `已提交 6 / 6`。
+15. 点击 `生成最终评价`。
+16. 检查最终评价是否完整展示。
+17. 检查最终评价区是否提示已保存到本地历史记录。
+18. 进入 `/interview/history`，检查是否能看到最近本地历史记录和详情。
+19. 回到 `/interview/new` 点击 `开始新一轮`，确认当前输入、问题、回答和评价被清空，但历史记录仍保留。
 
 如果真实 AI 请求失败，页面应显示对应错误提示：生成问题失败时可点击 `重试生成问题`，最终评价失败时可点击 `重试生成评价`。
 

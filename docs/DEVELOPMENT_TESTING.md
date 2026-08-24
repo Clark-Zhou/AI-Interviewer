@@ -7,6 +7,7 @@
 关联文件：
 
 - `components/InterviewSimulator.js`：开发辅助按钮和本地测试回答生成逻辑在这里。
+- `components/InterviewHistoryPanel.js`：本地历史记录列表和详情展示在这里。
 - `app/globals.css`：开发辅助区和按钮样式在这里。
 - `lib/client/interviewApi.js`：前端真实 API 请求封装在这里。
 - `lib/client/interviewHistoryStorage.js`：最终评价成功后的本地历史记录读写工具在这里。
@@ -14,6 +15,9 @@
 - `lib/supabase/browserClient.js`：浏览器端 Supabase Auth client。
 - `lib/supabase/serverClient.js`：服务端 Supabase Auth client。
 - `proxy.js`：Supabase Auth cookie 刷新和 `/interview` 访问保护。
+- `app/interview/page.js`：受保护的面试工作台入口页。
+- `app/interview/new/page.js`：受保护的新面试流程页。
+- `app/interview/history/page.js`：受保护的本地历史记录页。
 - `app/api/generate-questions/route.js`：生成问题的后端 API。
 - `app/api/evaluate-interview/route.js`：生成最终评价的后端 API。
 - `docs/INTERNAL_TESTING_RELEASE.md`：内部测试版部署准备和生产 smoke test 清单。
@@ -49,10 +53,10 @@ process.env.NODE_ENV === 'development'
 6. 使用新邮箱注册，或使用已注册邮箱登录。
 7. 确认登录或注册成功后浏览器地址回到 `/`。
 8. 确认主页显示当前账号邮箱，并把登录入口替换为可用的 `登出`。
-9. 从主页点击面试入口进入 `/interview`。
-10. 刷新 `/interview`，确认仍保持登录态。
+9. 从主页点击面试入口进入 `/interview` 工作台。
+10. 确认工作台只提供 `开始新的面试` 和 `查看历史记录` 两个主要入口。
 11. 回到 `/` 点击 `登出`，确认主页回到未登录状态；再次访问 `/interview` 会进入 `/login`。
-12. 重新登录后从主页进入 `/interview`。
+12. 重新登录后从主页进入 `/interview`，点击 `开始新的面试` 进入 `/interview/new`。
 13. 点击 `填入示例 JD/简历`。
 14. 点击真实 AI 问题按钮，等待 DeepSeek 返回问题列表。
 15. 点击 `填入测试回答`。
@@ -61,8 +65,8 @@ process.env.NODE_ENV === 'development'
 18. 点击真实 AI 评价按钮，等待 DeepSeek 返回最终评价。
 19. 检查页面是否展示总分、总结、优势、风险点、改进建议、逐题反馈和后续练习题。
 20. 检查最终评价区是否显示 `最终评价已生成，并已保存到本地历史记录。`。
-21. 检查页面底部历史记录区是否新增记录，点击后能看到详情。
-22. 点击 `开始新一轮`，确认当前岗位 JD、简历、问题、回答、提交状态、评价和提示信息被清空，历史记录仍保留。
+21. 进入 `/interview/history`，检查最近本地历史记录是否新增，点击后能看到详情。
+22. 回到 `/interview/new` 点击 `开始新一轮`，确认当前岗位 JD、简历、问题、回答、提交状态、评价和提示信息被清空，历史记录仍保留。
 
 错误恢复检查：
 
@@ -77,14 +81,15 @@ Mock 快速流程：
 3. 使用已注册邮箱登录。
 4. 确认浏览器地址回到 `/`。
 5. 从主页点击面试入口进入 `/interview`。
-6. 点击 `填入示例 JD/简历`。
-7. 点击 `使用 Mock 问题`，应立即展示固定问题列表。
-8. 点击 `填入测试回答`。
-9. 点击 `提交全部回答`，应立即显示 `已提交 6 / 6`。
-10. 点击 `使用 Mock 评价`，应立即展示固定结构的最终评价。
-11. 打开浏览器 DevTools，确认 localStorage 的 `ai-interview-sessions` 中新增一条完整记录，且 `generationSource` 标记为 mock。
-12. 检查页面底部历史记录区是否新增记录，点击后能看到详情。
-13. 点击 `开始新一轮`，确认页面回到初始输入状态，历史记录仍保留。
+6. 点击 `开始新的面试` 进入 `/interview/new`。
+7. 点击 `填入示例 JD/简历`。
+8. 点击 `使用 Mock 问题`，应立即展示固定问题列表。
+9. 点击 `填入测试回答`。
+10. 点击 `提交全部回答`，应立即显示 `已提交 6 / 6`。
+11. 点击 `使用 Mock 评价`，应立即展示固定结构的最终评价。
+12. 打开浏览器 DevTools，确认 localStorage 的 `ai-interview-sessions` 中新增一条完整记录，且 `generationSource` 标记为 mock。
+13. 进入 `/interview/history`，检查历史记录页是否新增记录，点击后能看到详情。
+14. 回到 `/interview/new` 点击 `开始新一轮`，确认页面回到初始输入状态，历史记录仍保留。
 
 ## 历史记录检查
 
@@ -99,12 +104,12 @@ Mock 快速流程：
 - `generationSource.questions` 和 `generationSource.evaluation` 用于区分 `ai` 与 `mock`，旧历史记录没有该字段也应能正常展示。
 - 如果 localStorage 写入失败，页面仍然展示最终评价，并显示本地保存失败提示。
 
-页面底部历史记录区应满足：
+`/interview/history` 历史记录页应满足：
 
 - 没有历史记录时显示空状态。
 - 有历史记录时显示最近记录数量、保存时间、岗位摘要、总分和可用的生成来源。
 - 点击单条记录后，右侧或下方展示该记录的岗位摘要、简历摘要、整体评价和问答记录。
-- 新完成一次最终评价后，历史列表自动刷新，并默认选中最新记录。
+- 新完成一次最终评价后，进入历史记录页能看到新记录，并默认选中最新记录。
 
 ## 重要边界
 
@@ -236,7 +241,7 @@ Supabase Auth 账号系统 MVP 实现后，重点检查：
 - 已登录状态下，主页显示当前账号邮箱，并把登录入口替换为可用的 `登出`。
 - 已登录点击主页面试入口进入 `/interview`。
 - 在主页点击 `登出` 后回到未登录状态，再访问 `/interview` 会进入 `/login`。
-- `/interview` 内的真实 AI、Mock、本地历史记录、开始新一轮和错误重试流程仍可用。
+- `/interview` 工作台、`/interview/new` 新面试流程、`/interview/history` 本地历史记录、开始新一轮和错误重试流程仍可用。
 
 
 ## 阶段 19 检查点

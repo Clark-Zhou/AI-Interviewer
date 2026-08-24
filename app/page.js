@@ -3,7 +3,7 @@
  *
  * 关联文件：
  * - app/login/page.js：登录入口页面壳路由。
- * - app/interview/page.js：受保护的模拟面试主界面路由。
+ * - app/interview/page.js：受保护的面试工作台入口路由。
  * - app/layout.js：页面外层 HTML 结构和全局样式入口。
  * - lib/supabase/serverClient.js：服务端读取 Supabase Auth 登录态。
  *

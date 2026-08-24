@@ -2,7 +2,9 @@
  * 文件职责：展示当前登录用户和登出入口。
  *
  * 关联文件：
- * - app/interview/page.js：在模拟面试主界面上方挂载本组件。
+ * - app/interview/page.js：在面试工作台入口页上方挂载本组件。
+ * - app/interview/new/page.js：在新面试流程页上方挂载本组件。
+ * - app/interview/history/page.js：在本地历史记录页上方挂载本组件。
  * - lib/supabase/browserClient.js：浏览器端 Supabase Auth client。
  *
  * 说明：

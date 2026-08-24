@@ -14,15 +14,15 @@
 
 ## 当前推荐方向
 
-当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成基础主页框架、主页封面视觉优化、主页登录流修正、本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步建议做阶段 19：拆分 `/interview` 工作台信息架构，让新面试和历史记录成为两个清晰入口。
+当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步建议先对阶段 19 做代码审查，再按 `docs/INTERNAL_TESTING_RELEASE.md` 做部署和生产 smoke test。
 
 原因：
 
 - 阶段 17 已完成，根路径 `/` 已经有顶栏、青色系 hero cover、登录入口、面试入口和登录状态。
 - 阶段 18 已完成：登录或注册成功后回到主页 `/`，不再直接进入 `/interview`。
 - 主页已登录时会把登录入口替换为登出入口，并继续显示当前账号邮箱。
-- 当前 `/interview` 仍把新面试流程和历史记录放在同一个页面，用户路径开始变得拥挤。
-- 下一步应把 `/interview` 做成受保护的面试工作台入口页，再拆出新面试和历史记录子路由。
+- 阶段 19 已完成：`/interview` 是受保护的面试工作台入口页，新面试和历史记录已拆到子路由。
+- `/interview/new` 承载完整新面试流程，`/interview/history` 承载本地历史记录列表和详情。
 
 ## 阶段计划
 
@@ -44,17 +44,17 @@
 - [x] 阶段 16：基础主页框架
 - [x] 阶段 17：主页封面视觉优化
 - [x] 阶段 18：主页登录流修正
-- [ ] 阶段 19：拆分面试工作台信息架构
+- [x] 阶段 19：拆分面试工作台信息架构
 
 ## 当前优先级
 
 当前优先级：
 
-1. 完成阶段 19：拆分面试工作台信息架构。
-2. `/interview` 作为受保护工作台入口页，只提供 `开始新的面试` 和 `查看历史记录` 两个真实入口。
-3. 新增 `/interview/new` 承载当前新面试完整流程。
-4. 新增 `/interview/history` 承载最近本地历史记录列表和详情。
-5. 不改 DeepSeek API、prompt、本地历史记录数据结构、Supabase Auth 或云端能力。
+1. 对阶段 19 进行代码审查，重点检查路由拆分、历史组件拆分和受保护子路由。
+2. 按 `docs/INTERNAL_TESTING_RELEASE.md` 做部署和生产 smoke test。
+3. 继续保留 `/interview`、`/interview/new`、`/interview/history` 的未登录保护。
+4. 不改 DeepSeek API、prompt、本地历史记录数据结构、Supabase Auth 或云端能力。
+5. 后续新阶段再评估历史记录恢复、删除、搜索或云端同步。
 
 推荐当前功能分支：
 
@@ -682,7 +682,7 @@ createInterviewSessionId()
 1. 先阅读 `README.md`、`AGENTS.md`、`docs/PROJECT_STATUS.md`、`docs/ROADMAP.md` 和 `docs/PRD.md`。
 2. 检查 `app/page.js`、`components/AppEntry.js`、`components/LoginEntryShell.js` 和 `components/InterviewSimulator.js` 当前职责。
 3. 新增 `app/login/page.js` 挂载登录入口页壳。
-4. 新增 `app/interview/page.js` 挂载模拟面试主界面。
+4. 阶段 13 当时新增 `app/interview/page.js` 挂载模拟面试主界面；阶段 19 后该路径已调整为面试工作台入口。
 5. 调整 `app/page.js`，让根路径有明确入口，优先跳转或重定向到 `/login`。
 6. 调整 `LoginEntryShell` 的进入动作，让它使用路由导航到 `/interview`。
 7. 删除或简化不再需要的首页状态切换组件，避免冗余代码。
@@ -1145,7 +1145,7 @@ docs/INTERNAL_TESTING_RELEASE.md
 
 ## 阶段 19：拆分面试工作台信息架构
 
-阶段状态：未完成。当前 `/interview` 同时承载新面试输入、问题生成、答题、评价和历史记录。随着主页和登录流完成，下一步应把受保护的面试区域整理成更清晰的工作台结构。
+阶段状态：已完成。当前已经把 `/interview` 从完整表单页拆成受保护的面试工作台入口页，并把新面试和本地历史记录拆到独立子路由。
 
 ### 阶段目标
 
@@ -1262,13 +1262,7 @@ docs/INTERNAL_TESTING_RELEASE.md
 你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“[阶段名称]”阶段。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md；如果本阶段涉及开发测试流程，也阅读 docs/DEVELOPMENT_TESTING.md。然后按 ROADMAP 的任务拆分和验收标准实现。只有在需要改变产品范围或用户流程时才阅读 docs/PRD.md。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
 ```
 
-当前建议先启动阶段开发 session 完成阶段 19。可以这样启动：
-
-```text
-你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“阶段 19：拆分面试工作台信息架构”。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/PRD.md 和 docs/DEVELOPMENT_TESTING.md。重点实现：/interview 作为受保护工作台入口页，只提供“开始新的面试”和“查看历史记录”；/interview/new 承载当前新面试完整流程；/interview/history 展示最近本地历史记录和详情。不要安装依赖；不要改 DeepSeek API、prompt、本地历史记录数据结构、Supabase Auth 或云端能力。完成后按 AGENTS.md 的分档收尾规则更新必要文档，并说明测试情况。
-```
-
-阶段 19 完成后，代码审查可以这样启动：
+当前阶段 19 已完成，建议先启动代码审查 session。可以这样启动：
 
 ```text
 你是 AI Interview Simulator 的代码审查 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/PRD.md、docs/DEVELOPMENT_TESTING.md，然后以 review 姿态检查阶段 19 的当前 diff。重点检查 /interview 是否只作为工作台入口页，/interview/new 是否完整保留真实 AI、Mock、答题、评价、保存历史和错误重试能力，/interview/history 是否能读取并展示本地历史记录和详情，未登录访问 /interview、/interview/new、/interview/history 是否都会进入 /login，以及是否没有改变 DeepSeek API、prompt、Supabase Auth 或 localStorage 历史数据结构。
