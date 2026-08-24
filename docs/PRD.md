@@ -41,15 +41,16 @@ The first version should prioritize a complete, useful workflow over advanced fe
 1. User opens the app homepage at `/`.
 2. The homepage shows the product entry, login/register entry, interview entry, and current authentication status.
 3. If the user is not logged in, the user goes to `/login` to sign up or log in.
-4. After authentication, the user can enter `/interview` from the homepage or direct route.
-5. User pastes the job description.
-6. User pastes resume text.
-7. User clicks "Start Mock Interview".
-8. The system generates 6 interview questions.
-9. User answers questions one by one.
-10. User submits each answer separately.
-11. The system generates a final report.
-12. User reviews strengths, weaknesses, and improvement suggestions.
+4. After authentication, the user can enter the protected interview workspace at `/interview`.
+5. In the interview workspace, the user chooses either `Start New Interview` or `View History`.
+6. If starting a new interview, the user pastes the job description.
+7. User pastes resume text.
+8. User clicks "Start Mock Interview".
+9. The system generates 6 interview questions.
+10. User answers questions one by one.
+11. User submits each answer separately.
+12. The system generates a final report and saves the session to local history.
+13. User reviews strengths, weaknesses, improvement suggestions, or goes to history to review previous sessions.
 
 ## 5. MVP Features
 
@@ -61,6 +62,7 @@ MVP behavior:
 
 - Show a `/` homepage with basic product entry information and a polished first-screen hero.
 - Show `/login` and `/interview` entry points on the homepage hero.
+- Use `/interview` as the protected workspace entry, with separate paths for starting a new interview and viewing local history.
 - Show whether the user is logged in; if logged in, show basic account information such as email.
 - Keep homepage navigation limited to real available destinations; do not show fake future-feature buttons.
 - Support email and password signup on `/login`.

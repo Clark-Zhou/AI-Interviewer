@@ -17,10 +17,10 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 当前分支：
 
 ```text
-optimiaze-main-page
+optimize-interview-page
 ```
 
-当前已经完成的是 MVP 的核心闭环、开发效率优化、基础主页框架、主页封面视觉优化、主页登录流修正、登录入口页面壳、入口/主界面路由拆分、Supabase Auth 账号系统 MVP 和内部测试版上线准备文档。当前代码事实是：
+当前已经完成的是 MVP 的核心闭环、开发效率优化、基础主页框架、主页封面视觉优化、主页登录流修正、登录入口页面壳、入口/主界面路由拆分、Supabase Auth 账号系统 MVP 和内部测试版上线准备文档。下一步计划见 `docs/ROADMAP.md` 的阶段 19：拆分面试工作台信息架构。当前代码事实仍是：
 
 ```text
 访问根路径后看到基础主页
@@ -547,19 +547,16 @@ http://localhost:3000
 
 建议下一步继续小步推进，不要一次做太大。
 
-阶段 18 已完成。建议检查：
+阶段 18 已完成并已合入 `main`。当前阶段 19 建议优先处理 `/interview` 信息架构：
 
-1. 登录或注册成功后是否回到主页 `/`。
-2. 已登录时主页是否显示当前账号邮箱。
-3. 已登录时主页是否把登录入口替换为可用的 `登出`。
-4. 未登录点击主页面试入口是否进入 `/login`。
-5. 已登录点击主页面试入口是否进入 `/interview`。
-6. 主页点击 `登出` 后是否回到未登录状态。
-7. `/interview` 路由保护、Supabase Auth、DeepSeek API、本地历史记录和开发 Mock 流程是否不受影响。
+1. `/interview` 改为受保护的面试工作台入口页。
+2. 工作台入口页只提供 `开始新的面试` 和 `查看历史记录` 两个主要入口。
+3. `/interview/new` 承载当前新面试完整流程。
+4. `/interview/history` 承载最近本地历史记录列表和详情。
+5. 保持 `/interview`、`/interview/new`、`/interview/history` 的未登录保护。
+6. 不改 DeepSeek API、prompt、本地历史记录数据结构、Supabase Auth 或云端能力。
 
-后续可以优先考虑:
-
-- 按 `docs/INTERNAL_TESTING_RELEASE.md` 完成外部平台部署和生产 smoke test。
+阶段 19 完成后，再按 `docs/INTERNAL_TESTING_RELEASE.md` 做部署和生产 smoke test。
 
 不建议马上做：
 
@@ -568,7 +565,7 @@ http://localhost:3000
 - 文件上传
 - 多轮追问
 - 语音或视频面试
-- 复杂 UI 重构
+- 复杂视觉重构或全站设计系统重构
 
 ## 12. 开发约定
 
