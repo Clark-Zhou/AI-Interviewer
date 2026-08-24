@@ -3,7 +3,8 @@
  *
  * 关联文件：
  * - app/login/page.js：挂载本入口页壳的 `/login` 路由。
- * - app/interview/page.js：体验版入口点击后进入的 `/interview` 路由。
+ * - app/page.js：登录或注册成功后返回的主页路由。
+ * - app/interview/page.js：登录后可从主页进入的受保护模拟面试路由。
  * - lib/supabase/browserClient.js：浏览器端 Supabase Auth client。
  * - app/globals.css：提供入口页背景、悬浮登录框和响应式样式。
  *
@@ -66,7 +67,7 @@ export default function LoginEntryShell() {
       }
 
       if (data.session) {
-        router.push('/interview');
+        router.push('/');
         router.refresh();
         return;
       }
@@ -89,7 +90,7 @@ export default function LoginEntryShell() {
       return;
     }
 
-    router.push('/interview');
+    router.push('/');
     router.refresh();
   };
 
@@ -122,7 +123,7 @@ export default function LoginEntryShell() {
           <div className="entry-card-header">
             <p className="entry-eyebrow">账号入口</p>
             <h1>{isRegisterMode ? '注册账号' : '登录账号'}</h1>
-            <p>登录后进入模拟面试工作区，继续生成问题、提交回答并获得结构化反馈。</p>
+            <p>登录后返回主页，再从主页进入模拟面试工作区。</p>
           </div>
 
           <div className="entry-mode-switch" aria-label="账号入口模式">
@@ -190,7 +191,7 @@ export default function LoginEntryShell() {
           <button type="submit" className="entry-submit" disabled={isSubmitting}>
             {isSubmitting
               ? isRegisterMode ? '正在注册...' : '正在登录...'
-              : isRegisterMode ? '注册并进入' : '登录并进入'}
+              : isRegisterMode ? '注册并返回主页' : '登录并返回主页'}
           </button>
 
           <p className="entry-note">
