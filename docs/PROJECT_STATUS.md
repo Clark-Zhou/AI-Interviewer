@@ -575,15 +575,15 @@ http://localhost:3000
 
 建议下一步继续小步推进，不要一次做太大。
 
-阶段 19 已完成。建议下一步先做代码审查，再按 `docs/INTERNAL_TESTING_RELEASE.md` 做部署和生产 smoke test。
+阶段 19 已完成并已审查。当前建议进入阶段 20，优化 `/interview/new` 新面试页面体验。
 
 建议检查：
 
-1. `/interview` 是否只展示 `开始新的面试` 和 `查看历史记录` 两个主要入口。
-2. `/interview/new` 是否完整保留真实 AI、Mock、答题、评价、保存历史和错误重试能力。
-3. `/interview/history` 是否能展示最近本地历史记录和详情。
-4. 未登录访问 `/interview`、`/interview/new`、`/interview/history` 是否都会进入 `/login`。
-5. 是否没有改 DeepSeek API、prompt、本地历史记录数据结构、Supabase Auth 或云端能力。
+1. `/interview/new` 初始状态是否不显示历史记录列表或历史详情。
+2. `/interview/new` 初始状态是否不显示 `模拟问题` 面板。
+3. 点击真实 AI 生成问题或开发环境 Mock 问题后，问题区是否再出现。
+4. 真实 AI、Mock、答题、评价、保存历史和错误重试流程是否仍可用。
+5. 轻量视觉修剪是否延续青色主色调，且没有影响 `/interview` 工作台和 `/interview/history`。
 
 不建议马上做：
 
