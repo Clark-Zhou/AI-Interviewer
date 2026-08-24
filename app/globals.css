@@ -691,7 +691,7 @@ button.home-secondary-link:hover {
   text-align: center;
 }
 
-/* 账号状态条：面试主界面顶部展示当前登录用户和登出入口。 */
+/* 账号状态条：受保护面试区域顶部展示当前登录用户和登出入口。 */
 .auth-status-bar {
   align-items: center;
   background: #ffffff;
@@ -732,6 +732,66 @@ button.home-secondary-link:hover {
   margin: 0;
 }
 
+/* 面试工作台入口：只提供新面试和本地历史两个真实入口。 */
+.workspace-panel {
+  padding: 32px;
+}
+
+.workspace-heading {
+  max-width: 680px;
+}
+
+.workspace-actions {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.workspace-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #111827;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 150px;
+  padding: 22px;
+  text-decoration: none;
+}
+
+.workspace-card:hover {
+  background: #ecfeff;
+  border-color: #5eead4;
+}
+
+.workspace-card-title {
+  color: #0f766e;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.workspace-card-description {
+  color: #4b5563;
+  line-height: 1.7;
+}
+
+.workspace-subpage-heading {
+  margin-bottom: 20px;
+}
+
+.text-link {
+  color: #0f766e;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.text-link:hover {
+  color: #115e59;
+  text-decoration: underline;
+}
+
 /* 页面布局：控制内容宽度和卡片外观。 */
 .page {
   width: min(900px, calc(100% - 32px));
@@ -739,11 +799,35 @@ button.home-secondary-link:hover {
   padding: 40px 0;
 }
 
+.interview-new-page {
+  width: min(960px, calc(100% - 32px));
+}
+
 .panel {
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   padding: 24px;
+}
+
+.interview-input-panel {
+  background:
+    linear-gradient(135deg, rgba(236, 253, 245, 0.92) 0%, rgba(255, 255, 255, 0.96) 48%, rgba(236, 254, 255, 0.92) 100%);
+  border-color: rgba(45, 212, 191, 0.32);
+  box-shadow: 0 22px 54px rgba(15, 82, 98, 0.1);
+}
+
+.interview-input-panel h1 {
+  color: #0f172a;
+}
+
+.interview-input-panel textarea:focus {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
+}
+
+.question-preview-panel {
+  border-color: rgba(15, 118, 110, 0.18);
 }
 
 .preview {
@@ -1029,8 +1113,16 @@ button:disabled {
   border-radius: 8px;
   font-size: 14px;
   font-weight: 700;
-  margin: 0 0 18px;
+  margin: 0;
   padding: 10px 12px;
+}
+
+.history-save-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
 .history-save-status.success {
@@ -1378,6 +1470,10 @@ button:disabled {
   .auth-status-actions {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .workspace-actions {
+    grid-template-columns: 1fr;
   }
 
   .dev-helper {

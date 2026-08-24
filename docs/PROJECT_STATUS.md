@@ -10,30 +10,37 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前已经验证核心面试练习闭环，并已完成基础主页框架、主页封面视觉优化、主页登录流修正、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。云端历史记录、文件上传和复杂账号能力仍暂缓。
+当前已经验证核心面试练习闭环，并已完成基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、新面试页面体验优化、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。云端历史记录、文件上传和复杂账号能力仍暂缓。
 
 ## 2. 当前阶段
 
 当前分支：
 
 ```text
-optimiaze-main-page
+optimize-interview-page
 ```
 
-当前已经完成的是 MVP 的核心闭环、开发效率优化、基础主页框架、主页封面视觉优化、主页登录流修正、登录入口页面壳、入口/主界面路由拆分、Supabase Auth 账号系统 MVP 和内部测试版上线准备文档。当前代码事实是：
+当前已经完成的是 MVP 的核心闭环、开发效率优化、基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、新面试页面体验优化、登录入口页面壳、入口/主界面路由拆分、Supabase Auth 账号系统 MVP 和内部测试版上线准备文档。当前代码事实是：
 
 ```text
 访问根路径后看到基础主页
 主页展示顶栏、hero cover、登录入口或登出入口、面试入口和登录状态
 未登录用户点击主页面试入口会进入 /login
-已登录用户可以从主页进入 /interview
+已登录用户可以从主页进入 /interview 面试工作台
+已登录用户在 /interview 看到开始新的面试和查看历史记录两个入口
+开始新的面试进入 /interview/new
+查看历史记录进入 /interview/history
+/interview/new 初始状态不显示历史记录区
+/interview/new 初始状态不显示模拟问题面板或问题空状态
+点击真实 AI 生成问题或开发环境 Mock 问题后才展示生成中状态或问题列表
+/interview/new 轻量视觉修剪延续青色主色调
 用户打开 /login 后先看到登录/注册入口页面壳
 新用户可以使用邮箱密码注册
 已注册用户可以使用邮箱密码登录
 登录或注册成功后回到主页 /
 主页已登录状态显示当前账号邮箱，并提供可用的登出入口
 未登录直接访问 /interview 会回到 /login
-已登录用户刷新 /interview 后仍保持登录态
+已登录用户刷新 /interview、/interview/new 或 /interview/history 后仍保持登录态
 用户可以从主界面登出，登出后回到 /login
 输入岗位信息
 输入个人简历
@@ -58,7 +65,8 @@ optimiaze-main-page
 最终评价失败后可重试
 最终评价成功后保存完整本地历史记录
 页面展示本地保存成功或失败提示
-页面底部展示最近本地历史记录列表
+/interview/new 不再在页面底部展示完整历史区
+/interview/history 展示最近本地历史记录列表
 点击历史记录后展示岗位摘要、简历摘要、整体评价和问答记录
 
 开发环境独立 Mock 问题按钮
@@ -138,7 +146,7 @@ docs/INTERNAL_TESTING_RELEASE.md
 app/page.js
 ```
 
-Next.js 基础主页。展示产品简短定位、顶栏、青色系 hero cover、登录入口或登出入口、面试入口和当前登录状态；未登录用户点击主页面试入口会进入 `/login`，已登录用户可从主页进入 `/interview` 或登出。
+Next.js 基础主页。展示产品简短定位、顶栏、青色系 hero cover、登录入口或登出入口、面试入口和当前登录状态；未登录用户点击主页面试入口会进入 `/login`，已登录用户可从主页进入 `/interview` 工作台或登出。
 
 ```text
 app/login/page.js
@@ -150,7 +158,19 @@ app/login/page.js
 app/interview/page.js
 ```
 
-模拟面试主界面路由。服务端读取 Supabase Auth 登录态；未登录用户会回到 `/login`，已登录用户进入 `components/InterviewSimulator.js`。
+面试工作台入口页。服务端读取 Supabase Auth 登录态；未登录用户会回到 `/login`，已登录用户看到 `开始新的面试` 和 `查看历史记录` 两个主要入口。
+
+```text
+app/interview/new/page.js
+```
+
+新面试流程页。服务端读取 Supabase Auth 登录态；未登录用户会回到 `/login`，已登录用户进入 `components/InterviewSimulator.js` 完成新面试流程。
+
+```text
+app/interview/history/page.js
+```
+
+本地历史记录页。服务端读取 Supabase Auth 登录态；未登录用户会回到 `/login`，已登录用户进入 `components/InterviewHistoryPanel.js` 查看当前浏览器本地历史记录和详情。
 
 ```text
 proxy.js
@@ -174,13 +194,19 @@ components/HomeSignOutButton.js
 components/AuthStatusBar.js
 ```
 
-账号状态条。展示当前登录邮箱并提供登出入口；登出后回到 `/login`。
+账号状态条。展示当前登录邮箱并提供登出入口；在工作台、新面试和历史记录页复用，登出后回到 `/login`。
 
 ```text
 components/InterviewSimulator.js
 ```
 
-前端主组件，负责岗位信息和简历输入、生成问题、逐题回答、逐题提交、答题进度、最终评价请求和结果展示。也包含仅开发环境显示的示例输入和测试回答填充逻辑。
+新面试前端主组件，负责岗位信息和简历输入、生成问题、逐题回答、逐题提交、答题进度、最终评价请求、结果展示和本地历史保存提示。也包含仅开发环境显示的示例输入和测试回答填充逻辑。
+
+```text
+components/InterviewHistoryPanel.js
+```
+
+本地历史记录组件。只在浏览器端读取 `localStorage`，展示最近记录列表和详情；不接数据库或云端同步。
 
 ```text
 lib/client/interviewApi.js
@@ -192,7 +218,7 @@ lib/client/interviewApi.js
 lib/client/interviewHistoryStorage.js
 ```
 
-浏览器本地历史记录读写工具。最终评价生成成功后，前端通过这里把完整面试 session 保存到 localStorage；页面历史区也通过这里读取最近记录。
+浏览器本地历史记录读写工具。最终评价生成成功后，前端通过这里把完整面试 session 保存到 localStorage；历史记录页也通过这里读取最近记录。
 
 ```text
 lib/dev/interviewMocks.js
@@ -320,8 +346,9 @@ components/LoginEntryShell.js
   -> /
   -> app/page.js 展示已登录主页、账号邮箱、面试入口和登出入口
   -> 已登录点击主页面试入口进入 /interview
-  -> proxy.js 刷新 Auth cookie 并保护 /interview
-  -> app/interview/page.js 服务端读取当前用户
+  -> proxy.js 刷新 Auth cookie 并保护 /interview/:path*
+  -> app/interview/page.js 服务端读取当前用户并展示工作台入口
+  -> app/interview/new/page.js 或 app/interview/history/page.js 继续做服务端登录态校验
   -> components/AuthStatusBar.js 提供登出入口
 ```
 
@@ -467,6 +494,9 @@ http://localhost:3000
 
 - Next.js 页面结构
 - 根路径 `/` 基础主页
+- `/interview` 受保护面试工作台入口
+- `/interview/new` 受保护新面试流程
+- `/interview/history` 受保护本地历史记录
 - 主页展示顶栏、hero cover、登录入口或登出入口、面试入口和登录状态
 - 登录入口页面壳
 - 背景视觉和悬浮体验框布局
@@ -476,7 +506,8 @@ http://localhost:3000
 - `/login` 和 `/interview` 前端路由拆分
 - 未登录用户点击主页面试入口会进入 `/login`
 - 登录或注册成功后回到主页 `/`
-- 已登录用户可以从主页进入 `/interview` 模拟面试主界面
+- 已登录用户可以从主页进入 `/interview` 面试工作台
+- 已登录用户可以从工作台进入 `/interview/new` 或 `/interview/history`
 - 已登录用户可以在主页点击 `登出`
 - 岗位信息输入框
 - 个人简历输入框
@@ -524,6 +555,7 @@ http://localhost:3000
 - 敏感信息提醒
 - 主页封面视觉优化
 - 主页登录流修正
+- 面试工作台信息架构拆分
 - 代码分层
 - 中文 file header 和关键逻辑注释
 - 项目协作规范 `AGENTS.md`
@@ -547,19 +579,16 @@ http://localhost:3000
 
 建议下一步继续小步推进，不要一次做太大。
 
-阶段 18 已完成。建议检查：
+阶段 20 已完成。当前建议先做阶段 20 的代码审查和必要的本地/部署前回归测试。
 
-1. 登录或注册成功后是否回到主页 `/`。
-2. 已登录时主页是否显示当前账号邮箱。
-3. 已登录时主页是否把登录入口替换为可用的 `登出`。
-4. 未登录点击主页面试入口是否进入 `/login`。
-5. 已登录点击主页面试入口是否进入 `/interview`。
-6. 主页点击 `登出` 后是否回到未登录状态。
-7. `/interview` 路由保护、Supabase Auth、DeepSeek API、本地历史记录和开发 Mock 流程是否不受影响。
+建议检查：
 
-后续可以优先考虑:
-
-- 按 `docs/INTERNAL_TESTING_RELEASE.md` 完成外部平台部署和生产 smoke test。
+1. `/interview/new` 初始状态是否不显示历史记录列表、历史详情、`模拟问题` 面板或问题空状态。
+2. 点击真实 AI 生成问题后，生成中状态或生成后的问题列表是否出现。
+3. 点击开发环境 Mock 问题后，问题列表是否出现。
+4. 真实 AI、Mock、答题、评价、保存历史和错误重试流程是否仍可用。
+5. 轻量视觉修剪是否延续青色主色调，且没有影响 `/interview` 工作台和 `/interview/history`。
+6. 是否没有改 DeepSeek API、prompt、本地历史记录数据结构、Supabase Auth 或路由信息架构。
 
 不建议马上做：
 
@@ -568,7 +597,7 @@ http://localhost:3000
 - 文件上传
 - 多轮追问
 - 语音或视频面试
-- 复杂 UI 重构
+- 复杂视觉重构或全站设计系统重构
 
 ## 12. 开发约定
 

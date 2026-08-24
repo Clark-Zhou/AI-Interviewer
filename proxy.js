@@ -3,7 +3,9 @@
  *
  * 关联文件：
  * - lib/supabase/serverClient.js：服务端页面读取认证状态。
- * - app/interview/page.js：受保护的模拟面试主界面。
+ * - app/interview/page.js：受保护的面试工作台入口页。
+ * - app/interview/new/page.js：受保护的新面试流程页。
+ * - app/interview/history/page.js：受保护的本地历史记录页。
  * - app/login/page.js：未登录用户回到这里登录或注册。
  *
  * 说明：

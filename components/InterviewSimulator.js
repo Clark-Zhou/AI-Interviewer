@@ -3,23 +3,23 @@
  *
  * 关联文件：
  * - lib/client/interviewApi.js：封装前端调用后端 API 的请求方法。
- * - lib/client/interviewHistoryStorage.js：保存和读取浏览器本地面试历史记录。
+ * - lib/client/interviewHistoryStorage.js：保存浏览器本地面试历史记录。
  * - lib/dev/interviewMocks.js：提供开发环境使用的本地 mock 问题和 mock 评价。
  * - app/globals.css：提供本组件使用的页面、表单、按钮和结果区样式。
  * - app/api/generate-questions/route.js：前端通过请求层调用生成问题 API。
  * - app/api/evaluate-interview/route.js：前端通过请求层调用最终评价 API。
  *
  * 说明：
- * - 这个文件只处理浏览器端交互：输入、按钮点击、loading、错误、结果展示和本地历史记录展示。
+ * - 这个文件只处理浏览器端交互：输入、按钮点击、loading、错误、结果展示和本地历史保存提示。
  * - 不要在这里读取 DEEPSEEK_API_KEY，API Key 只能放在服务端。
  */
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useRef, useState } from 'react';
 import { evaluateInterview, generateInterviewQuestions } from '../lib/client/interviewApi';
 import {
   createInterviewSessionId,
-  getInterviewSessions,
   saveInterviewSession,
 } from '../lib/client/interviewHistoryStorage';
 import {
@@ -82,46 +82,6 @@ function buildSampleAnswer(questionItem, questionIndex) {
   return `这是第 ${questionIndex + 1} 题的开发测试回答。针对「${questionItem.question}」，我会先结合岗位要求说明问题背景，再引用简历中的 AI Interview Simulator 或 AI 销售助手经历举例，重点说明${focus}。实际面试中我会继续补充具体指标、个人职责、协作方式和复盘思考。`;
 }
 
-function getTextSummary(text, maxLength = 48) {
-  const normalizedText = String(text || '').replace(/\s+/g, ' ').trim();
-
-  if (!normalizedText) {
-    return '未填写内容';
-  }
-
-  if (normalizedText.length <= maxLength) {
-    return normalizedText;
-  }
-
-  return `${normalizedText.slice(0, maxLength)}...`;
-}
-
-function formatHistoryTime(value) {
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return '时间未知';
-  }
-
-  return date.toLocaleString('zh-CN', {
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-function formatGenerationSource(generationSource) {
-  if (!generationSource) {
-    return '';
-  }
-
-  const questionSource = generationSource.questions === 'mock' ? 'Mock 问题' : 'AI 问题';
-  const evaluationSource = generationSource.evaluation === 'mock' ? 'Mock 评价' : 'AI 评价';
-
-  return `${questionSource} / ${evaluationSource}`;
-}
-
 function getRequestErrorMessage(prefix, error) {
   const detail = error?.message || '请稍后重试。';
 
@@ -148,14 +108,7 @@ export default function InterviewSimulator() {
   const [evaluationError, setEvaluationError] = useState('');
   const [historySaveStatus, setHistorySaveStatus] = useState('');
   const [historySaveMessage, setHistorySaveMessage] = useState('');
-  const [historySessions, setHistorySessions] = useState([]);
-  const [selectedHistorySessionId, setSelectedHistorySessionId] = useState('');
   const [questionGenerationSource, setQuestionGenerationSource] = useState('');
-
-  // 首次进入页面时读取本地历史记录，只在浏览器端执行。
-  useEffect(() => {
-    setHistorySessions(getInterviewSessions());
-  }, []);
 
   // 开发辅助：填入固定示例输入，并清空上一轮生成结果，方便反复测试主流程。
   const handleFillSampleInputs = () => {
@@ -204,13 +157,6 @@ export default function InterviewSimulator() {
     .filter((item) => item.answer);
   const isReadyForEvaluation =
     totalQuestionCount > 0 && submittedQuestionAnswers.length === totalQuestionCount;
-  const selectedHistorySession = historySessions.find(
-    (session) => session.id === selectedHistorySessionId
-  );
-  const selectedHistoryScore = selectedHistorySession?.evaluation?.overallScore;
-  const selectedHistorySourceLabel = formatGenerationSource(
-    selectedHistorySession?.generationSource
-  );
   const isQuestionGenerationDisabled = isLoading || isEvaluating;
   const canRetryGenerateQuestions =
     Boolean(error) &&
@@ -218,6 +164,7 @@ export default function InterviewSimulator() {
     Boolean(resume.trim()) &&
     !isQuestionGenerationDisabled;
   const canRetryEvaluation = Boolean(evaluationError) && isReadyForEvaluation && !isEvaluating;
+  const shouldShowQuestionPanel = isLoading || questions.length > 0;
 
   const hasCurrentInterviewContent =
     Boolean(jobInfo.trim()) ||
@@ -233,7 +180,7 @@ export default function InterviewSimulator() {
     isLoading ||
     isEvaluating;
 
-  // 清空当前面试状态，但保留 localStorage 历史记录和当前历史列表展示。
+  // 清空当前面试状态，但保留 localStorage 历史记录。
   const handleResetInterview = () => {
     if (
       hasCurrentInterviewContent &&
@@ -298,7 +245,7 @@ export default function InterviewSimulator() {
     try {
       const savedAt = new Date().toISOString();
 
-      const savedSession = saveInterviewSession({
+      saveInterviewSession({
         id: createInterviewSessionId(),
         version: 1,
         source: 'localStorage',
@@ -316,8 +263,6 @@ export default function InterviewSimulator() {
         updatedAt: savedAt,
       });
 
-      setHistorySessions(getInterviewSessions());
-      setSelectedHistorySessionId(savedSession.id);
       setHistorySaveStatus('success');
       setHistorySaveMessage('最终评价已生成，并已保存到本地历史记录。');
     } catch {
@@ -532,11 +477,14 @@ export default function InterviewSimulator() {
   };
 
   return (
-    <main className="page">
+    <main className="page interview-new-page">
       {/* 输入区：收集岗位信息和个人简历。 */}
-      <section className="panel">
+      <section className="panel interview-input-panel">
         <div className="panel-heading">
-          <h1>AI 模拟面试</h1>
+          <div>
+            <p className="category">新的模拟面试</p>
+            <h1>准备一轮针对当前岗位的练习</h1>
+          </div>
           <button
             type="button"
             className="secondary-button compact-button"
@@ -618,119 +566,118 @@ export default function InterviewSimulator() {
         )}
       </section>
 
-      {/* 结果区：展示空状态、加载状态或结构化问题列表。 */}
-      <section className="panel preview">
-        <div className="preview-header">
-          <h2>模拟问题</h2>
-          {totalQuestionCount > 0 && (
-            <div className="preview-actions">
-              <span className="answer-progress">
-                已提交 {submittedAnswerCount} / {totalQuestionCount}
-              </span>
-              {isDevelopment && (
-                <button
-                  type="button"
-                  className="secondary-button compact-button"
-                  onClick={handleFillSampleAnswers}
-                >
-                  填入测试回答
-                </button>
-              )}
-              <button
-                type="button"
-                className="secondary-button compact-button"
-                onClick={handleSubmitAllAnswers}
-              >
-                提交全部回答
-              </button>
-            </div>
-          )}
-        </div>
-        {isLoading && <p className="empty-state">DeepSeek 正在生成问题，请稍等。</p>}
-        {!isLoading && questions.length === 0 && (
-          <p className="empty-state">填写岗位信息和个人简历后，点击「AI 生成面试问题」开始。</p>
-        )}
-        {!isLoading && questions.length > 0 && (
-          <>
-            <ul className="question-list">
-              {questions.map((item, index) => (
-                <li className="question-item" key={`${item.category}-${item.question}`}>
-                  <p className="category">
-                    {index + 1}. {item.category}
-                  </p>
-                  <p className="question">{item.question}</p>
-                  <p className="reason">{item.reason}</p>
-
-                  {/* 回答输入框：用户可以逐题修改和提交回答。 */}
-                  <div className="answer-field">
-                    <label htmlFor={`answer-${index}`}>你的回答</label>
-                    <textarea
-                      id={`answer-${index}`}
-                      value={answers[index] || ''}
-                      onChange={(event) => handleAnswerChange(index, event.target.value)}
-                      placeholder="输入你的回答，提交后会用于生成最终评价"
-                    />
-
-                    <div className="answer-actions">
-                      <button type="button" onClick={() => handleSubmitAnswer(index)}>
-                        提交本题回答
-                      </button>
-                      {submittedAnswers[index] && <span className="answer-status">已提交</span>}
-                    </div>
-
-                    {answerErrors[index] && (
-                      <p className="answer-error">{answerErrors[index]}</p>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            {/* 评价准备区：所有回答提交后，触发最终评价 API。 */}
-            <div className="evaluation-ready-panel">
-              <p>
-                {isReadyForEvaluation
-                  ? '所有回答已提交，评价数据已经准备好。'
-                  : '提交所有题目的回答后，就可以生成最终评价。'}
-              </p>
-              <div className="button-row">
-                <button
-                  type="button"
-                  disabled={!isReadyForEvaluation || isEvaluating}
-                  onClick={handleEvaluateInterview}
-                >
-                  {isEvaluating ? '正在生成最终评价...' : 'AI 生成最终评价'}
-                </button>
+      {/* 结果区：生成开始后展示加载状态或结构化问题列表。 */}
+      {shouldShowQuestionPanel && (
+        <section className="panel preview question-preview-panel">
+          <div className="preview-header">
+            <h2>模拟问题</h2>
+            {totalQuestionCount > 0 && (
+              <div className="preview-actions">
+                <span className="answer-progress">
+                  已提交 {submittedAnswerCount} / {totalQuestionCount}
+                </span>
                 {isDevelopment && (
                   <button
                     type="button"
-                    className="secondary-button"
-                    disabled={!isReadyForEvaluation || isEvaluating}
-                    onClick={handleUseMockEvaluation}
+                    className="secondary-button compact-button"
+                    onClick={handleFillSampleAnswers}
                   >
-                    使用 Mock 评价
+                    填入测试回答
                   </button>
                 )}
+                <button
+                  type="button"
+                  className="secondary-button compact-button"
+                  onClick={handleSubmitAllAnswers}
+                >
+                  提交全部回答
+                </button>
               </div>
-              {evaluationError && (
-                <div className="message-with-action">
-                  <p className="answer-error">{evaluationError}</p>
-                  {canRetryEvaluation && (
+            )}
+          </div>
+          {isLoading && <p className="empty-state">DeepSeek 正在生成问题，请稍等。</p>}
+          {!isLoading && questions.length > 0 && (
+            <>
+              <ul className="question-list">
+                {questions.map((item, index) => (
+                  <li className="question-item" key={`${item.category}-${item.question}`}>
+                    <p className="category">
+                      {index + 1}. {item.category}
+                    </p>
+                    <p className="question">{item.question}</p>
+                    <p className="reason">{item.reason}</p>
+
+                    {/* 回答输入框：用户可以逐题修改和提交回答。 */}
+                    <div className="answer-field">
+                      <label htmlFor={`answer-${index}`}>你的回答</label>
+                      <textarea
+                        id={`answer-${index}`}
+                        value={answers[index] || ''}
+                        onChange={(event) => handleAnswerChange(index, event.target.value)}
+                        placeholder="输入你的回答，提交后会用于生成最终评价"
+                      />
+
+                      <div className="answer-actions">
+                        <button type="button" onClick={() => handleSubmitAnswer(index)}>
+                          提交本题回答
+                        </button>
+                        {submittedAnswers[index] && <span className="answer-status">已提交</span>}
+                      </div>
+
+                      {answerErrors[index] && (
+                        <p className="answer-error">{answerErrors[index]}</p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              {/* 评价准备区：所有回答提交后，触发最终评价 API。 */}
+              <div className="evaluation-ready-panel">
+                <p>
+                  {isReadyForEvaluation
+                    ? '所有回答已提交，评价数据已经准备好。'
+                    : '提交所有题目的回答后，就可以生成最终评价。'}
+                </p>
+                <div className="button-row">
+                  <button
+                    type="button"
+                    disabled={!isReadyForEvaluation || isEvaluating}
+                    onClick={handleEvaluateInterview}
+                  >
+                    {isEvaluating ? '正在生成最终评价...' : 'AI 生成最终评价'}
+                  </button>
+                  {isDevelopment && (
                     <button
                       type="button"
-                      className="secondary-button compact-button"
-                      onClick={handleEvaluateInterview}
-                      disabled={isEvaluating}
+                      className="secondary-button"
+                      disabled={!isReadyForEvaluation || isEvaluating}
+                      onClick={handleUseMockEvaluation}
                     >
-                      重试生成评价
+                      使用 Mock 评价
                     </button>
                   )}
                 </div>
-              )}
-            </div>
-          </>
-        )}
-      </section>
+                {evaluationError && (
+                  <div className="message-with-action">
+                    <p className="answer-error">{evaluationError}</p>
+                    {canRetryEvaluation && (
+                      <button
+                        type="button"
+                        className="secondary-button compact-button"
+                        onClick={handleEvaluateInterview}
+                        disabled={isEvaluating}
+                      >
+                        重试生成评价
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </section>
+      )}
 
       {/* 最终评价区：展示整体评分、总结、列表建议和逐题反馈。 */}
       {evaluation && (
@@ -742,9 +689,16 @@ export default function InterviewSimulator() {
 
           <p className="evaluation-summary">{evaluation.summary}</p>
           {historySaveMessage && (
-            <p className={`history-save-status ${historySaveStatus}`}>
-              {historySaveMessage}
-            </p>
+            <div className="history-save-row">
+              <p className={`history-save-status ${historySaveStatus}`}>
+                {historySaveMessage}
+              </p>
+              {historySaveStatus === 'success' && (
+                <Link className="text-link" href="/interview/history">
+                  查看历史记录
+                </Link>
+              )}
+            </div>
           )}
 
           <div className="evaluation-grid">
@@ -802,115 +756,6 @@ export default function InterviewSimulator() {
         </section>
       )}
 
-      {/* 历史记录区：展示最近保存的本地面试记录，并支持查看详情。 */}
-      <section className="panel history-panel">
-        <div className="preview-header">
-          <h2>历史记录</h2>
-          {historySessions.length > 0 && (
-            <span className="answer-progress">最近 {historySessions.length} 条</span>
-          )}
-        </div>
-
-        {historySessions.length === 0 && (
-          <p className="empty-state">生成最终评价后，这里会保留最近的本地历史记录。</p>
-        )}
-
-        {historySessions.length > 0 && (
-          <div className="history-layout">
-            <ul className="history-list">
-              {historySessions.map((session) => (
-                <li key={session.id}>
-                  <button
-                    type="button"
-                    className={`history-item-button ${
-                      selectedHistorySessionId === session.id ? 'active' : ''
-                    }`}
-                    onClick={() => setSelectedHistorySessionId(session.id)}
-                  >
-                    <span className="history-item-main">
-                      <span className="history-title">
-                        {getTextSummary(session.jobInfo, 36)}
-                      </span>
-                      <span className="history-meta">
-                        {formatHistoryTime(session.createdAt)}
-                        {typeof session.evaluation?.overallScore === 'number'
-                          ? ` ｜ ${session.evaluation.overallScore} / 100`
-                          : ''}
-                      </span>
-                      {formatGenerationSource(session.generationSource) && (
-                        <span className="history-source">
-                          {formatGenerationSource(session.generationSource)}
-                        </span>
-                      )}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-
-            <div className="history-detail">
-              {!selectedHistorySession && (
-                <p className="empty-state">选择一条本地历史记录查看详情。</p>
-              )}
-
-              {selectedHistorySession && (
-                <>
-                  <div className="history-detail-header">
-                    <div>
-                      <p className="category">
-                        {formatHistoryTime(selectedHistorySession.createdAt)}
-                      </p>
-                      <h3>{getTextSummary(selectedHistorySession.jobInfo, 56)}</h3>
-                      {selectedHistorySourceLabel && (
-                        <p className="history-source detail-source">
-                          {selectedHistorySourceLabel}
-                        </p>
-                      )}
-                    </div>
-                    {typeof selectedHistoryScore === 'number' && (
-                      <span className="evaluation-score">
-                        {selectedHistoryScore} / 100
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="history-detail-block">
-                    <h4>岗位信息摘要</h4>
-                    <p>{getTextSummary(selectedHistorySession.jobInfo, 120)}</p>
-                  </div>
-
-                  <div className="history-detail-block">
-                    <h4>简历摘要</h4>
-                    <p>{getTextSummary(selectedHistorySession.resume, 120)}</p>
-                  </div>
-
-                  {selectedHistorySession.evaluation?.summary && (
-                    <div className="history-detail-block">
-                      <h4>整体评价</h4>
-                      <p>{selectedHistorySession.evaluation.summary}</p>
-                    </div>
-                  )}
-
-                  <div className="history-detail-block">
-                    <h4>问答记录</h4>
-                    <ul className="history-qa-list">
-                      {(selectedHistorySession.questionAnswers || []).map((item, index) => (
-                        <li key={`${selectedHistorySession.id}-${item.question}-${index}`}>
-                          <p className="category">
-                            第 {index + 1} 题｜{item.category}
-                          </p>
-                          <p className="question">{item.question}</p>
-                          <p className="reason">回答：{item.answer}</p>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-      </section>
     </main>
   );
 }
