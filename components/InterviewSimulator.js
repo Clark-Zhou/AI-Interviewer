@@ -164,6 +164,7 @@ export default function InterviewSimulator() {
     Boolean(resume.trim()) &&
     !isQuestionGenerationDisabled;
   const canRetryEvaluation = Boolean(evaluationError) && isReadyForEvaluation && !isEvaluating;
+  const shouldShowQuestionPanel = isLoading || questions.length > 0;
 
   const hasCurrentInterviewContent =
     Boolean(jobInfo.trim()) ||
@@ -476,11 +477,14 @@ export default function InterviewSimulator() {
   };
 
   return (
-    <main className="page">
+    <main className="page interview-new-page">
       {/* 输入区：收集岗位信息和个人简历。 */}
-      <section className="panel">
+      <section className="panel interview-input-panel">
         <div className="panel-heading">
-          <h1>AI 模拟面试</h1>
+          <div>
+            <p className="category">新的模拟面试</p>
+            <h1>准备一轮针对当前岗位的练习</h1>
+          </div>
           <button
             type="button"
             className="secondary-button compact-button"
@@ -562,119 +566,118 @@ export default function InterviewSimulator() {
         )}
       </section>
 
-      {/* 结果区：展示空状态、加载状态或结构化问题列表。 */}
-      <section className="panel preview">
-        <div className="preview-header">
-          <h2>模拟问题</h2>
-          {totalQuestionCount > 0 && (
-            <div className="preview-actions">
-              <span className="answer-progress">
-                已提交 {submittedAnswerCount} / {totalQuestionCount}
-              </span>
-              {isDevelopment && (
-                <button
-                  type="button"
-                  className="secondary-button compact-button"
-                  onClick={handleFillSampleAnswers}
-                >
-                  填入测试回答
-                </button>
-              )}
-              <button
-                type="button"
-                className="secondary-button compact-button"
-                onClick={handleSubmitAllAnswers}
-              >
-                提交全部回答
-              </button>
-            </div>
-          )}
-        </div>
-        {isLoading && <p className="empty-state">DeepSeek 正在生成问题，请稍等。</p>}
-        {!isLoading && questions.length === 0 && (
-          <p className="empty-state">填写岗位信息和个人简历后，点击「AI 生成面试问题」开始。</p>
-        )}
-        {!isLoading && questions.length > 0 && (
-          <>
-            <ul className="question-list">
-              {questions.map((item, index) => (
-                <li className="question-item" key={`${item.category}-${item.question}`}>
-                  <p className="category">
-                    {index + 1}. {item.category}
-                  </p>
-                  <p className="question">{item.question}</p>
-                  <p className="reason">{item.reason}</p>
-
-                  {/* 回答输入框：用户可以逐题修改和提交回答。 */}
-                  <div className="answer-field">
-                    <label htmlFor={`answer-${index}`}>你的回答</label>
-                    <textarea
-                      id={`answer-${index}`}
-                      value={answers[index] || ''}
-                      onChange={(event) => handleAnswerChange(index, event.target.value)}
-                      placeholder="输入你的回答，提交后会用于生成最终评价"
-                    />
-
-                    <div className="answer-actions">
-                      <button type="button" onClick={() => handleSubmitAnswer(index)}>
-                        提交本题回答
-                      </button>
-                      {submittedAnswers[index] && <span className="answer-status">已提交</span>}
-                    </div>
-
-                    {answerErrors[index] && (
-                      <p className="answer-error">{answerErrors[index]}</p>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            {/* 评价准备区：所有回答提交后，触发最终评价 API。 */}
-            <div className="evaluation-ready-panel">
-              <p>
-                {isReadyForEvaluation
-                  ? '所有回答已提交，评价数据已经准备好。'
-                  : '提交所有题目的回答后，就可以生成最终评价。'}
-              </p>
-              <div className="button-row">
-                <button
-                  type="button"
-                  disabled={!isReadyForEvaluation || isEvaluating}
-                  onClick={handleEvaluateInterview}
-                >
-                  {isEvaluating ? '正在生成最终评价...' : 'AI 生成最终评价'}
-                </button>
+      {/* 结果区：生成开始后展示加载状态或结构化问题列表。 */}
+      {shouldShowQuestionPanel && (
+        <section className="panel preview question-preview-panel">
+          <div className="preview-header">
+            <h2>模拟问题</h2>
+            {totalQuestionCount > 0 && (
+              <div className="preview-actions">
+                <span className="answer-progress">
+                  已提交 {submittedAnswerCount} / {totalQuestionCount}
+                </span>
                 {isDevelopment && (
                   <button
                     type="button"
-                    className="secondary-button"
-                    disabled={!isReadyForEvaluation || isEvaluating}
-                    onClick={handleUseMockEvaluation}
+                    className="secondary-button compact-button"
+                    onClick={handleFillSampleAnswers}
                   >
-                    使用 Mock 评价
+                    填入测试回答
                   </button>
                 )}
+                <button
+                  type="button"
+                  className="secondary-button compact-button"
+                  onClick={handleSubmitAllAnswers}
+                >
+                  提交全部回答
+                </button>
               </div>
-              {evaluationError && (
-                <div className="message-with-action">
-                  <p className="answer-error">{evaluationError}</p>
-                  {canRetryEvaluation && (
+            )}
+          </div>
+          {isLoading && <p className="empty-state">DeepSeek 正在生成问题，请稍等。</p>}
+          {!isLoading && questions.length > 0 && (
+            <>
+              <ul className="question-list">
+                {questions.map((item, index) => (
+                  <li className="question-item" key={`${item.category}-${item.question}`}>
+                    <p className="category">
+                      {index + 1}. {item.category}
+                    </p>
+                    <p className="question">{item.question}</p>
+                    <p className="reason">{item.reason}</p>
+
+                    {/* 回答输入框：用户可以逐题修改和提交回答。 */}
+                    <div className="answer-field">
+                      <label htmlFor={`answer-${index}`}>你的回答</label>
+                      <textarea
+                        id={`answer-${index}`}
+                        value={answers[index] || ''}
+                        onChange={(event) => handleAnswerChange(index, event.target.value)}
+                        placeholder="输入你的回答，提交后会用于生成最终评价"
+                      />
+
+                      <div className="answer-actions">
+                        <button type="button" onClick={() => handleSubmitAnswer(index)}>
+                          提交本题回答
+                        </button>
+                        {submittedAnswers[index] && <span className="answer-status">已提交</span>}
+                      </div>
+
+                      {answerErrors[index] && (
+                        <p className="answer-error">{answerErrors[index]}</p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              {/* 评价准备区：所有回答提交后，触发最终评价 API。 */}
+              <div className="evaluation-ready-panel">
+                <p>
+                  {isReadyForEvaluation
+                    ? '所有回答已提交，评价数据已经准备好。'
+                    : '提交所有题目的回答后，就可以生成最终评价。'}
+                </p>
+                <div className="button-row">
+                  <button
+                    type="button"
+                    disabled={!isReadyForEvaluation || isEvaluating}
+                    onClick={handleEvaluateInterview}
+                  >
+                    {isEvaluating ? '正在生成最终评价...' : 'AI 生成最终评价'}
+                  </button>
+                  {isDevelopment && (
                     <button
                       type="button"
-                      className="secondary-button compact-button"
-                      onClick={handleEvaluateInterview}
-                      disabled={isEvaluating}
+                      className="secondary-button"
+                      disabled={!isReadyForEvaluation || isEvaluating}
+                      onClick={handleUseMockEvaluation}
                     >
-                      重试生成评价
+                      使用 Mock 评价
                     </button>
                   )}
                 </div>
-              )}
-            </div>
-          </>
-        )}
-      </section>
+                {evaluationError && (
+                  <div className="message-with-action">
+                    <p className="answer-error">{evaluationError}</p>
+                    {canRetryEvaluation && (
+                      <button
+                        type="button"
+                        className="secondary-button compact-button"
+                        onClick={handleEvaluateInterview}
+                        disabled={isEvaluating}
+                      >
+                        重试生成评价
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </section>
+      )}
 
       {/* 最终评价区：展示整体评分、总结、列表建议和逐题反馈。 */}
       {evaluation && (

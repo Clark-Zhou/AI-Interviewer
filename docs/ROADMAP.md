@@ -14,7 +14,7 @@
 
 ## 当前推荐方向
 
-当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步建议做阶段 20：优化 `/interview/new` 新面试页面的初始状态和轻量视觉。
+当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、新面试页面体验优化、本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步建议先做阶段 20 的代码审查和必要的本地/部署前回归测试。
 
 原因：
 
@@ -23,7 +23,8 @@
 - 主页已登录时会把登录入口替换为登出入口，并继续显示当前账号邮箱。
 - 阶段 19 已完成并已审查：`/interview` 是受保护的面试工作台入口页，新面试和历史记录已拆到子路由。
 - `/interview/new` 承载完整新面试流程，`/interview/history` 承载本地历史记录列表和详情。
-- 下一步只优化 `/interview/new` 的初始展示和轻量视觉，不重新拆路由、不改 AI 或历史数据结构。
+- 阶段 20 已完成：`/interview/new` 初始状态更聚焦，新面试页不提前展示历史区或 `模拟问题` 空面板。
+- 下一步重点是审查和测试阶段 20 的当前 diff，不重新拆路由、不改 AI 或历史数据结构。
 
 ## 阶段计划
 
@@ -46,17 +47,17 @@
 - [x] 阶段 17：主页封面视觉优化
 - [x] 阶段 18：主页登录流修正
 - [x] 阶段 19：拆分面试工作台信息架构
-- [ ] 阶段 20：优化新面试页面体验
+- [x] 阶段 20：优化新面试页面体验
 
 ## 当前优先级
 
 当前优先级：
 
-1. 完成阶段 20：优化 `/interview/new` 新面试页面体验。
-2. `/interview/new` 初始状态不显示历史记录区。
-3. `/interview/new` 初始状态不显示 `模拟问题` 组件；点击真实 AI 生成问题或 Mock 问题后再展示。
-4. 简单修剪 `/interview/new` 视觉，延续青色主色调，可使用轻量渐变。
-5. 不改 DeepSeek API、prompt、本地历史记录数据结构、Supabase Auth 或路由信息架构。
+1. 对阶段 20 当前 diff 做代码审查。
+2. 回归检查 `/interview/new` 初始状态是否不显示历史记录区、`模拟问题` 面板或问题空状态。
+3. 回归检查点击真实 AI 生成问题或开发环境 Mock 问题后，生成中状态或问题列表是否出现。
+4. 回归检查真实 AI、Mock、答题、评价、保存历史和错误重试流程是否仍可用。
+5. 确认没有改 DeepSeek API、prompt、本地历史记录数据结构、Supabase Auth 或路由信息架构。
 
 推荐当前功能分支：
 
@@ -1238,7 +1239,7 @@ docs/INTERNAL_TESTING_RELEASE.md
 
 ## 阶段 20：优化新面试页面体验
 
-阶段状态：未完成。阶段 19 已经完成并审查了 `/interview` 工作台拆分；本阶段是在这个基础上继续优化 `/interview/new` 页面，不属于阶段 19 的返工。
+阶段状态：已完成。阶段 19 已经完成并审查了 `/interview` 工作台拆分；本阶段在这个基础上优化了 `/interview/new` 页面，不属于阶段 19 的返工。
 
 ### 阶段目标
 
@@ -1331,13 +1332,7 @@ docs/INTERNAL_TESTING_RELEASE.md
 你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“[阶段名称]”阶段。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md；如果本阶段涉及开发测试流程，也阅读 docs/DEVELOPMENT_TESTING.md。然后按 ROADMAP 的任务拆分和验收标准实现。只有在需要改变产品范围或用户流程时才阅读 docs/PRD.md。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
 ```
 
-当前建议先启动阶段开发 session 完成阶段 20。可以这样启动：
-
-```text
-你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“阶段 20：优化新面试页面体验”。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md 和 docs/DEVELOPMENT_TESTING.md。重点实现：/interview/new 初始状态不显示历史记录区；初始状态不显示“模拟问题”组件，点击真实 AI 生成问题或 Mock 问题后再展示生成中状态或问题列表；轻量修剪 /interview/new 视觉，延续青色主色调和克制渐变。不要安装依赖；不要改 DeepSeek API、prompt、本地历史记录数据结构、Supabase Auth 或路由信息架构。完成后按 AGENTS.md 的分档收尾规则更新必要文档，并说明测试情况。
-```
-
-阶段 20 完成后，代码审查可以这样启动：
+阶段 20 已完成。当前建议先启动代码审查 session 检查阶段 20。可以这样启动：
 
 ```text
 你是 AI Interview Simulator 的代码审查 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/DEVELOPMENT_TESTING.md，然后以 review 姿态检查阶段 20 的当前 diff。重点检查 /interview/new 初始状态是否不显示历史记录区和“模拟问题”空面板，点击真实 AI 或 Mock 问题后问题区是否出现，真实 AI、Mock、提交回答、生成评价、保存历史和错误重试是否仍可用，/interview/history 是否不受影响，以及是否没有改 DeepSeek API、prompt、Supabase Auth 或 localStorage 历史数据结构。

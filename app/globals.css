@@ -799,11 +799,35 @@ button.home-secondary-link:hover {
   padding: 40px 0;
 }
 
+.interview-new-page {
+  width: min(960px, calc(100% - 32px));
+}
+
 .panel {
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   padding: 24px;
+}
+
+.interview-input-panel {
+  background:
+    linear-gradient(135deg, rgba(236, 253, 245, 0.92) 0%, rgba(255, 255, 255, 0.96) 48%, rgba(236, 254, 255, 0.92) 100%);
+  border-color: rgba(45, 212, 191, 0.32);
+  box-shadow: 0 22px 54px rgba(15, 82, 98, 0.1);
+}
+
+.interview-input-panel h1 {
+  color: #0f172a;
+}
+
+.interview-input-panel textarea:focus {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
+}
+
+.question-preview-panel {
+  border-color: rgba(15, 118, 110, 0.18);
 }
 
 .preview {
