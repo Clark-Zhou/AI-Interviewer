@@ -17,10 +17,10 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 当前分支：
 
 ```text
-develop-private-test-version
+optimiaze-main-page
 ```
 
-当前已经完成的是 MVP 的核心闭环、开发效率优化、基础主页框架、主页封面视觉优化、登录入口页面壳、入口/主界面路由拆分、Supabase Auth 账号系统 MVP 和内部测试版上线准备文档：
+当前已经完成的是 MVP 的核心闭环、开发效率优化、基础主页框架、主页封面视觉优化、登录入口页面壳、入口/主界面路由拆分、Supabase Auth 账号系统 MVP 和内部测试版上线准备文档。下一步计划见 `docs/ROADMAP.md` 的阶段 18：主页登录流修正。当前代码事实仍是：
 
 ```text
 访问根路径后看到基础主页
@@ -30,7 +30,7 @@ develop-private-test-version
 用户打开 /login 后先看到登录/注册入口页面壳
 新用户可以使用邮箱密码注册
 已注册用户可以使用邮箱密码登录
-登录成功后进入 /interview 模拟面试主界面
+登录成功后进入 /interview 模拟面试主界面（阶段 18 计划改为登录后回到主页 /）
 未登录直接访问 /interview 会回到 /login
 已登录用户刷新 /interview 后仍保持登录态
 用户可以从主界面登出，登出后回到 /login
