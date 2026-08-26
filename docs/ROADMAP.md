@@ -14,7 +14,7 @@
 
 ## 当前推荐方向
 
-当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、新面试页面体验优化、本地文本文件导入入口、本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步建议先做阶段 21 的代码审查和必要的本地回归测试。
+当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、新面试页面体验优化、本地文本文件导入入口、本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步建议进入阶段 22：PDF/DOCX 文档解析入口 MVP。
 
 原因：
 
@@ -26,6 +26,8 @@
 - 阶段 20 已完成：`/interview/new` 初始状态更聚焦，新面试页不提前展示历史区或 `模拟问题` 空面板。
 - 阶段 21 已完成：`/interview/new` 支持把本地 `.txt` / `.md` 内容导入到已有 JD 和简历 textarea。
 - 阶段 21 只做了浏览器本地文本导入，没有新增后端上传、PDF/DOCX 解析、云端存储或 AI 自动解析。
+- 项目所有者已安装阶段 22 所需解析依赖：`mammoth@1.12.1` 和 `pdf-parse@2.4.5`。
+- 下一步可以在项目后端增加一次性文档解析 API，把 `.pdf` / `.docx` 提取成纯文本后回填现有 textarea，但不保存原始文件。
 
 ## 阶段计划
 
@@ -50,17 +52,18 @@
 - [x] 阶段 19：拆分面试工作台信息架构
 - [x] 阶段 20：优化新面试页面体验
 - [x] 阶段 21：文本文件导入入口 MVP
+- [ ] 阶段 22：PDF/DOCX 文档解析入口 MVP
 
 ## 当前优先级
 
 当前优先级：
 
-1. 对阶段 21 当前 diff 做代码审查。
-2. 回归检查 `/interview/new` 的岗位 JD 和个人简历输入区是否都能导入 `.txt` 和 `.md`。
-3. 回归检查导入成功后文本是否填入现有 textarea、用户是否仍可手动编辑。
-4. 回归检查导入成功后是否清空旧问题、回答、提交状态、最终评价和保存提示。
-5. 确认不支持类型、空文件、读取失败和过大文件的提示清楚，且不清空当前有效内容。
-6. 确认没有新增后端上传 API、依赖、云端存储、PDF/DOCX 解析、AI 自动解析，且没有改 DeepSeek API、prompt、Supabase Auth 或 localStorage 数据结构。
+1. 完成阶段 22：PDF/DOCX 文档解析入口 MVP。
+2. 新增项目后端解析接口，把 `.pdf` / `.docx` 提取成纯文本并返回给前端。
+3. 复用 `/interview/new` 现有 JD 和简历输入区，把解析结果填入现有 textarea，用户仍可手动编辑。
+4. 文件只用于一次请求解析，不保存原始文件，不写入 localStorage、历史记录或数据库。
+5. 复用项目所有者已安装的 `mammoth@1.12.1` 和 `pdf-parse@2.4.5`，不要再安装依赖。
+6. 不做扫描版 PDF OCR、图片识别、多文件合并、云端文件存储、AI 自动解析或历史记录数据结构改动。
 
 推荐当前功能分支：
 
@@ -403,7 +406,7 @@ createInterviewSessionId()
 - 一键提交不调用后端 API、不调用 DeepSeek、不调用 mock 评价。
 - 最终评价生成和历史保存仍由原有评价按钮触发。
 - 新增函数或关键逻辑有简短中文注释。
-- 没有新增依赖。
+- 不新增除项目所有者已安装的 `mammoth` 和 `pdf-parse` 以外的新依赖。
 
 ### 代码审查关注点
 
@@ -477,7 +480,7 @@ createInterviewSessionId()
 - 真实 AI 生成问题和最终评价流程不受影响。
 - 不调用后端 API、不调用 DeepSeek、不调用 mock 评价、不保存新的历史记录。
 - 新增函数或关键逻辑有简短中文注释。
-- 没有新增依赖。
+- 不新增除项目所有者已安装的 `mammoth` 和 `pdf-parse` 以外的新依赖。
 
 ### 代码审查关注点
 
@@ -1346,7 +1349,7 @@ docs/INTERNAL_TESTING_RELEASE.md
 - 多文件合并。
 - AI 自动提取字段。
 - 把文件对象、文件名或文件内容以外的元数据保存到历史记录。
-- 新增依赖。
+- 新增除项目所有者已安装解析库以外的依赖。
 
 ### 建议实现方式
 
@@ -1381,7 +1384,7 @@ docs/INTERNAL_TESTING_RELEASE.md
 - 文件对象不保存到 localStorage，不发送到后端，不进入历史记录。
 - 历史记录仍只保存最终 JD 文本、简历文本、问题、回答和评价。
 - 真实 AI、Mock、答题、评价、保存历史和错误重试流程仍可用。
-- 没有新增依赖，没有新增后端上传 API，没有改 DeepSeek API、prompt、parser、Supabase Auth 或 localStorage 数据结构。
+- 没有新增后端上传 API；除项目所有者已安装的 `mammoth` / `pdf-parse` 外，没有再新增依赖；没有改 DeepSeek API、prompt、parser、Supabase Auth 或 localStorage 数据结构。
 
 ### 代码审查关注点
 
@@ -1390,8 +1393,119 @@ docs/INTERNAL_TESTING_RELEASE.md
 - 文件大小、空文件和读取失败是否有处理。
 - 导入成功后是否清空旧问题和旧评价，避免用户误用旧结果。
 - 是否没有把 File 对象、文件名、路径、token 或其他敏感信息写入历史记录或日志。
-- 是否没有新增依赖或改变 AI/API/Auth/历史数据结构。
+- 是否没有新增除 `mammoth` / `pdf-parse` 以外的依赖或改变 AI/API/Auth/历史数据结构。
 - 手动粘贴、开发 Mock、真实 AI 和历史保存是否仍可用。
+
+
+## 阶段 22：PDF/DOCX 文档解析入口 MVP
+
+阶段状态：未完成。阶段 21 已支持浏览器本地 `.txt` / `.md` 导入；本阶段在这个基础上支持常见 PDF 和 DOCX 文档，把文件解析成纯文本后填入现有 JD 或简历 textarea。
+
+### 开发前提
+
+项目所有者已安装本阶段需要的依赖，开发 session 不需要也不应该重复安装：
+
+```text
+mammoth@1.12.1
+pdf-parse@2.4.5
+```
+
+如果开发 session 发现依赖版本异常，应先向用户说明情况，不要自行执行 `npm install`。
+
+### 阶段目标
+
+- 支持在岗位 JD 输入区导入 `.pdf` / `.docx`，解析后填入现有 textarea。
+- 支持在个人简历输入区导入 `.pdf` / `.docx`，解析后填入现有 textarea。
+- 新增项目后端解析接口，前端只调用项目自己的 API。
+- 文件只用于一次性解析，不保存原始文件。
+- 解析结果仍然是普通文本，用户可以继续手动编辑。
+- 保留阶段 21 已有 `.txt` / `.md` 本地导入能力。
+
+### 产品思路
+
+本阶段仍然不是完整“文件管理系统”。它只是把用户手里的常见 PDF / DOCX 文档转换成输入框文本，降低复制粘贴成本。对用户来说，最终进入 AI 提问和评价流程的仍是 textarea 里的文本，而不是文件本身。
+
+### MVP 范围
+
+本阶段建议包含：
+
+- 新增 `/api/parse-document` 或同等后端 API route。
+- 前端为 JD 和简历导入入口支持 `.pdf` / `.docx`。
+- 后端使用 `mammoth` 解析 `.docx`。
+- 后端使用 `pdf-parse` 解析文本型 `.pdf`。
+- 解析成功后返回纯文本给前端。
+- 前端把纯文本填入对应 textarea，并清空旧问题、回答、提交状态、评价和保存提示。
+- 对文件类型不支持、文件过大、解析失败、解析为空给出明确提示。
+- 更新必要中文 file header、函数/代码块注释和测试说明。
+
+本阶段暂不包含：
+
+- 扫描版 PDF OCR。
+- 图片简历识别。
+- `.doc` 老格式解析。
+- 多文件合并。
+- 云端文件存储。
+- 数据库保存文件。
+- AI 自动结构化简历或 JD。
+- 修改 DeepSeek prompt、parser 或请求协议。
+- 修改 Supabase Auth。
+- 修改 localStorage 历史记录数据结构。
+- 新增除项目所有者已安装解析库以外的依赖。
+
+### 建议实现方式
+
+- 建议新增 server route：`app/api/parse-document/route.js`。
+- route 使用 `request.formData()` 接收单个文件和目标字段，例如 `target: jobInfo | resume`。
+- route 只接受 `.pdf` / `.docx`，并设置大小限制，例如 2MB 到 5MB。
+- `.docx` 使用 `mammoth.extractRawText` 提取纯文本。
+- `.pdf` 使用 `pdf-parse` 提取文本型 PDF 内容。
+- 解析后 trim 文本；如果为空，提示用户该文件可能是扫描件或图片型 PDF，建议复制粘贴或换文件。
+- 前端调用项目自己的解析 API，不直接在前端引入 `mammoth` 或 `pdf-parse`。
+- 前端收到纯文本后写入 `jobInfo` 或 `resume` state，并复用清空旧面试状态的逻辑。
+- 不要把文件对象、文件名、文件路径或解析前原始文件内容写入 localStorage、历史记录或日志。
+
+### 任务拆分建议
+
+1. 先阅读 `README.md`、`AGENTS.md`、`docs/PROJECT_STATUS.md`、`docs/ROADMAP.md`、`docs/PRD.md` 和 `docs/DEVELOPMENT_TESTING.md`。
+2. 检查 `package.json`，确认 `mammoth` 和 `pdf-parse` 已存在，不要安装依赖。
+3. 检查阶段 21 的文件导入实现，理解 `.txt` / `.md` 是如何填入 JD 和简历 textarea 的。
+4. 新增后端解析 route，并写中文 file header。
+5. 在 client API 层新增解析文档的封装，让前端组件只调用项目内部 API。
+6. 在 `/interview/new` 文件导入入口里接入 `.pdf` / `.docx` 解析流程，保留 `.txt` / `.md` 本地读取流程。
+7. 增加解析 loading、错误提示和空内容提示。
+8. 导入成功后清空旧问题、回答、评价和保存提示，但不删除 localStorage 历史记录。
+9. 运行必要检查，至少做 `git diff --check` 和 `npm run build`；不要启动 dev server，除非用户明确要求。
+10. 按 `AGENTS.md` 的分档收尾规则更新必要文档。
+
+### 验收标准
+
+阶段 22 完成时，应满足：
+
+- `/interview/new` 的岗位 JD 输入区可以导入文本型 `.pdf` 并填入 textarea。
+- `/interview/new` 的岗位 JD 输入区可以导入 `.docx` 并填入 textarea。
+- `/interview/new` 的个人简历输入区可以导入文本型 `.pdf` 并填入 textarea。
+- `/interview/new` 的个人简历输入区可以导入 `.docx` 并填入 textarea。
+- 阶段 21 的 `.txt` / `.md` 导入能力仍可用。
+- 解析成功后用户仍可继续手动编辑文本。
+- 解析成功后旧问题、回答、提交状态、最终评价和保存提示被清空。
+- 文件过大、类型不支持、解析失败、解析为空都有明确提示。
+- 扫描版 PDF 或图片型 PDF 无法解析时，提示用户改用复制粘贴或换文本型文件。
+- 前端只调用项目内部 `/api/parse-document`，不直接引入解析库。
+- 原始文件不保存到 localStorage，不进入历史记录，不写入数据库。
+- 历史记录仍只保存最终 JD 文本、简历文本、问题、回答和评价。
+- 真实 AI、Mock、答题、评价、保存历史和错误重试流程仍可用。
+- 除项目所有者已安装的 `mammoth` / `pdf-parse` 外，没有再新增依赖；没有改 DeepSeek API、prompt、parser、Supabase Auth 或 localStorage 数据结构。
+
+### 代码审查关注点
+
+- API route 是否只做一次性解析，没有保存文件。
+- 文件类型和大小限制是否在前后端都有清晰处理，后端不能只信任前端。
+- `.docx` 是否用 `mammoth`，文本型 `.pdf` 是否用 `pdf-parse`，没有把解析库打进前端 bundle。
+- 解析为空时是否有针对扫描件/图片型 PDF 的友好提示。
+- 解析成功后是否清空旧问题和旧评价，避免新输入复用旧结果。
+- 是否没有把 File 对象、文件名、路径或原始文件内容写入历史记录或日志。
+- 是否没有修改 DeepSeek prompt、parser、Supabase Auth 或 localStorage 历史结构。
+- `.txt` / `.md` 原有导入、手动粘贴、开发 Mock、真实 AI 和历史保存是否仍可用。
 
 ## 暂缓事项
 
@@ -1400,7 +1514,7 @@ docs/INTERNAL_TESTING_RELEASE.md
 - AI 逐步提问
 - 多轮追问
 - 云端历史记录和数据库存储
-- PDF/DOCX 文件解析简历或 JD
+- 扫描版 PDF OCR、图片简历识别或复杂文件解析
 - 语音或视频面试
 - 单题即时 AI 批改
 - 复杂视觉重构或全站设计系统重构
@@ -1422,10 +1536,16 @@ docs/INTERNAL_TESTING_RELEASE.md
 你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“[阶段名称]”阶段。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md；如果本阶段涉及开发测试流程，也阅读 docs/DEVELOPMENT_TESTING.md。然后按 ROADMAP 的任务拆分和验收标准实现。只有在需要改变产品范围或用户流程时才阅读 docs/PRD.md。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
 ```
 
-阶段 21 已完成。当前建议先启动代码审查 session 检查阶段 21。可以这样启动：
+阶段 22 当前未完成。可以这样启动阶段开发 session：
 
 ```text
-你是 AI Interview Simulator 的代码审查 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/PRD.md、docs/DEVELOPMENT_TESTING.md，然后以 review 姿态检查阶段 21 的当前 diff。重点检查文件导入是否只在浏览器本地完成，是否只支持 .txt/.md 并正确提示不支持类型，是否处理空文件、读取失败和过大文件，导入成功后是否清空旧问题和旧评价，是否没有保存 File 对象或文件元数据到历史记录，以及是否没有新增后端上传 API、依赖、DeepSeek/prompt/Auth/localStorage 数据结构改动。
+你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“阶段 22：PDF/DOCX 文档解析入口 MVP”。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/PRD.md 和 docs/DEVELOPMENT_TESTING.md。项目所有者已经安装 mammoth@1.12.1 和 pdf-parse@2.4.5，请不要安装依赖。重点实现：新增项目后端文档解析 API，把 .pdf/.docx 解析成纯文本；/interview/new 的岗位 JD 和个人简历输入区都能导入 PDF/DOCX 并填入现有 textarea；保留 .txt/.md 本地导入；解析成功后清空旧问题、回答、评价和保存提示。不要保存原始文件，不要做 OCR、图片识别、云端存储、AI 自动解析，也不要改 DeepSeek API、prompt、Supabase Auth 或 localStorage 历史数据结构。完成后按 AGENTS.md 的分档收尾规则更新必要文档，并说明测试情况。
+```
+
+阶段 22 完成后，可以这样启动代码审查 session：
+
+```text
+你是 AI Interview Simulator 的代码审查 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/PRD.md、docs/DEVELOPMENT_TESTING.md，然后以 review 姿态检查阶段 22 的当前 diff。重点检查：PDF/DOCX 是否通过项目后端 API 一次性解析，前端是否没有直接引入 mammoth/pdf-parse，文件类型和大小限制是否可靠，解析失败/空内容/扫描版 PDF 是否有提示，原始文件和文件元数据是否没有进入 localStorage/历史记录/日志，.txt/.md 导入是否仍可用，以及是否没有新增除 `mammoth` / `pdf-parse` 以外的依赖、云端文件存储、DeepSeek/prompt/Auth/localStorage 数据结构改动。
 ```
 
 代码审查 session 用于检查阶段开发结果:
