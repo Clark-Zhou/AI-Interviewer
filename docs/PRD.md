@@ -84,11 +84,13 @@ Out of scope for this MVP stage:
 
 ### 5.1 Job Description Input
 
-User can paste a job description into a text area.
+User can paste a job description into a text area. The near-term MVP may also let the user import `.txt`, `.md`, text-based `.pdf`, or `.docx` content into the same text area. PDF and DOCX parsing should return plain text only.
 
-Required fields for MVP:
+Supported input for MVP:
 
-- Job description raw text
+- Job description raw text pasted into the text area
+- Optional local `.txt` / `.md` import into the existing text area
+- Optional `.pdf` / `.docx` parsing into plain text through the project backend API
 
 Optional later fields:
 
@@ -99,16 +101,20 @@ Optional later fields:
 
 ### 5.2 Resume Input
 
-User can paste resume content into a text area.
+User can paste resume content into a text area. The near-term MVP may also let the user import `.txt`, `.md`, text-based `.pdf`, or `.docx` content into the same text area. PDF and DOCX parsing should return plain text only.
 
-Required fields for MVP:
+Supported input for MVP:
 
-- Resume raw text
+- Resume raw text pasted into the text area
+- Optional local `.txt` / `.md` import into the existing text area
+- Optional `.pdf` / `.docx` parsing into plain text through the project backend API
 
 Out of scope for MVP:
 
-- PDF upload
-- DOCX upload
+- Scanned PDF OCR
+- Image resume recognition
+- Server-side file storage
+- Cloud file upload or file management
 - Resume format parsing
 - Resume editor
 

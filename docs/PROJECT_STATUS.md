@@ -10,7 +10,7 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前已经验证核心面试练习闭环，并已完成基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、新面试页面体验优化、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。云端历史记录、文件上传和复杂账号能力仍暂缓。
+当前已经验证核心面试练习闭环，并已完成基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、新面试页面体验优化、本地文本文件导入入口、PDF/DOCX 文档解析入口、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。云端历史记录、扫描版 PDF OCR、图片识别和复杂账号能力仍暂缓。
 
 ## 2. 当前阶段
 
@@ -20,7 +20,7 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 optimize-interview-page
 ```
 
-当前已经完成的是 MVP 的核心闭环、开发效率优化、基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、新面试页面体验优化、登录入口页面壳、入口/主界面路由拆分、Supabase Auth 账号系统 MVP 和内部测试版上线准备文档。当前代码事实是：
+当前已经完成的是 MVP 的核心闭环、开发效率优化、基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、新面试页面体验优化、本地文本文件导入入口、PDF/DOCX 文档解析入口、登录入口页面壳、入口/主界面路由拆分、Supabase Auth 账号系统 MVP 和内部测试版上线准备文档。当前代码事实是：
 
 ```text
 访问根路径后看到基础主页
@@ -44,6 +44,15 @@ optimize-interview-page
 用户可以从主界面登出，登出后回到 /login
 输入岗位信息
 输入个人简历
+岗位 JD 输入区可以从本地 .txt / .md 文件导入文本
+个人简历输入区可以从本地 .txt / .md 文件导入文本
+文本文件只在浏览器本地读取并填入现有 textarea
+岗位 JD 输入区可以通过项目后端 API 把文本型 .pdf / .docx 解析成纯文本
+个人简历输入区可以通过项目后端 API 把文本型 .pdf / .docx 解析成纯文本
+PDF/DOCX 解析只做一次性纯文本提取，不保存原始文件
+导入成功后用户仍可继续编辑文本
+导入成功后清空旧问题、回答、提交状态、最终评价和保存提示
+不支持类型、空文件、读取失败和超过大小限制时有轻量提示
 点击生成面试问题
 前端调用后端生成问题 API
 后端调用 DeepSeek
@@ -90,13 +99,15 @@ React
 DeepSeek API
 Supabase Auth
 普通 CSS
+mammoth@1.12.1
+pdf-parse@2.4.5
 ```
 
 当前没有使用：
 
 ```text
 数据库
-文件上传
+云端文件存储、OCR 或图片识别
 Tailwind CSS
 组件库
 TypeScript
@@ -251,6 +262,12 @@ app/api/evaluate-interview/route.js
 生成最终面试评价的后端 API 入口，接收岗位、简历和整场问答，做基础校验，然后调用服务端 AI 逻辑。
 
 ```text
+app/api/parse-document/route.js
+```
+
+PDF/DOCX 文档解析 API 入口。接收一次性 formData 文件请求，校验 target、扩展名和大小，把文本型 PDF 或 DOCX 解析成纯文本返回；不保存原始文件、不写数据库、不写 localStorage。
+
+```text
 lib/server/deepseek.js
 ```
 
@@ -261,6 +278,12 @@ lib/server/interviewEvaluation.js
 ```
 
 最终评价的 DeepSeek 服务端调用封装。这里读取环境变量、调用 DeepSeek API，并把返回内容交给评价解析函数。
+
+```text
+lib/server/documentParser.js
+```
+
+服务端文档解析工具。使用 `mammoth` 提取 DOCX 原始文本，使用 `pdf-parse` 提取文本型 PDF 文本，并做轻量换行归一化；不做 OCR、图片识别、AI 自动结构化或文件持久化。
 
 ```text
 lib/server/parseAiQuestions.js
@@ -321,6 +344,17 @@ components/InterviewSimulator.js
   -> lib/server/parseInterviewEvaluation.js
   -> app/api/evaluate-interview/route.js
   -> lib/client/interviewApi.js
+  -> components/InterviewSimulator.js
+```
+
+文档解析链路：
+
+```text
+components/InterviewSimulator.js
+  -> lib/client/interviewApi.js
+  -> app/api/parse-document/route.js
+  -> lib/server/documentParser.js
+  -> mammoth 或 pdf-parse
   -> components/InterviewSimulator.js
 ```
 
@@ -440,6 +474,35 @@ POST /api/evaluate-interview
 }
 ```
 
+文档解析：
+
+```http
+POST /api/parse-document
+```
+
+请求体为 `multipart/form-data`：
+
+```text
+file: .pdf 或 .docx 文件
+target: jobInfo 或 resume
+```
+
+成功响应：
+
+```json
+{
+  "text": "解析出的纯文本"
+}
+```
+
+错误响应：
+
+```json
+{
+  "error": "错误说明"
+}
+```
+
 ## 7. 环境变量
 
 本地需要创建：
@@ -511,6 +574,12 @@ http://localhost:3000
 - 已登录用户可以在主页点击 `登出`
 - 岗位信息输入框
 - 个人简历输入框
+- 岗位 JD 和个人简历输入区支持本地 `.txt` / `.md` 文本导入
+- 文本导入只使用浏览器本地读取，不上传文件，不保存文件对象或文件元数据
+- 岗位 JD 和个人简历输入区支持通过项目后端 API 把文本型 `.pdf` / `.docx` 解析为纯文本
+- `/api/parse-document` 文档解析 API
+- `mammoth@1.12.1` DOCX 原始文本提取
+- `pdf-parse@2.4.5` 文本型 PDF 文本提取
 - 前端空输入校验
 - DeepSeek API Key 环境变量读取
 - `/api/generate-questions` 后端 API
@@ -564,7 +633,7 @@ http://localhost:3000
 
 当前 MVP 还没有做：
 
-- 文件上传解析简历或 JD
+- 扫描版 PDF OCR、图片简历识别或复杂文件解析
 - 恢复历史 session 到当前页面
 - 历史记录删除、编辑和搜索
 - 数据库或云端同步历史记录
@@ -579,22 +648,28 @@ http://localhost:3000
 
 建议下一步继续小步推进，不要一次做太大。
 
-阶段 20 已完成。当前建议先做阶段 20 的代码审查和必要的本地/部署前回归测试。
+阶段 22 已完成。当前建议先做阶段 22 的代码审查和必要的本地回归测试。
 
 建议检查：
 
-1. `/interview/new` 初始状态是否不显示历史记录列表、历史详情、`模拟问题` 面板或问题空状态。
-2. 点击真实 AI 生成问题后，生成中状态或生成后的问题列表是否出现。
-3. 点击开发环境 Mock 问题后，问题列表是否出现。
-4. 真实 AI、Mock、答题、评价、保存历史和错误重试流程是否仍可用。
-5. 轻量视觉修剪是否延续青色主色调，且没有影响 `/interview` 工作台和 `/interview/history`。
-6. 是否没有改 DeepSeek API、prompt、本地历史记录数据结构、Supabase Auth 或路由信息架构。
+1. `/interview/new` 的岗位 JD 输入区是否可以导入文本型 `.pdf` 和 `.docx` 文件。
+2. `/interview/new` 的个人简历输入区是否可以导入文本型 `.pdf` 和 `.docx` 文件。
+3. 解析结果是否填入现有 textarea，且用户仍可继续编辑。
+4. 解析成功后是否清空旧问题、回答、提交状态、最终评价和保存提示。
+5. 不支持类型、文件过大、解析失败、解析为空和扫描版 PDF 是否有清楚提示。
+6. 原始文件是否不保存到 localStorage、历史记录、数据库或日志。
+7. 是否保留 `.txt` / `.md` 本地导入能力。
+8. 除项目所有者已安装的 `mammoth` / `pdf-parse` 外，是否没有再新增依赖、云端文件存储、AI 自动解析，且没有改 DeepSeek API、prompt、Supabase Auth 或 localStorage 历史数据结构。
+
+已知残余风险：
+
+- 当前 `/api/parse-document` 在业务逻辑里限制文件大小为 5MB，但大小检查发生在 `request.formData()` 之后。也就是说，超大 multipart 请求在被业务代码拒绝前，仍可能先进入 Next.js 的 formData 解析流程并占用内存。阶段 22 暂不处理这个平台/route 层请求体限制；后续如果要提高可靠性，应在部署平台、反向代理或更底层请求体配置中增加更早的 body size 防护。
 
 不建议马上做：
 
 - 云端历史记录和数据库存储
 - 用户资料页、OAuth、支付或权限系统
-- 文件上传
+- 扫描版 PDF OCR、图片识别和云端文件上传
 - 多轮追问
 - 语音或视频面试
 - 复杂视觉重构或全站设计系统重构

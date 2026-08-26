@@ -10,7 +10,7 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前版本先验证最小可用闭环。当前已完成基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、新面试页面体验优化、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。云端历史记录、文件上传、语音或视频面试仍暂缓。
+当前版本先验证最小可用闭环。当前已完成基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、新面试页面体验优化、本地文本文件导入入口、PDF/DOCX 文档解析入口、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。云端历史记录、云端文件存储、OCR、语音或视频面试仍暂缓。
 
 ## 当前功能
 
@@ -31,6 +31,9 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 - 已登录用户可从主页进入 `/interview` 面试工作台
 - 输入岗位 JD
 - 输入个人简历
+- 岗位 JD 和个人简历输入区可从本地 `.txt` / `.md` 文件导入文本
+- 岗位 JD 和个人简历输入区可通过项目后端 API 把文本型 `.pdf` / `.docx` 解析成纯文本
+- 文件导入或解析后仍可继续编辑，并会清空旧问题、回答、评价和保存提示
 - 前端空输入校验
 - 调用后端 API 生成 6 道结构化面试问题
 - 生成问题失败后显示错误提示，并可重试生成问题
@@ -60,12 +63,15 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 - React
 - DeepSeek API
 - Supabase Auth
+- mammoth
+- pdf-parse
 - 普通 CSS
 
 当前没有使用：
 
 - 云端历史数据库
-- 文件上传
+- 云端文件存储
+- OCR 或图片识别
 - 云端历史记录
 - 完整用户资料系统
 - Tailwind CSS
@@ -145,6 +151,7 @@ app/interview/new/page.js         受保护的新面试流程页
 app/interview/history/page.js     受保护的本地历史记录页
 app/api/generate-questions/       生成面试问题 API
 app/api/evaluate-interview/       生成最终评价 API
+app/api/parse-document/           PDF/DOCX 纯文本解析 API
 proxy.js                          Supabase Auth cookie 刷新和 /interview 访问保护
 
 components/LoginEntryShell.js     登录/注册入口页面壳
@@ -160,6 +167,7 @@ lib/supabase/browserClient.js     浏览器端 Supabase Auth client
 lib/supabase/serverClient.js      服务端 Supabase Auth client
 lib/server/deepseek.js            生成问题的 DeepSeek 服务端调用
 lib/server/interviewEvaluation.js 最终评价的 DeepSeek 服务端调用
+lib/server/documentParser.js      服务端 PDF/DOCX 纯文本解析工具
 lib/server/parseAiQuestions.js    面试问题 JSON 解析和校验
 lib/server/parseInterviewEvaluation.js 最终评价 JSON 解析和校验
 lib/prompts/interviewQuestions.js 生成问题 prompt
@@ -202,6 +210,17 @@ components/InterviewSimulator.js
   -> 前端展示最终评价
 ```
 
+解析 PDF/DOCX：
+
+```text
+components/InterviewSimulator.js
+  -> lib/client/interviewApi.js
+  -> app/api/parse-document/route.js
+  -> lib/server/documentParser.js
+  -> mammoth 或 pdf-parse
+  -> 前端 textarea
+```
+
 前端不能直接调用 DeepSeek。API Key 只能在服务端读取。
 
 ## 开发测试
@@ -224,7 +243,7 @@ components/InterviewSimulator.js
 7. 在主页点击 `登出` 后确认回到未登录状态；再次登录或直接访问 `/interview`，确认登录态和路由保护仍可用。
 8. 在 `/interview` 点击 `开始新的面试`，确认进入 `/interview/new`。
 9. 确认 `/interview/new` 初始状态只显示新面试输入和操作入口，不显示历史记录区或 `模拟问题` 面板。
-10. 点击 `填入示例 JD/简历`。
+10. 可分别导入本地 `.txt` / `.md`，或解析文本型 `.pdf` / `.docx` 到岗位 JD 或个人简历输入区，确认文本填入后仍可编辑；也可以点击 `填入示例 JD/简历` 走快速测试。
 11. 点击 `生成面试问题`。
 12. 等待问题生成。
 13. 点击 `填入测试回答`。
@@ -283,7 +302,7 @@ components/InterviewSimulator.js
 
 - 云端历史记录和完整用户资料系统
 - 数据库存储
-- 文件上传解析简历或 JD
+- 云端文件存储、OCR 或图片识别
 - 云端/数据库历史面试记录
 - OAuth、支付或权限系统
 - 历史记录删除、编辑、搜索和恢复 session
