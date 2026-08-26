@@ -30,7 +30,6 @@ import {
 const isDevelopment = process.env.NODE_ENV === 'development';
 const MAX_TEXT_IMPORT_SIZE_BYTES = 300 * 1024;
 const SUPPORTED_TEXT_FILE_EXTENSIONS = ['.txt', '.md'];
-const SUPPORTED_TEXT_FILE_TYPES = ['text/plain', 'text/markdown', 'text/x-markdown'];
 
 const SAMPLE_JOB_INFO = `岗位名称：AI 产品经理实习生
 
@@ -97,13 +96,9 @@ function getRequestErrorMessage(prefix, error) {
 
 function isSupportedTextFile(file) {
   const fileName = file.name.toLowerCase();
-  const hasSupportedExtension = SUPPORTED_TEXT_FILE_EXTENSIONS.some((extension) =>
+  return SUPPORTED_TEXT_FILE_EXTENSIONS.some((extension) =>
     fileName.endsWith(extension),
   );
-  const hasSupportedMimeType =
-    !file.type || SUPPORTED_TEXT_FILE_TYPES.includes(file.type.toLowerCase());
-
-  return hasSupportedExtension && hasSupportedMimeType;
 }
 
 // 前端主组件：负责收集输入、生成问题、提交回答，并展示最终评价。
