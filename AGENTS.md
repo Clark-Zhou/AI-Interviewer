@@ -8,7 +8,7 @@
 
 - 前端：Next.js App Router
 - AI 服务：DeepSeek API
-- 当前阶段：已跑通“岗位信息 + 简历 -> 生成问题 -> 逐题回答 -> 最终评价”的 MVP 核心闭环，并已完成本地历史记录、Supabase Auth、基础主页和主页封面视觉优化
+- 当前阶段：已跑通“岗位信息 + 简历 -> 生成问题 -> 逐题回答 -> 最终评价”的 MVP 核心闭环，并已完成本地历史记录、Supabase Auth、主页优化、面试工作台拆分、本地文本导入和 PDF/DOCX 纯文本解析
 
 ## 新 session 接手规则
 
@@ -33,6 +33,15 @@
 
 - 如果要改开发测试辅助逻辑、mock 策略或本地测试流程，阅读 `docs/DEVELOPMENT_TESTING.md`。
 - 如果要改产品范围、用户流程、MVP 边界或非目标，阅读 `docs/PRD.md`。
+- 如果要追溯已完成历史阶段的详细方案，阅读 `docs/ROADMAP_ARCHIVE.md` 的相关章节。
+
+PRD 降低优先级规则：
+
+- `docs/PRD.md` 不是通用必读文件。普通开发、代码审查、样式调整、bug 修复和阶段内收尾不要默认读取 PRD。
+- `docs/ROADMAP_ARCHIVE.md` 也不是通用必读文件。不要为了了解下一步任务而读取历史归档。
+- 优先通过 `README.md`、`AGENTS.md`、`docs/PROJECT_STATUS.md` 和 `docs/ROADMAP.md` 理解当前任务。
+- 只有当任务会改变产品目标、MVP 范围、用户主流程、非目标或长期边界时，才阅读或更新 PRD。
+- 如果不确定是否需要读 PRD，先看 ROADMAP 中当前阶段是否明确要求；没有要求时不要为了保险而全文读取。
 
 开始前检查：
 
@@ -59,7 +68,7 @@ git log --oneline -3
 - 如果是代码审查任务，先判断审查对象是当前未提交 diff、staged diff、最近一次 commit，还是整个分支相对 main 的 diff。
 - 如果同一个开发 session 连续做多个任务，每个新任务开始前都重新做这次轻量同步，不要沿用上一个任务的计划记忆。
 
-同步后按任务需要阅读相关文档：通用优先看 `README.md`、`AGENTS.md`、`docs/PROJECT_STATUS.md`、`docs/ROADMAP.md`；涉及开发辅助、mock 或测试流程时，再看 `docs/DEVELOPMENT_TESTING.md`；涉及产品范围变化时，再看 `docs/PRD.md`。
+同步后按任务需要阅读相关文档：通用优先看 `README.md`、`AGENTS.md`、`docs/PROJECT_STATUS.md`、`docs/ROADMAP.md`；涉及开发辅助、mock 或测试流程时，再看 `docs/DEVELOPMENT_TESTING.md`；只有涉及产品范围、用户主流程、MVP 边界或非目标变化时，才看 `docs/PRD.md`；只有需要追溯旧阶段详细决策时，才看 `docs/ROADMAP_ARCHIVE.md`。
 
 如果开发或审查时发现文档之间存在模糊、矛盾、过时或互相反作用的地方，应停下来向用户说明问题并询问如何处理，不要自己猜一个解释继续开发。
 
@@ -70,7 +79,7 @@ git log --oneline -3
 
 推荐角色分工：
 
-- 产品助理 session：维护产品范围、阶段计划、优先级和验收标准，主要修改 `docs/PRD.md`、`docs/ROADMAP.md`、`docs/PROJECT_STATUS.md`。
+- 产品助理 session：维护产品范围、阶段计划、优先级和验收标准，主要修改 `docs/ROADMAP.md`、`docs/PROJECT_STATUS.md`；只有产品边界变化时才修改 `docs/PRD.md`。
 - 阶段开发 session：按照 `docs/ROADMAP.md` 的某个阶段完成完整实现，可能同时修改前端、后端、prompt、客户端工具和相关文档。
 - 代码审查 session：以 review 姿态检查阶段开发 session 的 diff、风险、遗漏测试和文档同步，不主动做大范围重构。
 - 开发测试 session（可选）：维护本地测试流程和开发辅助边界，主要修改 `docs/DEVELOPMENT_TESTING.md`，必要时配合阶段开发 session 修改开发辅助按钮。
@@ -263,7 +272,7 @@ AI agent 应该先停下来，向用户说明当前情况和可选方案，而�
 
 1. 先保持当前 MVP 核心闭环稳定。
 2. 再小步优化开发测试效率和用户体验。
-3. 后续如需新增 mock AI、历史记录增强、文件上传或对话式提问，应先明确产品边界。
-4. 账号系统只能在 ROADMAP 明确安排时开发；当前推荐使用 Supabase Auth。不要自建密码存储，不要使用或提交 Supabase `service_role` key，不要把密码写入 localStorage、日志或历史记录。云端历史记录、文件上传、语音或视频面试仍需单独规划。
+3. 后续如需新增 mock AI、历史记录增强、云端文件存储、OCR、图片识别或对话式提问，应先明确产品边界。
+4. 账号系统只能在 ROADMAP 明确安排时开发；当前推荐使用 Supabase Auth。不要自建密码存储，不要使用或提交 Supabase `service_role` key，不要把密码写入 localStorage、日志或历史记录。云端历史记录、云端文件存储、OCR、图片识别、语音或视频面试仍需单独规划。
 
 每一步都应保持可理解、可运行、可回退。

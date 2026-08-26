@@ -69,10 +69,9 @@ AI Interview Simulator 是一个个人 MVP 项目，用于帮助求职者基于�
 
 当前没有使用：
 
-- 云端历史数据库
+- 云端历史记录或数据库
 - 云端文件存储
 - OCR 或图片识别
-- 云端历史记录
 - 完整用户资料系统
 - Tailwind CSS
 - UI 组件库
@@ -175,7 +174,8 @@ lib/prompts/interviewEvaluation.js 最终评价 prompt
 
 docs/PRD.md                       MVP 产品需求文档
 docs/PROJECT_STATUS.md            当前项目状态文档
-docs/ROADMAP.md                   阶段计划和优先级
+docs/ROADMAP.md                   当前阶段计划和下一步优先级
+docs/ROADMAP_ARCHIVE.md           已完成历史阶段详情归档，按需阅读
 docs/DEVELOPMENT_TESTING.md       开发测试说明
 docs/INTERNAL_TESTING_RELEASE.md  内部测试版部署和 smoke test 清单
 AGENTS.md                         AI agent 和开发协作规范
@@ -283,7 +283,8 @@ components/InterviewSimulator.js
 按需阅读：
 
 - `docs/DEVELOPMENT_TESTING.md`：改开发辅助、mock 策略或本地测试流程时阅读。
-- `docs/PRD.md`：改产品范围、用户流程、MVP 边界或非目标时阅读。
+- `docs/PRD.md`：不是通用必读；只在改产品目标、用户主流程、MVP 边界或非目标时阅读。
+- `docs/ROADMAP_ARCHIVE.md`：不是通用必读；只在追溯已完成阶段的详细方案时阅读。
 
 ## Session 协作方式
 
