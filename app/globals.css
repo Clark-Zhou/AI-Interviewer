@@ -931,6 +931,10 @@ label {
   color: #047857;
 }
 
+.text-import-message.loading {
+  color: #0f766e;
+}
+
 .text-import-message.error {
   color: #dc2626;
 }

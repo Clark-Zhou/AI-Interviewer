@@ -10,7 +10,7 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 岗位信息 + 个人简历 -> AI 生成面试问题 -> 用户逐题回答 -> AI 生成最终评价
 ```
 
-当前已经验证核心面试练习闭环，并已完成基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、新面试页面体验优化、本地文本文件导入入口、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。云端历史记录、扫描版 PDF OCR、图片识别和复杂账号能力仍暂缓。
+当前已经验证核心面试练习闭环，并已完成基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、新面试页面体验优化、本地文本文件导入入口、PDF/DOCX 文档解析入口、本地历史记录初始化、列表和详情查看、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。云端历史记录、扫描版 PDF OCR、图片识别和复杂账号能力仍暂缓。
 
 ## 2. 当前阶段
 
@@ -20,7 +20,7 @@ AI Interview Simulator 是一个个人项目，用于帮助求职者基于目标
 optimize-interview-page
 ```
 
-当前已经完成的是 MVP 的核心闭环、开发效率优化、基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、新面试页面体验优化、本地文本文件导入入口、登录入口页面壳、入口/主界面路由拆分、Supabase Auth 账号系统 MVP 和内部测试版上线准备文档。当前代码事实是：
+当前已经完成的是 MVP 的核心闭环、开发效率优化、基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、新面试页面体验优化、本地文本文件导入入口、PDF/DOCX 文档解析入口、登录入口页面壳、入口/主界面路由拆分、Supabase Auth 账号系统 MVP 和内部测试版上线准备文档。当前代码事实是：
 
 ```text
 访问根路径后看到基础主页
@@ -47,6 +47,9 @@ optimize-interview-page
 岗位 JD 输入区可以从本地 .txt / .md 文件导入文本
 个人简历输入区可以从本地 .txt / .md 文件导入文本
 文本文件只在浏览器本地读取并填入现有 textarea
+岗位 JD 输入区可以通过项目后端 API 把文本型 .pdf / .docx 解析成纯文本
+个人简历输入区可以通过项目后端 API 把文本型 .pdf / .docx 解析成纯文本
+PDF/DOCX 解析只做一次性纯文本提取，不保存原始文件
 导入成功后用户仍可继续编辑文本
 导入成功后清空旧问题、回答、提交状态、最终评价和保存提示
 不支持类型、空文件、读取失败和超过大小限制时有轻量提示
@@ -104,7 +107,7 @@ pdf-parse@2.4.5
 
 ```text
 数据库
-后端文件上传、PDF/DOCX 文件解析或 OCR
+云端文件存储、OCR 或图片识别
 Tailwind CSS
 组件库
 TypeScript
@@ -259,6 +262,12 @@ app/api/evaluate-interview/route.js
 生成最终面试评价的后端 API 入口，接收岗位、简历和整场问答，做基础校验，然后调用服务端 AI 逻辑。
 
 ```text
+app/api/parse-document/route.js
+```
+
+PDF/DOCX 文档解析 API 入口。接收一次性 formData 文件请求，校验 target、扩展名和大小，把文本型 PDF 或 DOCX 解析成纯文本返回；不保存原始文件、不写数据库、不写 localStorage。
+
+```text
 lib/server/deepseek.js
 ```
 
@@ -269,6 +278,12 @@ lib/server/interviewEvaluation.js
 ```
 
 最终评价的 DeepSeek 服务端调用封装。这里读取环境变量、调用 DeepSeek API，并把返回内容交给评价解析函数。
+
+```text
+lib/server/documentParser.js
+```
+
+服务端文档解析工具。使用 `mammoth` 提取 DOCX 原始文本，使用 `pdf-parse` 提取文本型 PDF 文本，并做轻量换行归一化；不做 OCR、图片识别、AI 自动结构化或文件持久化。
 
 ```text
 lib/server/parseAiQuestions.js
@@ -329,6 +344,17 @@ components/InterviewSimulator.js
   -> lib/server/parseInterviewEvaluation.js
   -> app/api/evaluate-interview/route.js
   -> lib/client/interviewApi.js
+  -> components/InterviewSimulator.js
+```
+
+文档解析链路：
+
+```text
+components/InterviewSimulator.js
+  -> lib/client/interviewApi.js
+  -> app/api/parse-document/route.js
+  -> lib/server/documentParser.js
+  -> mammoth 或 pdf-parse
   -> components/InterviewSimulator.js
 ```
 
@@ -448,6 +474,35 @@ POST /api/evaluate-interview
 }
 ```
 
+文档解析：
+
+```http
+POST /api/parse-document
+```
+
+请求体为 `multipart/form-data`：
+
+```text
+file: .pdf 或 .docx 文件
+target: jobInfo 或 resume
+```
+
+成功响应：
+
+```json
+{
+  "text": "解析出的纯文本"
+}
+```
+
+错误响应：
+
+```json
+{
+  "error": "错误说明"
+}
+```
+
 ## 7. 环境变量
 
 本地需要创建：
@@ -521,6 +576,10 @@ http://localhost:3000
 - 个人简历输入框
 - 岗位 JD 和个人简历输入区支持本地 `.txt` / `.md` 文本导入
 - 文本导入只使用浏览器本地读取，不上传文件，不保存文件对象或文件元数据
+- 岗位 JD 和个人简历输入区支持通过项目后端 API 把文本型 `.pdf` / `.docx` 解析为纯文本
+- `/api/parse-document` 文档解析 API
+- `mammoth@1.12.1` DOCX 原始文本提取
+- `pdf-parse@2.4.5` 文本型 PDF 文本提取
 - 前端空输入校验
 - DeepSeek API Key 环境变量读取
 - `/api/generate-questions` 后端 API
@@ -589,7 +648,7 @@ http://localhost:3000
 
 建议下一步继续小步推进，不要一次做太大。
 
-阶段 21 已完成并审查。项目所有者已安装阶段 22 需要的 `mammoth@1.12.1` 和 `pdf-parse@2.4.5`。当前建议进入阶段 22：PDF/DOCX 文档解析入口 MVP。
+阶段 22 已完成。当前建议先做阶段 22 的代码审查和必要的本地回归测试。
 
 建议检查：
 

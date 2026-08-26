@@ -20,6 +20,7 @@
 - `app/interview/history/page.js`：受保护的本地历史记录页。
 - `app/api/generate-questions/route.js`：生成问题的后端 API。
 - `app/api/evaluate-interview/route.js`：生成最终评价的后端 API。
+- `app/api/parse-document/route.js`：PDF/DOCX 解析成纯文本的后端 API。
 - `docs/INTERNAL_TESTING_RELEASE.md`：内部测试版部署准备和生产 smoke test 清单。
 
 ## 当前开发辅助能力
@@ -58,7 +59,7 @@ process.env.NODE_ENV === 'development'
 11. 回到 `/` 点击 `登出`，确认主页回到未登录状态；再次访问 `/interview` 会进入 `/login`。
 12. 重新登录后从主页进入 `/interview`，点击 `开始新的面试` 进入 `/interview/new`。
 13. 确认 `/interview/new` 初始状态不显示历史记录区、`模拟问题` 面板或问题空状态。
-14. 分别在岗位 JD 和个人简历输入区导入本地 `.txt` 或 `.md` 文本文件，确认文本填入 textarea 后仍可编辑。
+14. 分别在岗位 JD 和个人简历输入区导入本地 `.txt` / `.md` 文本文件，或解析文本型 `.pdf` / `.docx` 文档，确认文本填入 textarea 后仍可编辑。
 15. 如不使用本地文件，也可以点击 `填入示例 JD/简历` 走快速测试。
 16. 点击真实 AI 问题按钮，等待 DeepSeek 返回问题列表。
 17. 点击 `填入测试回答`。
@@ -85,7 +86,7 @@ Mock 快速流程：
 5. 从主页点击面试入口进入 `/interview`。
 6. 点击 `开始新的面试` 进入 `/interview/new`。
 7. 确认 `/interview/new` 初始状态不显示历史记录区、`模拟问题` 面板或问题空状态。
-8. 分别在岗位 JD 和个人简历输入区导入本地 `.txt` 或 `.md` 文本文件，确认文本填入 textarea 后仍可编辑。
+8. 分别在岗位 JD 和个人简历输入区导入本地 `.txt` / `.md` 文本文件，或解析文本型 `.pdf` / `.docx` 文档，确认文本填入 textarea 后仍可编辑。
 9. 如不使用本地文件，也可以点击 `填入示例 JD/简历` 走快速测试。
 10. 点击 `使用 Mock 问题`，应立即展示固定问题列表。
 11. 点击 `填入测试回答`。
