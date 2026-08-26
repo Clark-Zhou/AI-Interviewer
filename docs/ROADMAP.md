@@ -14,7 +14,7 @@
 
 ## 当前推荐方向
 
-当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、新面试页面体验优化、本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步建议进入阶段 21：文本文件导入入口 MVP。
+当前 MVP 已经跑通“岗位信息 + 简历 -> 生成问题 -> 用户回答 -> AI 生成最终评价”，并已完成基础主页框架、主页封面视觉优化、主页登录流修正、面试工作台信息架构拆分、新面试页面体验优化、本地文本文件导入入口、本地历史记录、开发模式 Mock 流程、一键提交全部回答、开始新一轮面试、AI 请求失败后的基础重试入口、登录入口页面壳、`/login` 和 `/interview` 前端路由拆分、Supabase Auth 账号系统 MVP，以及内部测试版上线准备文档。下一步建议先做阶段 21 的代码审查和必要的本地回归测试。
 
 原因：
 
@@ -24,8 +24,8 @@
 - 阶段 19 已完成并已审查：`/interview` 是受保护的面试工作台入口页，新面试和历史记录已拆到子路由。
 - `/interview/new` 承载完整新面试流程，`/interview/history` 承载本地历史记录列表和详情。
 - 阶段 20 已完成：`/interview/new` 初始状态更聚焦，新面试页不提前展示历史区或 `模拟问题` 空面板。
-- 下一步可以降低输入成本：支持在 `/interview/new` 把本地 `.txt` / `.md` 内容导入到已有 JD 和简历 textarea。
-- 阶段 21 只做浏览器本地文本导入，不做后端上传、PDF/DOCX 解析、云端存储或 AI 自动解析。
+- 阶段 21 已完成：`/interview/new` 支持把本地 `.txt` / `.md` 内容导入到已有 JD 和简历 textarea。
+- 阶段 21 只做了浏览器本地文本导入，没有新增后端上传、PDF/DOCX 解析、云端存储或 AI 自动解析。
 
 ## 阶段计划
 
@@ -49,17 +49,18 @@
 - [x] 阶段 18：主页登录流修正
 - [x] 阶段 19：拆分面试工作台信息架构
 - [x] 阶段 20：优化新面试页面体验
-- [ ] 阶段 21：文本文件导入入口 MVP
+- [x] 阶段 21：文本文件导入入口 MVP
 
 ## 当前优先级
 
 当前优先级：
 
-1. 完成阶段 21：文本文件导入入口 MVP。
-2. 在 `/interview/new` 的岗位 JD 和个人简历输入区分别增加本地文件导入入口。
-3. 第一版只支持 `.txt` 和 `.md` 纯文本文件，用浏览器 File API / FileReader 读取并填入现有 textarea。
-4. 导入后用户仍可手动编辑文本；历史记录仍只保存最终文本，不保存文件对象。
-5. 不新增后端上传 API、依赖、云端存储、PDF/DOCX 解析或 AI 自动解析。
+1. 对阶段 21 当前 diff 做代码审查。
+2. 回归检查 `/interview/new` 的岗位 JD 和个人简历输入区是否都能导入 `.txt` 和 `.md`。
+3. 回归检查导入成功后文本是否填入现有 textarea、用户是否仍可手动编辑。
+4. 回归检查导入成功后是否清空旧问题、回答、提交状态、最终评价和保存提示。
+5. 确认不支持类型、空文件、读取失败和过大文件的提示清楚，且不清空当前有效内容。
+6. 确认没有新增后端上传 API、依赖、云端存储、PDF/DOCX 解析、AI 自动解析，且没有改 DeepSeek API、prompt、Supabase Auth 或 localStorage 数据结构。
 
 推荐当前功能分支：
 
@@ -1308,7 +1309,7 @@ docs/INTERNAL_TESTING_RELEASE.md
 
 ## 阶段 21：文本文件导入入口 MVP
 
-阶段状态：未完成。当前 `/interview/new` 已经可以通过手动粘贴 JD 和简历完成完整模拟面试；本阶段的目标是降低复制粘贴成本，先提供本地纯文本文件导入入口。
+阶段状态：已完成。当前 `/interview/new` 已经可以通过手动粘贴 JD 和简历完成完整模拟面试，并支持本地 `.txt` / `.md` 纯文本文件导入入口。
 
 ### 阶段目标
 
@@ -1421,17 +1422,13 @@ docs/INTERNAL_TESTING_RELEASE.md
 你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“[阶段名称]”阶段。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md；如果本阶段涉及开发测试流程，也阅读 docs/DEVELOPMENT_TESTING.md。然后按 ROADMAP 的任务拆分和验收标准实现。只有在需要改变产品范围或用户流程时才阅读 docs/PRD.md。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后按 AGENTS.md 的分档收尾规则处理文档，并说明未运行的测试。
 ```
 
-阶段 21 当前未完成。可以这样启动阶段开发 session：
-
-```text
-你是 AI Interview Simulator 的阶段开发 session。本轮目标是完成 docs/ROADMAP.md 中的“阶段 21：文本文件导入入口 MVP”。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/PRD.md 和 docs/DEVELOPMENT_TESTING.md。重点实现：在 /interview/new 的岗位 JD 和个人简历输入区分别增加本地 .txt/.md 文件导入入口；文件只在浏览器本地读取并填入现有 textarea；导入后用户仍可编辑；导入成功后清空旧问题、回答、评价和保存提示。不要安装依赖；不要新增后端上传 API、PDF/DOCX 解析、云端存储或 AI 自动解析；不要改 DeepSeek API、prompt、Supabase Auth 或 localStorage 历史数据结构。完成后按 AGENTS.md 的分档收尾规则更新必要文档，并说明测试情况。
-```
-
-阶段 21 完成后，可以这样启动代码审查 session：
+阶段 21 已完成。当前建议先启动代码审查 session 检查阶段 21。可以这样启动：
 
 ```text
 你是 AI Interview Simulator 的代码审查 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md、docs/PRD.md、docs/DEVELOPMENT_TESTING.md，然后以 review 姿态检查阶段 21 的当前 diff。重点检查文件导入是否只在浏览器本地完成，是否只支持 .txt/.md 并正确提示不支持类型，是否处理空文件、读取失败和过大文件，导入成功后是否清空旧问题和旧评价，是否没有保存 File 对象或文件元数据到历史记录，以及是否没有新增后端上传 API、依赖、DeepSeek/prompt/Auth/localStorage 数据结构改动。
-```代码审查 session 用于检查阶段开发结果:
+```
+
+代码审查 session 用于检查阶段开发结果:
 
 ```text
 你是 AI Interview Simulator 的代码审查 session。请先阅读 README.md、AGENTS.md、docs/PROJECT_STATUS.md、docs/ROADMAP.md，然后以 review 姿态检查当前 diff。只有在 diff 涉及产品范围或用户流程时才阅读 docs/PRD.md。优先指出 bug、风险、遗漏测试和文档未同步的问题；不要主动做大范围重构。

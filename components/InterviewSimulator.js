@@ -28,6 +28,9 @@ import {
 } from '../lib/dev/interviewMocks';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
+const MAX_TEXT_IMPORT_SIZE_BYTES = 300 * 1024;
+const SUPPORTED_TEXT_FILE_EXTENSIONS = ['.txt', '.md'];
+const SUPPORTED_TEXT_FILE_TYPES = ['text/plain', 'text/markdown', 'text/x-markdown'];
 
 const SAMPLE_JOB_INFO = `岗位名称：AI 产品经理实习生
 
@@ -92,9 +95,22 @@ function getRequestErrorMessage(prefix, error) {
   return `${prefix}：${detail}`;
 }
 
+function isSupportedTextFile(file) {
+  const fileName = file.name.toLowerCase();
+  const hasSupportedExtension = SUPPORTED_TEXT_FILE_EXTENSIONS.some((extension) =>
+    fileName.endsWith(extension),
+  );
+  const hasSupportedMimeType =
+    !file.type || SUPPORTED_TEXT_FILE_TYPES.includes(file.type.toLowerCase());
+
+  return hasSupportedExtension && hasSupportedMimeType;
+}
+
 // 前端主组件：负责收集输入、生成问题、提交回答，并展示最终评价。
 export default function InterviewSimulator() {
   const actionVersionRef = useRef(0);
+  const jobInfoFileInputRef = useRef(null);
+  const resumeFileInputRef = useRef(null);
   const [jobInfo, setJobInfo] = useState('');
   const [resume, setResume] = useState('');
   const [questions, setQuestions] = useState([]);
@@ -109,21 +125,33 @@ export default function InterviewSimulator() {
   const [historySaveStatus, setHistorySaveStatus] = useState('');
   const [historySaveMessage, setHistorySaveMessage] = useState('');
   const [questionGenerationSource, setQuestionGenerationSource] = useState('');
+  const [textImportStatus, setTextImportStatus] = useState('');
+  const [textImportMessage, setTextImportMessage] = useState('');
 
-  // 开发辅助：填入固定示例输入，并清空上一轮生成结果，方便反复测试主流程。
-  const handleFillSampleInputs = () => {
-    setJobInfo(SAMPLE_JOB_INFO);
-    setResume(SAMPLE_RESUME);
+  // 输入被文件或示例替换后，清空旧的生成结果，避免新文本混用上一轮问题和评价。
+  const clearGeneratedInterviewState = () => {
     setQuestions([]);
     setAnswers({});
     setSubmittedAnswers({});
     setAnswerErrors({});
     setEvaluation(null);
+    setIsLoading(false);
+    setIsEvaluating(false);
     setError('');
     setEvaluationError('');
     setHistorySaveStatus('');
     setHistorySaveMessage('');
     setQuestionGenerationSource('');
+  };
+
+  // 开发辅助：填入固定示例输入，并清空上一轮生成结果，方便反复测试主流程。
+  const handleFillSampleInputs = () => {
+    actionVersionRef.current += 1;
+    setJobInfo(SAMPLE_JOB_INFO);
+    setResume(SAMPLE_RESUME);
+    clearGeneratedInterviewState();
+    setTextImportStatus('');
+    setTextImportMessage('');
   };
 
   // 开发辅助：为当前问题列表填入测试回答，但保留逐题手动提交动作。
@@ -177,6 +205,7 @@ export default function InterviewSimulator() {
     Boolean(error) ||
     Boolean(evaluationError) ||
     Boolean(historySaveMessage) ||
+    Boolean(textImportMessage) ||
     isLoading ||
     isEvaluating;
 
@@ -204,16 +233,94 @@ export default function InterviewSimulator() {
     setHistorySaveStatus('');
     setHistorySaveMessage('');
     setQuestionGenerationSource('');
+    setTextImportStatus('');
+    setTextImportMessage('');
   };
 
   const handleJobInfoChange = (nextJobInfo) => {
     setJobInfo(nextJobInfo);
     setError('');
+    setTextImportStatus('');
+    setTextImportMessage('');
   };
 
   const handleResumeChange = (nextResume) => {
     setResume(nextResume);
     setError('');
+    setTextImportStatus('');
+    setTextImportMessage('');
+  };
+
+  const handleChooseTextFile = (inputRef) => {
+    if (!inputRef.current) {
+      return;
+    }
+
+    inputRef.current.value = '';
+    inputRef.current.click();
+  };
+
+  // 文件导入只在浏览器本地读取文本，不上传文件，也不保存文件名或文件对象。
+  const handleTextFileImport = (inputTarget, file) => {
+    if (!file) {
+      return;
+    }
+
+    if (!isSupportedTextFile(file)) {
+      setTextImportStatus('error');
+      setTextImportMessage('仅支持导入 .txt 或 .md 文本文件。');
+      return;
+    }
+
+    if (file.size === 0) {
+      setTextImportStatus('error');
+      setTextImportMessage('文件内容为空，请选择包含文本的 .txt 或 .md 文件。');
+      return;
+    }
+
+    if (file.size > MAX_TEXT_IMPORT_SIZE_BYTES) {
+      setTextImportStatus('error');
+      setTextImportMessage('文件过大，请选择 300KB 以内的 .txt 或 .md 文本文件。');
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onerror = () => {
+      setTextImportStatus('error');
+      setTextImportMessage('文件读取失败，请重新选择文件或手动粘贴文本。');
+    };
+
+    reader.onload = () => {
+      const fileText = typeof reader.result === 'string' ? reader.result : '';
+
+      if (!fileText.trim()) {
+        setTextImportStatus('error');
+        setTextImportMessage('文件内容为空，请选择包含文本的 .txt 或 .md 文件。');
+        return;
+      }
+
+      actionVersionRef.current += 1;
+
+      if (inputTarget === 'jobInfo') {
+        setJobInfo(fileText);
+      } else {
+        setResume(fileText);
+      }
+
+      clearGeneratedInterviewState();
+      setTextImportStatus('success');
+      setTextImportMessage('文本已导入，可以继续编辑；旧问题、回答和评价已清空。');
+    };
+
+    reader.readAsText(file);
+  };
+
+  const handleTextFileChange = (inputTarget, event) => {
+    const file = event.target.files?.[0];
+
+    handleTextFileImport(inputTarget, file);
+    event.target.value = '';
   };
 
   // 按问题下标保存用户回答，提交整场评价时会使用这些回答。
@@ -510,7 +617,23 @@ export default function InterviewSimulator() {
         )}
 
         <div className="field">
-          <label htmlFor="job">岗位信息</label>
+          <div className="field-label-row">
+            <label htmlFor="job">岗位信息</label>
+            <button
+              type="button"
+              className="secondary-button compact-button"
+              onClick={() => handleChooseTextFile(jobInfoFileInputRef)}
+            >
+              导入 JD 文件
+            </button>
+            <input
+              ref={jobInfoFileInputRef}
+              className="file-input-hidden"
+              type="file"
+              accept=".txt,.md,text/plain,text/markdown"
+              onChange={(event) => handleTextFileChange('jobInfo', event)}
+            />
+          </div>
           <textarea
             id="job"
             value={jobInfo}
@@ -520,7 +643,23 @@ export default function InterviewSimulator() {
         </div>
 
         <div className="field">
-          <label htmlFor="resume">个人简历</label>
+          <div className="field-label-row">
+            <label htmlFor="resume">个人简历</label>
+            <button
+              type="button"
+              className="secondary-button compact-button"
+              onClick={() => handleChooseTextFile(resumeFileInputRef)}
+            >
+              导入简历文件
+            </button>
+            <input
+              ref={resumeFileInputRef}
+              className="file-input-hidden"
+              type="file"
+              accept=".txt,.md,text/plain,text/markdown"
+              onChange={(event) => handleTextFileChange('resume', event)}
+            />
+          </div>
           <textarea
             id="resume"
             value={resume}
@@ -528,6 +667,10 @@ export default function InterviewSimulator() {
             placeholder="粘贴简历内容，例如工作经历、项目经历、技能栈等"
           />
         </div>
+
+        {textImportMessage && (
+          <p className={`text-import-message ${textImportStatus}`}>{textImportMessage}</p>
+        )}
 
         <div className="button-row">
           <button
