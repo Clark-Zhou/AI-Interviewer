@@ -1507,6 +1507,10 @@ pdf-parse@2.4.5
 - 是否没有修改 DeepSeek prompt、parser、Supabase Auth 或 localStorage 历史结构。
 - `.txt` / `.md` 原有导入、手动粘贴、开发 Mock、真实 AI 和历史保存是否仍可用。
 
+### 已知残余风险
+
+- 当前 `/api/parse-document` 的 5MB 文件大小限制发生在 `request.formData()` 之后，不能完全防止超大 multipart 请求在业务校验前占用服务端内存。阶段 22 暂不处理这个平台/route 层请求体限制；后续如需更可靠防护，应在部署平台、反向代理或更底层请求体配置中增加更早的 body size 限制。
+
 ## 暂缓事项
 
 暂不优先做：

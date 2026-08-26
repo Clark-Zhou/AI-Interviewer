@@ -38,6 +38,31 @@ function isFormDataFile(value) {
   );
 }
 
+function isPdfBuffer(buffer) {
+  return buffer.subarray(0, 4).toString('utf8') === '%PDF';
+}
+
+function isDocxBuffer(buffer) {
+  const hasZipHeader = buffer.subarray(0, 2).toString('utf8') === 'PK';
+  const hasContentTypes = buffer.includes(Buffer.from('[Content_Types].xml'));
+  const hasWordDocument = buffer.includes(Buffer.from('word/'));
+
+  return hasZipHeader && hasContentTypes && hasWordDocument;
+}
+
+// 文件名只用于选择解析器，真正解析前还要做轻量文件内容校验。
+function isSupportedDocumentContent(buffer, extension) {
+  if (extension === '.pdf') {
+    return isPdfBuffer(buffer);
+  }
+
+  if (extension === '.docx') {
+    return isDocxBuffer(buffer);
+  }
+
+  return false;
+}
+
 // 后端入口：接收单个 PDF/DOCX 文件，解析成纯文本后立即返回给前端。
 export async function POST(request) {
   try {
@@ -83,6 +108,14 @@ export async function POST(request) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+
+    if (!isSupportedDocumentContent(buffer, extension)) {
+      return Response.json(
+        { error: '文件内容和扩展名不匹配，请选择有效的 PDF 或 DOCX 文件。' },
+        { status: 400 },
+      );
+    }
+
     const text = await parseDocumentToText({ buffer, extension });
 
     if (!text) {

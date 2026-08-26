@@ -661,6 +661,10 @@ http://localhost:3000
 7. 是否保留 `.txt` / `.md` 本地导入能力。
 8. 除项目所有者已安装的 `mammoth` / `pdf-parse` 外，是否没有再新增依赖、云端文件存储、AI 自动解析，且没有改 DeepSeek API、prompt、Supabase Auth 或 localStorage 历史数据结构。
 
+已知残余风险：
+
+- 当前 `/api/parse-document` 在业务逻辑里限制文件大小为 5MB，但大小检查发生在 `request.formData()` 之后。也就是说，超大 multipart 请求在被业务代码拒绝前，仍可能先进入 Next.js 的 formData 解析流程并占用内存。阶段 22 暂不处理这个平台/route 层请求体限制；后续如果要提高可靠性，应在部署平台、反向代理或更底层请求体配置中增加更早的 body size 防护。
+
 不建议马上做：
 
 - 云端历史记录和数据库存储
