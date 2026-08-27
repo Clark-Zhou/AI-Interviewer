@@ -9,33 +9,31 @@
 | 任务 | 状态 | 负责人 | 说明 |
 | --- | --- | --- | --- |
 | #23 | 已完成 | 产品助理 session | docs 目录轻量化重构和默认阅读规则调整 |
-| #24 | 待规划 | 产品助理 session | 下一组阶段方向待讨论 |
+| #24 | 待开发 | 阶段开发 session | 新增岗位名称字段，并兼容 Mock、AI 请求和历史保存 |
+| #25 | 待开发 | 阶段开发 session | 增加本地历史删除/清空，并优化历史页左右栏布局 |
 
-## 任务卡 #23：docs 目录轻量化重构
+## 任务卡 #24：新增岗位名称字段
 
-状态：已完成。
+状态：待开发。
 
-目标：把 docs 改造成按角色按需阅读的轻量结构，降低新 session 默认 token 消耗。
+目标：在 `/interview/new` 新增岗位名称 `jobTitle` 输入，让每次面试和历史记录有清晰标题，同时保持旧历史记录兼容。
 
-已完成：
+范围：
 
-- 新增 `docs/HANDOFF.md`、`docs/TASKS.md`、`docs/STATUS.md`、`docs/ARCHITECTURE.md`、`docs/API.md`、`docs/TESTING.md`、`docs/WORKFLOW.md` 和 `docs/templates/session-prompts.md`。
-- 将 `docs/ROADMAP_ARCHIVE.md` 移入 `docs/archive/ROADMAP_ARCHIVE.md`。
-- 将旧 `PROJECT_STATUS`、`DEVELOPMENT_TESTING`、`INTERNAL_TESTING_RELEASE` 改成兼容提示壳。
-- 压缩 `README`、`ROADMAP` 和 `PRD`，明确 PRD 与 archive 默认不读。
+- `/interview/new` 在原有岗位信息 textarea 之前新增岗位名称输入框。
+- `jobTitle` 不是必填；生成问题仍只强制校验岗位信息和简历不能为空。
+- 新历史记录保存 `jobTitle`。
+- 旧历史记录没有 `jobTitle` 时，展示 fallback 到岗位信息摘要；两者都没有时显示“未命名岗位”。
+- Mock 示例 JD/简历和 Mock 问题/评价流程支持 `jobTitle`。
+- 生成问题和最终评价 API 可以支持可选 `jobTitle`，但必须兼容旧请求不传该字段。
+- 如果 prompt 使用 `jobTitle`，只能作为辅助上下文，不改变 6 道问题和最终评价 JSON 协议。
 
-## 任务卡 #24：下一组阶段规划
+非目标：
 
-状态：未开始。
-
-目标：由产品助理 session 和用户讨论下一组阶段方向，再更新 `docs/ROADMAP.md` 与本文件中的具体任务卡。
-
-建议候选方向：
-
-- 优化已有面试流程体验。
-- 增强历史记录能力，例如删除、搜索或恢复历史 session。
-- 规划云端历史记录和数据库存储。
-- 继续做小范围 UI、文案或错误恢复优化。
+- 不做历史删除、清空或搜索。
+- 不做 history 左栏收起/展开。
+- 不做云端历史、数据库、OCR、图片识别或新 AI 流程。
+- 不把 `jobTitle` 改成必填。
 
 默认需要阅读：
 
@@ -45,12 +43,83 @@
 
 按需阅读：
 
-- 产品规划读 `docs/ROADMAP.md`。
 - 当前事实读 `docs/STATUS.md`。
-- 产品边界变化读 `docs/PRD.md`。
+- 数据流和相关文件读 `docs/ARCHITECTURE.md`。
+- 如果改 API 请求/响应，读并更新 `docs/API.md`。
+- 如果改测试流程或长期回归清单，读并更新 `docs/TESTING.md`。
+- 本任务涉及用户流程变化，已由产品助理更新 `docs/PRD.md`；开发 session 不需要默认全文阅读 PRD，除非发现产品边界不清。
 
 验收标准：
 
-- 下一组阶段方向明确。
-- 有清晰任务目标、范围、非目标、验收标准和审查关注点。
-- 明确开发 session 需要读哪些文件，避免默认读取归档和 PRD。
+- `/interview/new` 显示岗位名称输入框和岗位信息 textarea。
+- `jobTitle` 为空时仍可生成问题，只要岗位信息和简历非空。
+- 新保存的历史记录包含 `jobTitle`。
+- 旧历史记录没有 `jobTitle` 时仍可正常展示。
+- history 列表和详情优先显示 `jobTitle`，否则 fallback 到岗位信息摘要。
+- Mock 示例、Mock 问题、Mock 评价和真实 AI 流程仍可用。
+- 没有改变 localStorage 旧记录兼容性，没有引入新依赖。
+
+审查关注点：
+
+- `jobTitle` 是否可选，而不是被误设为必填。
+- API 和 prompt 改动是否保持向后兼容。
+- 旧 localStorage 历史记录是否不会因为缺少 `jobTitle` 崩溃。
+- Mock 流程和真实 AI 流程是否都保留。
+- 是否没有顺手做阶段 25 的删除/布局功能。
+
+## 任务卡 #25：本地历史记录管理和布局优化
+
+状态：待开发，需在 #24 完成后开始。
+
+目标：提升 `/interview/history` 的本地历史管理体验，支持删除记录、清空记录、简化左侧列表，并允许收起/展开左侧列表。
+
+范围：
+
+- 在历史记录列表中为每条记录增加删除按钮。
+- 增加删除全部历史记录的入口。
+- 单条删除和全部删除都需要确认，避免误删。
+- 删除当前选中记录后，自动选中剩余记录中的第一条；没有记录时显示空状态。
+- 左侧列表未选中项只显示岗位名称、时间和分数，不显示 Mock 来源、不显示岗位信息正文。
+- 如果没有 `jobTitle`，左侧标题 fallback 到岗位信息摘要，再 fallback 到“未命名岗位”。
+- Mock/AI 来源可以保留在右侧详情中，不在左侧未选中项展示。
+- 支持收起/展开左侧列表；收起时右侧详情区域扩大。
+- 移动端保持可用，不出现遮挡或内容溢出。
+
+非目标：
+
+- 不改 AI API、prompt、文档解析 API 或 Supabase Auth。
+- 不改 localStorage 历史记录核心结构，除非为兼容 `jobTitle` 做只读 fallback。
+- 不做搜索、筛选、恢复历史 session、云端同步或数据库。
+- 不新增依赖。
+
+默认需要阅读：
+
+- `AGENTS.md`
+- `docs/HANDOFF.md`
+- `docs/TASKS.md`
+
+按需阅读：
+
+- 当前事实读 `docs/STATUS.md`。
+- 历史相关文件和数据流读 `docs/ARCHITECTURE.md`。
+- 历史回归流程读 `docs/TESTING.md`。
+
+验收标准：
+
+- `/interview/history` 可以删除单条本地历史记录。
+- `/interview/history` 可以清空全部本地历史记录。
+- 删除操作有确认，不会误删。
+- 删除后选中状态合理；删空后显示空状态。
+- 左侧列表未选中项只显示岗位名称、时间和分数。
+- 左侧列表可以收起/展开，收起后详情区域变宽。
+- 旧历史记录、Mock 历史和 AI 历史都能正常展示和删除。
+- 不影响 `/interview/new` 的新面试、文件导入/解析、真实 AI、Mock、评价和保存历史流程。
+
+审查关注点：
+
+- 删除函数是否只操作本地 localStorage，不影响其他浏览器或云端假设。
+- 清空全部是否有明确确认。
+- 删除当前选中项后的状态是否稳定。
+- 左栏收起/展开是否没有造成移动端布局问题。
+- 是否没有把 Mock 来源从详情里完全丢失。
+- 是否没有扩大到搜索、恢复 session 或云端历史。
