@@ -10,7 +10,7 @@
 optimize-local-history
 ```
 
-阶段 1-23 已完成、审查并合并到 `main`。阶段 24 已完成。阶段 25 已在 `optimize-local-history` 完成，待审查和合并。
+阶段 1-23 已完成、审查并合并到 `main`。阶段 24/25 已在 `optimize-local-history` 完成并审查，当前待 PR 合并。
 
 ## 已完成功能摘要
 
@@ -62,4 +62,4 @@ optimize-local-history
 
 ## 下一步建议
 
-下一步先审查阶段 25 diff；云端历史、数据库、OCR、历史搜索和恢复历史 session 继续暂缓。
+下一步准备 `optimize-local-history` 分支 PR；合并后回到 `main`，再由产品助理 session 规划阶段 26。云端历史、数据库、OCR、历史搜索和恢复历史 session 继续暂缓。

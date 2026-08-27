@@ -7,9 +7,9 @@
 ## 当前状态
 
 - 当前分支：`optimize-local-history`
-- 当前阶段：阶段 25 已完成，待审查和合并。
-- 当前任务：本地历史记录管理和布局优化已完成。
-- 下一步：审查阶段 25 diff。
+- 当前阶段：阶段 24/25 已完成并审查，待 PR 合并。
+- 当前任务：本地 history 优化阶段 24/25 已完成并审查。
+- 下一步：准备 `optimize-local-history` 分支 PR，合并后回到 `main` 再规划阶段 26。
 
 ## 最近完成
 
@@ -33,5 +33,5 @@
 - 默认只读 `AGENTS.md`、`docs/HANDOFF.md`、`docs/TASKS.md`。
 - 不要默认读取 `docs/PRD.md` 或 `docs/archive/`。
 - 如需了解当前事实，读 `docs/STATUS.md`。
-- 阶段 25 已完成；后续如继续开发，请先由产品助理 session 更新新的任务卡。
+- 阶段 24/25 已完成并审查；后续如继续开发，请先由产品助理 session 更新新的任务卡。
 - 如需改 API 或模块边界，按任务卡链接读 `docs/API.md` 或 `docs/ARCHITECTURE.md`。
