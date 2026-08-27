@@ -39,9 +39,9 @@ const SUPPORTED_DOCUMENT_FILE_EXTENSIONS = ['.pdf', '.docx'];
 const IMPORT_FILE_ACCEPT =
   '.txt,.md,.pdf,.docx,text/plain,text/markdown,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
-const SAMPLE_JOB_INFO = `岗位名称：AI 产品经理实习生
+const SAMPLE_JOB_TITLE = 'AI 产品经理实习生';
 
-岗位职责：
+const SAMPLE_JOB_INFO = `岗位职责：
 1. 参与 AI 面试训练产品的需求分析、用户流程设计和功能验收。
 2. 协助梳理岗位 JD、简历内容和面试问题之间的匹配逻辑。
 3. 与前端和后端开发协作，推动 MVP 功能快速落地。
@@ -126,6 +126,7 @@ export default function InterviewSimulator() {
   const fileImportVersionRef = useRef(0);
   const jobInfoFileInputRef = useRef(null);
   const resumeFileInputRef = useRef(null);
+  const [jobTitle, setJobTitle] = useState('');
   const [jobInfo, setJobInfo] = useState('');
   const [resume, setResume] = useState('');
   const [questions, setQuestions] = useState([]);
@@ -164,6 +165,7 @@ export default function InterviewSimulator() {
   const handleFillSampleInputs = () => {
     actionVersionRef.current += 1;
     fileImportVersionRef.current += 1;
+    setJobTitle(SAMPLE_JOB_TITLE);
     setJobInfo(SAMPLE_JOB_INFO);
     setResume(SAMPLE_RESUME);
     clearGeneratedInterviewState();
@@ -214,6 +216,7 @@ export default function InterviewSimulator() {
   const shouldShowQuestionPanel = isLoading || questions.length > 0;
 
   const hasCurrentInterviewContent =
+    Boolean(jobTitle.trim()) ||
     Boolean(jobInfo.trim()) ||
     Boolean(resume.trim()) ||
     questions.length > 0 ||
@@ -240,6 +243,7 @@ export default function InterviewSimulator() {
 
     actionVersionRef.current += 1;
     fileImportVersionRef.current += 1;
+    setJobTitle('');
     setJobInfo('');
     setResume('');
     setQuestions([]);
@@ -257,6 +261,11 @@ export default function InterviewSimulator() {
     setTextImportStatus('');
     setTextImportMessage('');
     setDocumentImportTarget('');
+  };
+
+  const handleJobTitleChange = (nextJobTitle) => {
+    setJobTitle(nextJobTitle);
+    setError('');
   };
 
   const handleJobInfoChange = (nextJobInfo) => {
@@ -452,6 +461,7 @@ export default function InterviewSimulator() {
           questions: questionGenerationSource || 'ai',
           evaluation: evaluationGenerationSource,
         },
+        jobTitle,
         jobInfo,
         resume,
         questions,
@@ -565,7 +575,7 @@ export default function InterviewSimulator() {
     setIsLoading(true);
 
     try {
-      const generatedQuestions = await generateInterviewQuestions({ jobInfo, resume });
+      const generatedQuestions = await generateInterviewQuestions({ jobTitle, jobInfo, resume });
 
       if (actionVersion !== actionVersionRef.current) {
         return;
@@ -636,6 +646,7 @@ export default function InterviewSimulator() {
 
     try {
       const generatedEvaluation = await evaluateInterview({
+        jobTitle,
         jobInfo,
         resume,
         questionAnswers: submittedQuestionAnswers,
@@ -707,6 +718,17 @@ export default function InterviewSimulator() {
             </button>
           </div>
         )}
+
+        <div className="field">
+          <label htmlFor="job-title">岗位名称（可选）</label>
+          <input
+            id="job-title"
+            type="text"
+            value={jobTitle}
+            onChange={(event) => handleJobTitleChange(event.target.value)}
+            placeholder="例如：AI 产品经理实习生"
+          />
+        </div>
 
         <div className="field">
           <div className="field-label-row">

@@ -15,7 +15,7 @@ import { generateInterviewQuestionsWithDeepSeek } from '../../../lib/server/deep
 // 后端入口：接收前端请求，做基础校验，然后交给 DeepSeek 服务层处理。
 export async function POST(request) {
   try {
-    const { jobInfo, resume } = await request.json();
+    const { jobTitle, jobInfo, resume } = await request.json();
 
     if (!jobInfo?.trim() || !resume?.trim()) {
       return Response.json(
@@ -25,7 +25,11 @@ export async function POST(request) {
     }
 
     // 服务层已经完成 AI 调用和 JSON 解析，这里只把标准 questions 数组返回给前端。
-    const questions = await generateInterviewQuestionsWithDeepSeek({ jobInfo, resume });
+    const questions = await generateInterviewQuestionsWithDeepSeek({
+      jobTitle: typeof jobTitle === 'string' ? jobTitle : '',
+      jobInfo,
+      resume,
+    });
     return Response.json({ questions });
   } catch (error) {
     return Response.json(

@@ -29,6 +29,26 @@ function getTextSummary(text, maxLength = 48) {
   return `${normalizedText.slice(0, maxLength)}...`;
 }
 
+function getHistorySessionTitle(session, maxLength = 48) {
+  const normalizedJobTitle = String(session?.jobTitle || '').replace(/\s+/g, ' ').trim();
+
+  if (normalizedJobTitle) {
+    return normalizedJobTitle.length <= maxLength
+      ? normalizedJobTitle
+      : `${normalizedJobTitle.slice(0, maxLength)}...`;
+  }
+
+  const normalizedJobInfo = String(session?.jobInfo || '').replace(/\s+/g, ' ').trim();
+
+  if (!normalizedJobInfo) {
+    return '未命名岗位';
+  }
+
+  return normalizedJobInfo.length <= maxLength
+    ? normalizedJobInfo
+    : `${normalizedJobInfo.slice(0, maxLength)}...`;
+}
+
 function formatHistoryTime(value) {
   const date = new Date(value);
 
@@ -102,7 +122,7 @@ export default function InterviewHistoryPanel() {
                 >
                   <span className="history-item-main">
                     <span className="history-title">
-                      {getTextSummary(session.jobInfo, 36)}
+                      {getHistorySessionTitle(session, 36)}
                     </span>
                     <span className="history-meta">
                       {formatHistoryTime(session.createdAt)}
@@ -133,7 +153,7 @@ export default function InterviewHistoryPanel() {
                     <p className="category">
                       {formatHistoryTime(selectedHistorySession.createdAt)}
                     </p>
-                    <h3>{getTextSummary(selectedHistorySession.jobInfo, 56)}</h3>
+                    <h3>{getHistorySessionTitle(selectedHistorySession, 56)}</h3>
                     {selectedHistorySourceLabel && (
                       <p className="history-source detail-source">
                         {selectedHistorySourceLabel}

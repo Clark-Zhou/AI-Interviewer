@@ -949,9 +949,22 @@ textarea {
   outline: none;
 }
 
+.field input[type='text'] {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+  padding: 12px;
+  width: 100%;
+}
+
 textarea:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.field input[type='text']:focus {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
 }
 
 /* 操作按钮和错误提示。 */
