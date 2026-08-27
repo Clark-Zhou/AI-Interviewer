@@ -28,7 +28,7 @@ function validateQuestionAnswer(item, index) {
 // 后端入口：接收前端提交的整场问答，交给 DeepSeek 服务层生成最终评价。
 export async function POST(request) {
   try {
-    const { jobInfo, resume, questionAnswers } = await request.json();
+    const { jobTitle, jobInfo, resume, questionAnswers } = await request.json();
 
     if (!jobInfo?.trim() || !resume?.trim()) {
       return Response.json(
@@ -54,6 +54,7 @@ export async function POST(request) {
 
     // 服务层已经完成 AI 调用和 JSON 解析，这里只把标准 evaluation 对象返回给前端。
     const evaluation = await evaluateInterviewWithDeepSeek({
+      jobTitle: typeof jobTitle === 'string' ? jobTitle : '',
       jobInfo,
       resume,
       questionAnswers,
