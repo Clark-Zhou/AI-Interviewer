@@ -1,295 +1,103 @@
-# AI Interview Simulator MVP PRD
+# PRD
 
-> 文档职责：记录当前 MVP 的产品目标、用户流程、功能边界和后续方向。当前实现以 Next.js + DeepSeek、6 道问题、逐题提交回答、最终整体评价为准。
+## 文档职责
 
-## 1. Product Overview
+记录 AI Interview Simulator 的产品目标、核心用户流程、MVP 范围和非目标。PRD 不是通用必读；只有产品目标、用户主流程、MVP 边界或非目标变化时才读或改。
 
-AI Interview Simulator is a personal interview preparation tool. Users provide a target job description and their resume, then the product generates a customized mock interview, collects answers, and returns structured feedback.
+## 产品概述
 
-The MVP focuses on validating one core value:
+AI Interview Simulator 是一个个人模拟面试准备工具。用户提供目标岗位 JD 和个人简历，系统生成定制化面试问题，收集用户回答，并给出结构化最终评价。
 
-> Can AI help a job seeker prepare for a specific role with relevant questions and useful feedback?
+核心验证问题：AI 能否帮助求职者围绕一个具体岗位进行有针对性的面试准备。
 
-## 2. Target User
+## 目标用户
 
-Primary user:
+- 正在准备面试的求职者。
+- 手里有具体岗位 JD。
+- 希望根据自己的简历提前练习可能被问到的问题。
+- 希望知道回答是否有说服力，以及哪里需要改进。
 
-- A job seeker preparing for an upcoming interview.
-- Has a specific job description in hand.
-- Wants to know what questions may be asked and how to improve their answers.
+## MVP 目标
 
-Early user scenarios:
-
-- The user wants to practice for a role before a real interview.
-- The user wants to understand gaps between their resume and the job requirements.
-- The user wants feedback on whether their answers sound convincing.
-
-## 3. MVP Goal
-
-Build a simple web-based demo that completes the full interview preparation flow:
-
-1. User enters a job description.
-2. User enters resume content.
-3. AI generates interview questions.
-4. User answers the questions in text.
-5. AI generates a final evaluation report.
-
-The first version should prioritize a complete, useful workflow over advanced features.
-
-## 4. Core User Flow
-
-1. User opens the app homepage at `/`.
-2. The homepage shows the product entry, login/register entry, interview entry, and current authentication status.
-3. If the user is not logged in, the user goes to `/login` to sign up or log in.
-4. After authentication, the user can enter the protected interview workspace at `/interview`.
-5. In the interview workspace, the user chooses either `Start New Interview` or `View History`.
-6. If starting a new interview, the user pastes the job description.
-7. User pastes resume text.
-8. User clicks "Start Mock Interview".
-9. The system generates 6 interview questions.
-10. User answers questions one by one.
-11. User submits each answer separately.
-12. The system generates a final report and saves the session to local history.
-13. User reviews strengths, weaknesses, improvement suggestions, or goes to history to review previous sessions.
-
-## 5. MVP Features
-
-### 5.0 Homepage, Entry, and Authentication
-
-The product uses a basic homepage as the first product entry. Supabase Auth protects the interview workspace and prepares for later cloud history, without changing the core AI interview flow.
-
-MVP behavior:
-
-- Show a `/` homepage with basic product entry information and a polished first-screen hero.
-- Show `/login` and `/interview` entry points on the homepage hero.
-- Use `/interview` as the protected workspace entry, with separate paths for starting a new interview and viewing local history.
-- Show whether the user is logged in; if logged in, show basic account information such as email.
-- Keep homepage navigation limited to real available destinations; do not show fake future-feature buttons.
-- Support email and password signup on `/login`.
-- Support email and password login on `/login`.
-- Keep the user signed in after refresh.
-- When an unauthenticated user clicks the homepage `/interview` entry, send them directly to `/login`; direct unauthenticated access to `/interview` should also return to `/login`.
-- Provide logout from the authenticated experience.
-
-Out of scope for this MVP stage:
-
-- Complex marketing landing page
-- Cloud-synced interview history
-- User profile page
-- Password reset customization
-- Third-party OAuth login
-- Roles or permissions
-- Payment or usage limits
-- Custom password storage or custom session implementation
-
-### 5.1 Job Description Input
-
-User can paste a job description into a text area. The near-term MVP may also let the user import `.txt`, `.md`, text-based `.pdf`, or `.docx` content into the same text area. PDF and DOCX parsing should return plain text only.
-
-Supported input for MVP:
-
-- Job description raw text pasted into the text area
-- Optional local `.txt` / `.md` import into the existing text area
-- Optional `.pdf` / `.docx` parsing into plain text through the project backend API
-
-Optional later fields:
-
-- Job title
-- Company name
-- Seniority level
-- Interview language
-
-### 5.2 Resume Input
-
-User can paste resume content into a text area. The near-term MVP may also let the user import `.txt`, `.md`, text-based `.pdf`, or `.docx` content into the same text area. PDF and DOCX parsing should return plain text only.
-
-Supported input for MVP:
-
-- Resume raw text pasted into the text area
-- Optional local `.txt` / `.md` import into the existing text area
-- Optional `.pdf` / `.docx` parsing into plain text through the project backend API
-
-Out of scope for MVP:
-
-- Scanned PDF OCR
-- Image resume recognition
-- Server-side file storage
-- Cloud file upload or file management
-- Resume format parsing
-- Resume editor
-
-### 5.3 Question Generation
-
-The system generates role-specific interview questions based on the job description and resume.
-
-Question types should include:
-
-- Background and experience questions
-- Technical or skill-based questions
-- Project deep-dive questions
-- Behavioral questions
-- Role-fit questions
-
-MVP output:
-
-- 6 questions
-- Each question has a short reason explaining why it was asked
-
-### 5.4 Answer Collection
-
-User answers each question in text.
-
-MVP behavior:
-
-- Display questions in a list for the current MVP; step-by-step interviewing can be reconsidered later
-- Provide one text area per answer
-- Allow the user to submit each answer separately
-
-Out of scope for MVP:
-
-- Voice input
-- Video recording
-- Real-time follow-up questions
-- Timer
-
-### 5.5 Final Evaluation
-
-After submission, AI generates a structured evaluation report.
-
-Report sections:
-
-- Overall interview score
-- Role match summary
-- Key strengths
-- Main weaknesses or risk areas
-- Answer quality feedback
-- Resume and job requirement gap analysis
-- Suggested improvement actions
-- Recommended follow-up practice questions
-
-## 6. Non-Goals
-
-The MVP will not include:
-
-- Payment
-- Admin dashboard
-- Enterprise hiring workflow
-- Interview scheduling
-- Real-time voice conversation
-- Video interview analysis
-- Complex resume parsing
-- Account-based or cloud-synced persistent interview history
-- Multi-model scoring comparison
-
-These features can be considered after the core workflow proves useful.
-
-## 7. Suggested Data Model
+完成一条可用闭环：
 
 ```text
-JobPost
-- id
-- raw_text
-- created_at
-
-Resume
-- id
-- raw_text
-- created_at
-
-InterviewSession
-- id
-- job_post_id
-- resume_id
-- questions
-- answers
-- final_feedback
-- created_at
-
-InterviewQuestion
-- id
-- question
-- category
-- reason
-
-InterviewAnswer
-- question_id
-- answer_text
+用户输入 JD 和简历 -> AI 生成问题 -> 用户回答 -> AI 生成最终评价 -> 保存本地历史
 ```
 
-For the earliest prototype, this can live in memory or local state. A database can be added after the basic product loop works.
+MVP 优先保证流程完整、问题相关、反馈可用，不追求复杂账号体系、云端数据、语音视频或自动化求职管理。
 
-## 8. AI Prompting Requirements
+## 核心用户流程
 
-### Question Generation Prompt
+1. 用户打开主页 `/`。
+2. 未登录用户进入 `/login` 注册或登录。
+3. 登录后回到主页，再进入受保护的 `/interview` 工作台。
+4. 用户选择开始新面试或查看历史记录。
+5. 开始新面试时，用户输入或导入岗位 JD 和简历文本。
+6. 用户点击生成面试问题。
+7. 系统生成 6 道结构化问题，每题包含分类、问题和提问原因。
+8. 用户逐题输入并提交回答，也可以一键提交全部回答。
+9. 所有回答提交后，用户生成最终评价。
+10. 系统展示总分、总结、优势、风险点、改进建议、逐题反馈和后续练习题。
+11. 最终评价成功后，系统保存本地历史记录。
 
-Input:
+## MVP 功能范围
 
-- Job description
-- Resume text
+### 入口和账号
 
-Output:
+- 主页展示产品入口、登录/登出入口、面试入口和登录状态。
+- Supabase Auth 支持邮箱密码注册、登录、登出和登录态保持。
+- 未登录用户访问面试区时进入 `/login`。
 
-- 6 interview questions
-- Category for each question
-- Reason for each question
+### 新面试
 
-The model should focus on the specific match between the resume and the job description instead of producing generic interview questions.
+- JD 和简历都使用 textarea 作为最终输入载体。
+- 支持手动粘贴 JD 和简历文本。
+- 支持 `.txt` / `.md` 本地导入到 textarea。
+- 支持文本型 `.pdf` / `.docx` 通过项目后端 API 解析为纯文本后填入 textarea。
+- 文件导入或解析成功后，用户仍可继续编辑文本。
+- 生成问题前校验 JD 和简历不能为空。
+- 问题生成后展示问题列表。
+- 用户可以逐题提交回答，也可以一键提交全部回答。
+- 所有回答提交后才能生成最终评价。
 
-### Final Evaluation Prompt
+### AI 反馈
 
-Input:
+- 问题生成和最终评价都通过项目后端 API 调用 DeepSeek。
+- 前端不能直接调用 DeepSeek 或暴露 API Key。
+- 最终评价应包括整体评价和逐题反馈。
+- 失败时给出错误提示和重试入口。
 
-- Job description
-- Resume text
-- Generated questions
-- User answers
+### 历史记录
 
-Output:
+- 最终评价成功后保存完整 session 到浏览器 localStorage。
+- 历史记录最多保留 10 条。
+- 支持本地历史列表和详情查看。
+- 历史记录不做跨设备同步。
 
-- Overall score
-- Strengths
-- Weaknesses
-- Role match analysis
-- Answer-by-answer feedback
-- Concrete improvement suggestions
-- Recommended next practice questions
+### 开发辅助
 
-The feedback should be direct, constructive, and specific.
+- 开发环境支持示例 JD/简历、Mock 问题、Mock 评价和测试回答。
+- Mock 能力只用于开发测试，不应出现在生产环境。
 
-## 9. Success Criteria
+## 非目标
 
-The MVP is successful if:
+当前不做：
 
-- A user can complete the full flow without guidance.
-- Generated questions feel relevant to the job and resume.
-- Final feedback contains specific, actionable advice.
-- The whole session can be completed in less than 15 minutes.
-- The product is useful even without cloud history, uploads, or voice features.
+- 云端历史记录或数据库同步。
+- 云端文件存储或文件管理。
+- 扫描版 PDF OCR、图片简历识别或复杂文件解析。
+- `.doc` 老格式解析或多文件合并。
+- AI 自动结构化 JD/简历。
+- AI 逐步提问、多轮追问或单题即时批改。
+- 语音或视频面试。
+- 用户资料页、OAuth、支付、权限或用量系统。
+- 完整设计系统或大规模视觉重构。
 
-## 10. First Build Milestone
+## 成功标准
 
-Milestone 1: Text-only prototype
-
-Deliverables:
-
-- Single web page or simple multi-step UI
-- Job description text input
-- Resume text input
-- AI-generated question list
-- Answer text areas
-- Final evaluation report
-
-Recommended tech stack:
-
-- Frontend: Next.js or React
-- Backend: Next.js API routes
-- AI provider: DeepSeek API
-- Database: none for first prototype, then SQLite or Supabase later
-
-## 11. Open Questions
-
-- Should the product start in Chinese, English, or support both?
-- Should the first version optimize for software engineering interviews or general job interviews?
-- Should the product later evolve from the current question-list flow into one-question-at-a-time interviewing?
-- Should scores be strict and numeric, or more coaching-oriented?
-- Should interview sessions be saved locally after the first prototype?
+- 用户能在几分钟内完成一轮基于目标岗位的模拟面试。
+- 生成问题与 JD 和简历明显相关。
+- 最终评价能给出可执行的改进建议。
+- 开发者能用 Mock 和文件导入快速完成本地回归。
+- 新功能不破坏现有 AI、Auth、历史记录和文件解析边界。

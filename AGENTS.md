@@ -24,24 +24,29 @@
 
 通用必读：
 
-1. 阅读 `README.md`，了解项目目标、运行方式和目录结构。
-2. 阅读 `AGENTS.md`，了解协作规则、边界和收尾要求。
-3. 阅读 `docs/PROJECT_STATUS.md`，确认当前分支、已完成功能、未完成事项和下一步建议。
-4. 阅读 `docs/ROADMAP.md`，确认当前计划、优先级、任务拆分和验收标准。
+1. 阅读 `AGENTS.md`，了解协作规则、边界和收尾要求。
+2. 阅读 `docs/HANDOFF.md`，确认当前交接状态。
+3. 阅读 `docs/TASKS.md`，确认当前任务卡、验收标准和本轮按需阅读文件。
 
 按需阅读：
 
-- 如果要改开发测试辅助逻辑、mock 策略或本地测试流程，阅读 `docs/DEVELOPMENT_TESTING.md`。
+- 如果需要快速了解项目入口或文档地图，阅读 `README.md` 或 `docs/README.md`。
+- 如果需要了解当前项目事实，阅读 `docs/STATUS.md`。
+- 如果要规划新阶段，阅读 `docs/ROADMAP.md`。
+- 如果要改模块边界、路由、目录或数据流，阅读 `docs/ARCHITECTURE.md`。
+- 如果要改 API route、请求响应或错误边界，阅读 `docs/API.md`。
+- 如果要改开发测试辅助逻辑、mock 策略或本地测试流程，阅读 `docs/TESTING.md`。
+- 如果要改本地运行、环境变量、部署或内部测试流程，阅读 `docs/WORKFLOW.md`。
 - 如果要改产品范围、用户流程、MVP 边界或非目标，阅读 `docs/PRD.md`。
-- 如果要追溯已完成历史阶段的详细方案，阅读 `docs/ROADMAP_ARCHIVE.md` 的相关章节。
+- 如果要追溯已完成历史阶段的详细方案，阅读 `docs/archive/` 的相关章节。
 
 PRD 降低优先级规则：
 
 - `docs/PRD.md` 不是通用必读文件。普通开发、代码审查、样式调整、bug 修复和阶段内收尾不要默认读取 PRD。
-- `docs/ROADMAP_ARCHIVE.md` 也不是通用必读文件。不要为了了解下一步任务而读取历史归档。
-- 优先通过 `README.md`、`AGENTS.md`、`docs/PROJECT_STATUS.md` 和 `docs/ROADMAP.md` 理解当前任务。
+- `docs/archive/` 也不是通用必读文件。不要为了了解下一步任务而读取历史归档。
+- 优先通过 `AGENTS.md`、`docs/HANDOFF.md` 和 `docs/TASKS.md` 理解当前任务；再按任务卡链接补读文档。
 - 只有当任务会改变产品目标、MVP 范围、用户主流程、非目标或长期边界时，才阅读或更新 PRD。
-- 如果不确定是否需要读 PRD，先看 ROADMAP 中当前阶段是否明确要求；没有要求时不要为了保险而全文读取。
+- 如果不确定是否需要读 PRD，先看 `docs/TASKS.md` 中当前任务卡是否明确要求；没有要求时不要为了保险而全文读取。
 
 开始前检查：
 
@@ -64,33 +69,33 @@ git log --oneline -3
 根据当前情况判断本轮应该看哪里：
 
 - 如果工作区有未提交改动，先看 `git diff`；如果用户说改动已放入 stage，也看 `git diff --staged`。
-- 如果工作区干净，但用户说产品助理刚提交了计划，先看 `git show --stat HEAD`，必要时看 `git show HEAD -- docs/ROADMAP.md docs/PROJECT_STATUS.md`。
+- 如果工作区干净，但用户说产品助理刚提交了计划，先看 `git show --stat HEAD`，必要时看 `git show HEAD -- docs/TASKS.md docs/HANDOFF.md docs/STATUS.md docs/ROADMAP.md`。
 - 如果是代码审查任务，先判断审查对象是当前未提交 diff、staged diff、最近一次 commit，还是整个分支相对 main 的 diff。
 - 如果同一个开发 session 连续做多个任务，每个新任务开始前都重新做这次轻量同步，不要沿用上一个任务的计划记忆。
 
-同步后按任务需要阅读相关文档：通用优先看 `README.md`、`AGENTS.md`、`docs/PROJECT_STATUS.md`、`docs/ROADMAP.md`；涉及开发辅助、mock 或测试流程时，再看 `docs/DEVELOPMENT_TESTING.md`；只有涉及产品范围、用户主流程、MVP 边界或非目标变化时，才看 `docs/PRD.md`；只有需要追溯旧阶段详细决策时，才看 `docs/ROADMAP_ARCHIVE.md`。
+同步后按任务需要阅读相关文档：通用优先看 `AGENTS.md`、`docs/HANDOFF.md`、`docs/TASKS.md`；再按任务卡链接补读 `docs/STATUS.md`、`docs/ROADMAP.md`、`docs/ARCHITECTURE.md`、`docs/API.md`、`docs/TESTING.md` 或 `docs/WORKFLOW.md`。只有涉及产品范围、用户主流程、MVP 边界或非目标变化时，才看 `docs/PRD.md`；只有需要追溯旧阶段详细决策时，才看 `docs/archive/`。
 
 如果开发或审查时发现文档之间存在模糊、矛盾、过时或互相反作用的地方，应停下来向用户说明问题并询问如何处理，不要自己猜一个解释继续开发。
 
 
 ## 多 session 协作规则
 
-项目当前更适合按“阶段闭环”拆分 session，而不是按前端/后端拆分。一个阶段开发 session 应负责某个 ROADMAP 阶段的完整实现、必要文档同步和收尾检查。
+项目当前更适合按“阶段闭环”拆分 session，而不是按前端/后端拆分。一个阶段开发 session 应负责 `docs/TASKS.md` 中指定任务卡的完整实现、必要文档同步和收尾检查。
 
 推荐角色分工：
 
-- 产品助理 session：维护产品范围、阶段计划、优先级和验收标准，主要修改 `docs/ROADMAP.md`、`docs/PROJECT_STATUS.md`；只有产品边界变化时才修改 `docs/PRD.md`。
-- 阶段开发 session：按照 `docs/ROADMAP.md` 的某个阶段完成完整实现，可能同时修改前端、后端、prompt、客户端工具和相关文档。
+- 产品助理 session：维护产品范围、阶段计划、优先级和验收标准，主要修改 `docs/ROADMAP.md`、`docs/TASKS.md`、`docs/HANDOFF.md`；只有产品边界变化时才修改 `docs/PRD.md`。
+- 阶段开发 session：按照 `docs/TASKS.md` 的指定任务卡完成完整实现，可能同时修改前端、后端、prompt、客户端工具和相关文档。
 - 代码审查 session：以 review 姿态检查阶段开发 session 的 diff、风险、遗漏测试和文档同步，不主动做大范围重构。
-- 开发测试 session（可选）：维护本地测试流程和开发辅助边界，主要修改 `docs/DEVELOPMENT_TESTING.md`，必要时配合阶段开发 session 修改开发辅助按钮。
+- 开发测试 session（可选）：维护长期有效测试流程和开发辅助边界，主要修改 `docs/TESTING.md`，不要为每个阶段永久新增检查点。
 
 协作规则：
 
 1. 每个 session 开始时说明自己的角色和本轮目标。
-2. 阶段开发 session 应围绕一个 ROADMAP 阶段闭环，不要在同一轮顺手做多个阶段。
+2. 阶段开发 session 应围绕一个任务卡闭环，不要在同一轮顺手做多个阶段或多个任务。
 3. 不同 session 不应同时修改同一批文件；如果发现未提交改动，先确认归属。
-4. 产品范围、优先级或验收标准变化时，先由产品助理 session 更新 `docs/ROADMAP.md` 或 `docs/PRD.md`，再进入开发。
-5. 阶段开发 session 完成后，按“每次收尾工作”更新对应文档。
+4. 产品范围、优先级或验收标准变化时，先由产品助理 session 更新 `docs/ROADMAP.md`、`docs/TASKS.md` 或 `docs/PRD.md`，再进入开发。
+5. 阶段开发 session 完成后，按“每次收尾工作”更新 `docs/STATUS.md`、`docs/TASKS.md`、`docs/HANDOFF.md` 等必要文档。
 6. 代码审查 session 只基于当前 diff 和文档契约提问题、指出风险或做小修，不重新定义产品方向。
 7. 如果任务边界不清晰，先写计划或提出问题，不要直接改代码。
 
@@ -138,7 +143,7 @@ lib/prompts/                Prompt 模板和 AI 输出要求
 - 真实 AI 生成问题和真实 AI 最终评价仍应走原有后端 API。
 - Mock 问题和 Mock 评价必须由开发者显式点击触发，不能自动替代真实 AI。
 - Mock 评价应复用现有历史保存机制，确保 mock 面试也可以计入本地历史。
-- 如果修改开发辅助逻辑，应按“每次收尾工作”的分档规则判断是否更新 `docs/DEVELOPMENT_TESTING.md` 和 `docs/PROJECT_STATUS.md`。
+- 如果修改开发辅助逻辑，应按“每次收尾工作”的分档规则判断是否更新 `docs/TESTING.md` 和 `docs/STATUS.md`。
 
 ## API Key 和环境变量
 
@@ -236,30 +241,30 @@ AI agent 应该先停下来，向用户说明当前情况和可选方案，而�
 3. 查看关键 diff，确认没有误改业务逻辑、密钥、依赖文件或无关文件。
 4. 最终回复说明改了什么、验证了什么、哪些测试没有运行。
 
-这类改动通常不需要更新 `README.md`、`docs/PROJECT_STATUS.md`、`docs/ROADMAP.md`、`docs/DEVELOPMENT_TESTING.md` 或 `docs/PRD.md`。
+这类改动通常不需要更新 `README.md`、`docs/STATUS.md`、`docs/ROADMAP.md`、`docs/TESTING.md` 或 `docs/PRD.md`。
 
 ### 阶段内收尾
 
-适用：ROADMAP 某阶段中的一部分实现，功能还没整体完成。
+适用：当前任务卡中的一部分实现，功能还没整体完成。
 
 1. 完成“小改动收尾”。
 2. 如果新增或修改重要代码文件，确认文件顶部有中文 file header。
 3. 如果新增函数、较大逻辑块、关键条件判断或重要数据转换，确认有简短中文注释。
 4. 只更新直接受影响的文档：
    - 数据结构、API 协议、验收标准或阶段拆分变化，更新 `docs/ROADMAP.md`。
-   - 开发辅助按钮、mock 策略或本地测试流程变化，更新 `docs/DEVELOPMENT_TESTING.md`。
-   - 用户可见功能状态或下一步建议明显变化，更新 `docs/PROJECT_STATUS.md`。
+   - 开发辅助按钮、mock 策略或本地测试流程变化，更新 `docs/TESTING.md`。
+   - 用户可见功能状态或下一步建议明显变化，更新 `docs/STATUS.md`。
 5. 不要因为“改过代码”就机械更新 `README.md` 或 `docs/PRD.md`。
 
 ### 阶段完成或 PR 前收尾
 
-适用：ROADMAP 阶段完成、准备 PR、或用户要求整体收尾。
+适用：当前任务卡完成、准备 PR、或用户要求整体收尾。
 
 1. 完成“阶段内收尾”。
-2. 更新 `docs/PROJECT_STATUS.md`，记录当前已完成状态、关键文件、已知限制和下一步建议。
-3. 更新 `docs/ROADMAP.md`，勾选已完成阶段并调整当前优先级。
+2. 更新 `docs/STATUS.md`，记录当前已完成状态、已知限制和下一步建议。
+3. 更新 `docs/TASKS.md` 和 `docs/HANDOFF.md`，记录任务状态、交接信息和下一步建议；必要时更新 `docs/ROADMAP.md`。
 4. 如果安装、运行方式、目录结构、环境变量或总体功能说明变化，更新 `README.md`。
-5. 如果开发测试路径变化，更新 `docs/DEVELOPMENT_TESTING.md`。
+5. 如果长期测试路径变化，更新 `docs/TESTING.md`；不要为每个阶段永久新增检查点。
 6. 只有产品目标、MVP 范围、用户流程或非目标变化时，才更新 `docs/PRD.md`。
 7. 如果改动影响依赖，说明需要用户自行运行的安装命令，不要直接安装。
 8. 如果没有实际运行测试，要在最终回复里说明“未运行测试”和原因。
