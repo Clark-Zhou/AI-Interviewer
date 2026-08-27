@@ -3,17 +3,21 @@
  *
  * 关联文件：
  * - app/interview/history/page.js：受保护的历史记录页面挂载本组件。
- * - lib/client/interviewHistoryStorage.js：读取浏览器 localStorage 中的历史记录。
+ * - lib/client/interviewHistoryStorage.js：读取、删除和清空浏览器 localStorage 中的历史记录。
  * - app/globals.css：提供历史记录列表和详情样式。
  *
  * 说明：
  * - 本组件只在浏览器端读取 localStorage，不接数据库，也不做云端同步。
- * - 不改变本地历史记录数据结构，只按已有字段做只读展示。
+ * - 删除和清空只作用于当前浏览器 localStorage，不接云端同步。
  */
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getInterviewSessions } from '../lib/client/interviewHistoryStorage';
+import {
+  clearInterviewSessions,
+  deleteInterviewSession,
+  getInterviewSessions,
+} from '../lib/client/interviewHistoryStorage';
 
 function getTextSummary(text, maxLength = 48) {
   const normalizedText = String(text || '').replace(/\s+/g, ' ').trim();
@@ -79,6 +83,8 @@ function formatGenerationSource(generationSource) {
 export default function InterviewHistoryPanel() {
   const [historySessions, setHistorySessions] = useState([]);
   const [selectedHistorySessionId, setSelectedHistorySessionId] = useState('');
+  const [isHistoryListCollapsed, setIsHistoryListCollapsed] = useState(false);
+  const [historyActionMessage, setHistoryActionMessage] = useState('');
 
   useEffect(() => {
     const sessions = getInterviewSessions();
@@ -95,51 +101,113 @@ export default function InterviewHistoryPanel() {
     selectedHistorySession?.generationSource
   );
 
+  const handleDeleteHistorySession = (session) => {
+    const sessionTitle = getHistorySessionTitle(session, 36);
+
+    if (!window.confirm(`确定删除「${sessionTitle}」这条本地历史记录吗？此操作不会影响其他记录。`)) {
+      return;
+    }
+
+    try {
+      const nextSessions = deleteInterviewSession(session.id);
+      setHistorySessions(nextSessions);
+
+      if (session.id === selectedHistorySessionId) {
+        setSelectedHistorySessionId(nextSessions[0]?.id || '');
+      } else if (!nextSessions.some((item) => item.id === selectedHistorySessionId)) {
+        setSelectedHistorySessionId(nextSessions[0]?.id || '');
+      }
+
+      setHistoryActionMessage('已删除这条本地历史记录。');
+    } catch {
+      setHistoryActionMessage('删除失败，请确认浏览器允许访问 localStorage 后重试。');
+    }
+  };
+
+  const handleClearHistorySessions = () => {
+    if (!window.confirm('确定清空全部本地历史记录吗？此操作无法撤销。')) {
+      return;
+    }
+
+    try {
+      const nextSessions = clearInterviewSessions();
+      setHistorySessions(nextSessions);
+      setSelectedHistorySessionId('');
+      setHistoryActionMessage('已清空全部本地历史记录。');
+    } catch {
+      setHistoryActionMessage('清空失败，请确认浏览器允许访问 localStorage 后重试。');
+    }
+  };
+
   return (
     <section className="panel history-panel">
       <div className="preview-header">
         <h2>历史记录</h2>
         {historySessions.length > 0 && (
-          <span className="answer-progress">最近 {historySessions.length} 条</span>
+          <div className="history-panel-actions">
+            <span className="answer-progress">最近 {historySessions.length} 条</span>
+            <button
+              type="button"
+              className="secondary-button compact-button"
+              onClick={() => setIsHistoryListCollapsed((currentValue) => !currentValue)}
+            >
+              {isHistoryListCollapsed ? '展开左栏' : '收起左栏'}
+            </button>
+            <button
+              type="button"
+              className="danger-button compact-button"
+              onClick={handleClearHistorySessions}
+            >
+              清空全部
+            </button>
+          </div>
         )}
       </div>
+
+      {historyActionMessage && (
+        <p className="history-action-message">{historyActionMessage}</p>
+      )}
 
       {historySessions.length === 0 && (
         <p className="empty-state">生成最终评价后，这里会保留最近的本地历史记录。</p>
       )}
 
       {historySessions.length > 0 && (
-        <div className="history-layout">
-          <ul className="history-list">
-            {historySessions.map((session) => (
-              <li key={session.id}>
-                <button
-                  type="button"
-                  className={`history-item-button ${
-                    selectedHistorySessionId === session.id ? 'active' : ''
-                  }`}
-                  onClick={() => setSelectedHistorySessionId(session.id)}
-                >
-                  <span className="history-item-main">
-                    <span className="history-title">
-                      {getHistorySessionTitle(session, 36)}
-                    </span>
-                    <span className="history-meta">
-                      {formatHistoryTime(session.createdAt)}
-                      {typeof session.evaluation?.overallScore === 'number'
-                        ? ` ｜ ${session.evaluation.overallScore} / 100`
-                        : ''}
-                    </span>
-                    {formatGenerationSource(session.generationSource) && (
-                      <span className="history-source">
-                        {formatGenerationSource(session.generationSource)}
+        <div className={`history-layout ${isHistoryListCollapsed ? 'collapsed' : ''}`}>
+          {!isHistoryListCollapsed && (
+            <ul className="history-list">
+              {historySessions.map((session) => (
+                <li className="history-item-row" key={session.id}>
+                  <button
+                    type="button"
+                    className={`history-item-button ${
+                      selectedHistorySessionId === session.id ? 'active' : ''
+                    }`}
+                    onClick={() => setSelectedHistorySessionId(session.id)}
+                  >
+                    <span className="history-item-main">
+                      <span className="history-title">
+                        {getHistorySessionTitle(session, 36)}
                       </span>
-                    )}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
+                      <span className="history-meta">
+                        {formatHistoryTime(session.createdAt)}
+                        {typeof session.evaluation?.overallScore === 'number'
+                          ? ` ｜ ${session.evaluation.overallScore} / 100`
+                          : ''}
+                      </span>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    className="danger-button compact-button history-delete-button"
+                    onClick={() => handleDeleteHistorySession(session)}
+                  >
+                    删除
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
 
           <div className="history-detail">
             {!selectedHistorySession && (

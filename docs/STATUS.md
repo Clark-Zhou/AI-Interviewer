@@ -7,10 +7,10 @@
 ## 当前分支
 
 ```text
-develop-job-title-field
+optimize-local-history
 ```
 
-阶段 1-23 已完成、审查并合并到 `main`。阶段 24 已在 `develop-job-title-field` 完成，待审查和合并；阶段 25 暂未开始。
+阶段 1-23 已完成、审查并合并到 `main`。阶段 24 已完成。阶段 25 已在 `optimize-local-history` 完成，待审查和合并。
 
 ## 已完成功能摘要
 
@@ -20,7 +20,7 @@ develop-job-title-field
 - 新面试：可选岗位名称、空输入校验、生成问题、逐题提交、一键提交全部回答、答题进度、最终评价、错误重试、开始新一轮。
 - 开发效率：示例 JD/简历、Mock 问题、Mock 评价、根据当前问题填入测试回答。
 - 文件输入：`.txt` / `.md` 浏览器本地导入；文本型 `.pdf` / `.docx` 通过项目后端 API 解析为纯文本。
-- 历史记录：最终评价成功后保存到浏览器 `localStorage`，最多保留 10 条，支持列表和详情查看；新记录保存 `jobTitle`，旧记录缺少 `jobTitle` 时按岗位信息摘要 fallback。
+- 历史记录：最终评价成功后保存到浏览器 `localStorage`，最多保留 10 条，支持列表和详情查看、单条删除、清空全部和左侧列表收起/展开；新记录保存 `jobTitle`，旧记录缺少 `jobTitle` 时按岗位信息摘要 fallback。
 - 文档：已完成多 session 协作规范、内部测试准备、轻量 docs 结构和历史归档。
 
 ## 当前技术栈
@@ -62,4 +62,4 @@ develop-job-title-field
 
 ## 下一步建议
 
-下一步先审查阶段 24 diff；通过后再做阶段 25：本地历史记录管理和布局优化。云端历史、数据库、OCR 和搜索/恢复历史 session 继续暂缓。
+下一步先审查阶段 25 diff；云端历史、数据库、OCR、历史搜索和恢复历史 session 继续暂缓。

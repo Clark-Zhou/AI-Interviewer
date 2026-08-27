@@ -892,6 +892,14 @@ h2 {
   background: #374151;
 }
 
+.danger-button {
+  background: #b91c1c;
+}
+
+.danger-button:hover {
+  background: #991b1b;
+}
+
 /* 表单输入区。 */
 .field {
   margin-bottom: 18px;
@@ -1236,6 +1244,10 @@ button:disabled {
   grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.2fr);
 }
 
+.history-layout.collapsed {
+  grid-template-columns: 1fr;
+}
+
 .history-list,
 .history-qa-list {
   list-style: none;
@@ -1245,6 +1257,28 @@ button:disabled {
 
 .history-list li {
   margin-bottom: 8px;
+}
+
+.history-panel-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.history-action-message {
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 700;
+  margin: -4px 0 16px;
+}
+
+.history-item-row {
+  align-items: stretch;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 
 .history-item-button {
@@ -1289,6 +1323,10 @@ button:disabled {
   line-height: 1.4;
 }
 
+.history-delete-button {
+  align-self: stretch;
+}
+
 .detail-source {
   margin: 6px 0 0;
 }
@@ -1297,6 +1335,11 @@ button:disabled {
   border-left: 1px solid #e5e7eb;
   min-height: 160px;
   padding-left: 18px;
+}
+
+.history-layout.collapsed .history-detail {
+  border-left: 0;
+  padding-left: 0;
 }
 
 .history-detail-header {
@@ -1563,6 +1606,20 @@ button:disabled {
 
   .history-layout {
     grid-template-columns: 1fr;
+  }
+
+  .history-item-row {
+    grid-template-columns: 1fr;
+  }
+
+  .history-panel-actions {
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .history-panel-actions button,
+  .history-delete-button {
+    width: 100%;
   }
 
   .history-detail {
