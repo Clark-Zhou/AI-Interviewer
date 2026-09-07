@@ -8,7 +8,7 @@
 
 - 前端：Next.js App Router
 - AI 服务：DeepSeek API
-- 当前阶段：已跑通“岗位信息 + 简历 -> 生成问题 -> 逐题回答 -> 最终评价”的 MVP 核心闭环，并已完成本地历史记录、Supabase Auth、主页优化、面试工作台拆分、本地文本导入和 PDF/DOCX 纯文本解析
+- 当前已上线能力、限制和残余风险以 `docs/STATUS.md` 为准，不在本文件重复维护。
 
 ## 新 session 接手规则
 
@@ -17,7 +17,7 @@
 本地项目主目录：
 
 ```text
-/Users/a0000/personal-project/AI-Interview_Simulator
+/Users/a0000/personal-project/AI-Interview
 ```
 
 如果当前终端目录不确定，先用 `pwd` 和 `git rev-parse --show-toplevel` 确认自己在项目根目录。
@@ -38,13 +38,13 @@
 - 如果要改开发测试辅助逻辑、mock 策略或本地测试流程，阅读 `docs/TESTING.md`。
 - 如果要改本地运行、环境变量、部署或内部测试流程，阅读 `docs/WORKFLOW.md`。
 - 如果要改产品范围、用户流程、MVP 边界或非目标，阅读 `docs/PRD.md`。
-- 如果要追溯已完成历史阶段的详细方案，阅读 `docs/archive/` 的相关章节。
+- `docs/archive/` 是所有 AI session 的只写区：不得读取、搜索或扫描，但可以根据当前已知内容直接创建新的归档文件。
 
 PRD 降低优先级规则：
 
 - `docs/PRD.md` 不是通用必读文件。普通开发、代码审查、样式调整、bug 修复和阶段内收尾不要默认读取 PRD。
-- `docs/archive/` 也不是通用必读文件。不要为了了解下一步任务而读取历史归档。
-- 优先通过 `AGENTS.md`、`docs/HANDOFF.md` 和 `docs/TASKS.md` 理解当前任务；再按任务卡链接补读文档。
+- 任何 session 都不得读取 `docs/archive/`。当前工作所需信息必须完整保留在活跃文档中，不能依赖历史归档。
+- 优先通过 `AGENTS.md`、`docs/HANDOFF.md` 和 `docs/TASKS.md` 理解当前任务；再按任务卡链接补读活跃文档。
 - 只有当任务会改变产品目标、MVP 范围、用户主流程、非目标或长期边界时，才阅读或更新 PRD。
 - 如果不确定是否需要读 PRD，先看 `docs/TASKS.md` 中当前任务卡是否明确要求；没有要求时不要为了保险而全文读取。
 
@@ -62,6 +62,7 @@ PRD 降低优先级规则：
 每次开始一个新任务前，先做轻量同步，不需要大量扫描：
 
 ```bash
+git branch --show-current
 git status --short
 git log --oneline -3
 ```
@@ -73,9 +74,35 @@ git log --oneline -3
 - 如果是代码审查任务，先判断审查对象是当前未提交 diff、staged diff、最近一次 commit，还是整个分支相对 main 的 diff。
 - 如果同一个开发 session 连续做多个任务，每个新任务开始前都重新做这次轻量同步，不要沿用上一个任务的计划记忆。
 
-同步后按任务需要阅读相关文档：通用优先看 `AGENTS.md`、`docs/HANDOFF.md`、`docs/TASKS.md`；再按任务卡链接补读 `docs/STATUS.md`、`docs/ROADMAP.md`、`docs/ARCHITECTURE.md`、`docs/API.md`、`docs/TESTING.md` 或 `docs/WORKFLOW.md`。只有涉及产品范围、用户主流程、MVP 边界或非目标变化时，才看 `docs/PRD.md`；只有需要追溯旧阶段详细决策时，才看 `docs/archive/`。
+同步后按任务需要阅读相关文档：通用优先看 `AGENTS.md`、`docs/HANDOFF.md`、`docs/TASKS.md`；再按任务卡链接补读 `docs/STATUS.md`、`docs/ROADMAP.md`、`docs/ARCHITECTURE.md`、`docs/API.md`、`docs/TESTING.md` 或 `docs/WORKFLOW.md`。只有涉及产品范围、用户主流程、MVP 边界或非目标变化时，才看 `docs/PRD.md`；任何情况都不得读取 `docs/archive/`。
 
 如果开发或审查时发现文档之间存在模糊、矛盾、过时或互相反作用的地方，应停下来向用户说明问题并询问如何处理，不要自己猜一个解释继续开发。
+
+## 文档职责与维护规则
+
+每类信息只维护一个主要来源，其他文档只放链接或一句引用，不复制整段状态：
+
+| 信息 | 唯一维护位置 |
+| --- | --- |
+| 当前分支、当前任务、建议下个 session 角色和下一步动作 | `docs/HANDOFF.md` |
+| 已批准任务卡、范围、非目标、验收标准和任务状态 | `docs/TASKS.md` |
+| 已上线能力、已知限制和残余风险 | `docs/STATUS.md` |
+| 未来阶段、优先级、候选方向和暂缓事项 | `docs/ROADMAP.md` |
+| 技术栈、路由、目录、模块边界和数据流 | `docs/ARCHITECTURE.md` |
+| API 请求、响应、错误边界和兼容要求 | `docs/API.md` |
+| 长期测试边界、Mock 约束和核心回归路径 | `docs/TESTING.md` |
+| 本地运行、环境变量、依赖、部署和内部测试流程 | `docs/WORKFLOW.md` |
+| 产品目标、用户主流程、MVP 边界和非目标 | `docs/PRD.md` |
+| 历史材料 | `docs/archive/`，所有 AI session 只写不读 |
+
+维护边界：
+
+- `docs/HANDOFF.md` 每次交接覆盖更新，“最近完成”最多保留 3-5 条，不累积完整历史。
+- `docs/TASKS.md` 可以同时保存多张已批准任务卡，但一个阶段开发 session 默认只处理用户指定的一张。
+- 候选方向不能直接进入开发；必须先由产品助理 session 写成任务卡。
+- 已完成任务不长期留在活跃任务卡中；需要归档时，只能根据当前已知内容创建新的 archive 文件。
+- 不覆盖已有 archive 文件，不在写入后重新打开验证；只通过工具执行结果和 `git status` 确认文件存在。
+- archive 内容不能作为当前任务、决策或验收的依据；需要恢复的信息必须由用户或产品助理重新写入活跃文档。
 
 
 ## 多 session 协作规则
@@ -84,20 +111,22 @@ git log --oneline -3
 
 推荐角色分工：
 
-- 产品助理 session：维护产品范围、阶段计划、优先级和验收标准，主要修改 `docs/ROADMAP.md`、`docs/TASKS.md`、`docs/HANDOFF.md`；只有产品边界变化时才修改 `docs/PRD.md`。
-- 阶段开发 session：按照 `docs/TASKS.md` 的指定任务卡完成完整实现，可能同时修改前端、后端、prompt、客户端工具和相关文档。
-- 代码审查 session：以 review 姿态检查阶段开发 session 的 diff、风险、遗漏测试和文档同步，不主动做大范围重构。
-- 开发测试 session（可选）：维护长期有效测试流程和开发辅助边界，主要修改 `docs/TESTING.md`，不要为每个阶段永久新增检查点。
+- 产品助理 session：维护阶段计划、优先级、任务范围和验收标准，主要修改 `docs/ROADMAP.md`、`docs/TASKS.md`、`docs/HANDOFF.md`；只有产品边界变化时才读取并修改 `docs/PRD.md`。
+- 阶段开发 session：按照 `docs/TASKS.md` 中用户指定的任务卡闭环实现，更新执行状态、受影响的专题文档和交接信息，但不能自行扩大范围或修改验收标准。
+- 代码审查 session：检查指定任务的 diff、风险、遗漏测试、验收结果和文档职责是否同步；只提问题或做小修，不重新定义产品方向。
+- 修复开发 session：只处理已经确认的审查问题，读取审查意见和受影响文档，不扩大任务范围。
+- 开发测试 session（可选）：维护 `docs/TESTING.md` 中长期有效的测试流程和开发辅助边界，不把阶段一次性验收永久写入测试文档。
 
 协作规则：
 
 1. 每个 session 开始时说明自己的角色和本轮目标。
-2. 阶段开发 session 应围绕一个任务卡闭环，不要在同一轮顺手做多个阶段或多个任务。
+2. 阶段开发 session 应围绕用户指定的一张任务卡闭环，不要在同一轮顺手做多个阶段或多个任务。
 3. 不同 session 不应同时修改同一批文件；如果发现未提交改动，先确认归属。
 4. 产品范围、优先级或验收标准变化时，先由产品助理 session 更新 `docs/ROADMAP.md`、`docs/TASKS.md` 或 `docs/PRD.md`，再进入开发。
-5. 阶段开发 session 完成后，按“每次收尾工作”更新 `docs/STATUS.md`、`docs/TASKS.md`、`docs/HANDOFF.md` 等必要文档。
-6. 代码审查 session 只基于当前 diff 和文档契约提问题、指出风险或做小修，不重新定义产品方向。
+5. 阶段开发 session 完成后，按“每次收尾工作”更新任务状态、已经成立的项目事实、受影响的专题文档和交接信息。
+6. 代码审查 session 应额外检查是否重复维护状态、是否遗漏合并状态、是否错误读取 PRD 或 archive。
 7. 如果任务边界不清晰，先写计划或提出问题，不要直接改代码。
+8. 所有角色都必须遵守 archive 只写不读规则。
 
 ## 前后端职责边界
 
@@ -181,7 +210,7 @@ AI agent 不应直接在用户电脑上安装依赖。
 例如：
 
 ```bash
-cd /Users/a0000/personal-project/AI-Interview_Simulator
+cd /Users/a0000/personal-project/AI-Interview
 npm install
 ```
 
@@ -251,9 +280,13 @@ AI agent 应该先停下来，向用户说明当前情况和可选方案，而�
 2. 如果新增或修改重要代码文件，确认文件顶部有中文 file header。
 3. 如果新增函数、较大逻辑块、关键条件判断或重要数据转换，确认有简短中文注释。
 4. 只更新直接受影响的文档：
-   - 数据结构、API 协议、验收标准或阶段拆分变化，更新 `docs/ROADMAP.md`。
-   - 开发辅助按钮、mock 策略或本地测试流程变化，更新 `docs/TESTING.md`。
-   - 用户可见功能状态或下一步建议明显变化，更新 `docs/STATUS.md`。
+   - 任务执行状态变化，更新 `docs/TASKS.md`；范围或验收标准变化必须交回产品助理 session。
+   - 模块边界、路由或数据流变化，更新 `docs/ARCHITECTURE.md`。
+   - API 协议或错误边界变化，更新 `docs/API.md`。
+   - 开发辅助按钮、Mock 策略或长期测试流程变化，更新 `docs/TESTING.md`。
+   - 运行、环境变量、依赖或部署流程变化，更新 `docs/WORKFLOW.md`。
+   - 用户可见能力、限制或残余风险变化，更新 `docs/STATUS.md`。
+   - 当前分支、任务、下个角色或下一步动作变化，更新 `docs/HANDOFF.md`。
 5. 不要因为“改过代码”就机械更新 `README.md` 或 `docs/PRD.md`。
 
 ### 阶段完成或 PR 前收尾
@@ -261,13 +294,14 @@ AI agent 应该先停下来，向用户说明当前情况和可选方案，而�
 适用：当前任务卡完成、准备 PR、或用户要求整体收尾。
 
 1. 完成“阶段内收尾”。
-2. 更新 `docs/STATUS.md`，记录当前已完成状态、已知限制和下一步建议。
-3. 更新 `docs/TASKS.md` 和 `docs/HANDOFF.md`，记录任务状态、交接信息和下一步建议；必要时更新 `docs/ROADMAP.md`。
+2. 只有用户可见能力、已知限制或残余风险变化时才更新 `docs/STATUS.md`。
+3. 更新 `docs/TASKS.md` 的任务状态和 `docs/HANDOFF.md` 的即时交接；只有未来阶段或优先级变化时才由产品助理更新 `docs/ROADMAP.md`。
 4. 如果安装、运行方式、目录结构、环境变量或总体功能说明变化，更新 `README.md`。
 5. 如果长期测试路径变化，更新 `docs/TESTING.md`；不要为每个阶段永久新增检查点。
 6. 只有产品目标、MVP 范围、用户流程或非目标变化时，才更新 `docs/PRD.md`。
 7. 如果改动影响依赖，说明需要用户自行运行的安装命令，不要直接安装。
-8. 如果没有实际运行测试，要在最终回复里说明“未运行测试”和原因。
+8. 如需保存已完成任务历史，可以根据当前已知内容直接创建新的 archive 文件，但不得读取或覆盖已有 archive 文件。
+9. 如果没有实际运行测试，要在最终回复里说明“未运行测试”和原因。
 
 收尾回复应简洁说明：改了什么、验证了什么、还有什么没有做。不要把命令输出原样大量贴给用户，只总结关键结果。
 

@@ -13,12 +13,13 @@ JD + 简历 -> AI 生成问题 -> 用户回答 -> AI 最终评价 -> 本地历�
 项目目录：
 
 ```text
-/Users/a0000/personal-project/AI-Interview_Simulator
+/Users/a0000/personal-project/AI-Interview
 ```
 
 安装依赖和启动服务由项目所有者执行：
 
 ```bash
+cd /Users/a0000/personal-project/AI-Interview
 npm install
 npm run dev
 ```
@@ -34,28 +35,15 @@ http://localhost:3000
 ## 当前能力
 
 - 主页、登录/注册、受保护面试工作台。
-- JD/简历输入，支持 `.txt` / `.md` 本地导入和文本型 `.pdf` / `.docx` 解析。
+- 可选岗位名称、JD 和简历输入，支持 `.txt` / `.md` 本地导入和文本型 `.pdf` / `.docx` 解析。
 - DeepSeek 生成面试问题和最终评价。
 - 逐题回答、一键提交、错误重试、开始新一轮。
-- 浏览器 localStorage 本地历史记录。
+- 浏览器 localStorage 本地历史记录，支持查看、单条删除、清空和列表收起。
 - 开发环境 Mock 问题和 Mock 评价。
 
 ## 文档地图
 
-默认阅读：
-
+- `docs/README.md`：完整文档地图和职责说明。
 - `AGENTS.md`：AI session 协作规则和硬性边界。
-- `docs/HANDOFF.md`：当前交接状态。
-- `docs/TASKS.md`：当前任务卡。
 
-按需阅读：
-
-- `docs/README.md`：docs 目录地图。
-- `docs/STATUS.md`：当前项目事实。
-- `docs/ROADMAP.md`：下一阶段方向。
-- `docs/ARCHITECTURE.md`：技术结构和数据流。
-- `docs/API.md`：API 契约。
-- `docs/TESTING.md`：测试边界和回归清单。
-- `docs/WORKFLOW.md`：本地运行、环境变量、部署和内部测试。
-- `docs/PRD.md`：产品边界，默认不读。
-- `docs/archive/`：历史长文档，默认不读。
+新的 AI session 默认先读 `AGENTS.md`、`docs/HANDOFF.md` 和 `docs/TASKS.md`，再按当前任务需要选择专题文档。
