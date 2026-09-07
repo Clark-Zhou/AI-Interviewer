@@ -7,7 +7,7 @@
 ## 本地项目位置
 
 ```text
-/Users/a0000/personal-project/AI-Interview_Simulator
+/Users/a0000/personal-project/AI-Interview
 ```
 
 如果目录不确定，先运行：
@@ -79,7 +79,4 @@ Supabase Auth 需要配置：
 
 ## AI Agent 边界
 
-- 不擅自安装依赖。
-- 不默认启动 dev server。
-- 多次运行或测试失败时，应停下来和用户讨论。
-- 需要新增依赖、外部账号配置或部署平台操作时，只给用户命令和步骤。
+AI session 的依赖安装、服务启动、失败处理和外部操作权限统一以 `AGENTS.md` 为准，本文件只维护项目运行与部署流程。
