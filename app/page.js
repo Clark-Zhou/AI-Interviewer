@@ -62,6 +62,28 @@ export default async function Home() {
             </span>
             <span>AI Interview Simulator</span>
           </Link>
+
+          <div className="home-nav-placeholders" aria-label="即将开放的功能">
+            <button
+              type="button"
+              className="home-nav-placeholder"
+              disabled
+              title="帮助即将开放"
+            >
+              <span>帮助</span>
+              <small>即将开放</small>
+            </button>
+            <button
+              type="button"
+              className="home-nav-placeholder"
+              disabled
+              title="公告即将开放"
+            >
+              <span>公告</span>
+              <small>即将开放</small>
+            </button>
+          </div>
+
           <nav className="home-nav-links" aria-label="主页导航">
             {isLoggedIn ? (
               <HomeSignOutButton className="home-nav-sign-out" />
@@ -74,23 +96,12 @@ export default async function Home() {
 
         <div className="home-hero-grid">
           <div className="home-copy">
-            <p className="home-kicker">Interview preparation workspace</p>
-            <h1>把岗位信息和个人经历，整理成一次更清晰的面试练习。</h1>
+            <p className="home-kicker">AI Interview Simulator</p>
+            <h1>面试之前，先练一次</h1>
 
             <p className="home-lede">
-              输入岗位 JD 和简历后，系统会生成结构化面试问题；提交回答后，再生成总分、优势、风险点和改进建议。
+              基于岗位 JD 和个人简历生成针对性问题并在作答后提供结构化评价。
             </p>
-            <p className="home-note">
-              当前历史记录仍保存在当前浏览器本地，没有云端同步。内部测试时请使用脱敏后的简历和岗位信息。
-            </p>
-
-            <div
-              className={isLoggedIn ? 'home-status logged-in' : 'home-status'}
-              aria-live="polite"
-            >
-              <span>{isLoggedIn ? '当前已登录' : '当前未登录'}</span>
-              <strong>{isLoggedIn ? user.email : '请先登录或注册后进入面试'}</strong>
-            </div>
 
             {!isAuthConfigured && (
               <p className="home-warning">
@@ -100,7 +111,7 @@ export default async function Home() {
 
             <div className="home-actions" aria-label="主页入口">
               <Link className="home-primary-link" href={interviewHref}>
-                {isLoggedIn ? '进入模拟面试' : '登录后进入面试'}
+                {isLoggedIn ? '进入面试工作台' : '开始模拟面试'}
               </Link>
               {isLoggedIn ? (
                 <HomeSignOutButton />
@@ -110,6 +121,13 @@ export default async function Home() {
                 </Link>
               )}
             </div>
+
+            {isLoggedIn && (
+              <p className="home-account" aria-live="polite">
+                已登录 · {user.email}
+              </p>
+            )}
+            <p className="home-note">记录仅保存在当前浏览器 · 请使用脱敏信息</p>
           </div>
 
           <div className="home-cover" aria-hidden="true">

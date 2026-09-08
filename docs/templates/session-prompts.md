@@ -13,7 +13,7 @@
 ## 阶段开发 session
 
 ```text
-你是 AI Interview Simulator 的阶段开发 session。本轮目标是实现 docs/TASKS.md 中指定的任务卡。请先阅读 AGENTS.md、docs/HANDOFF.md、docs/TASKS.md，然后只阅读任务卡明确链接的文档。不要默认阅读 docs/PRD.md 或 docs/archive/。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后更新必要的 STATUS/TASKS/HANDOFF。
+你是 AI Interview Simulator 的阶段开发 session。本轮目标是实现 docs/TASKS.md 中指定的任务卡。请先阅读 AGENTS.md、docs/HANDOFF.md、docs/TASKS.md，然后只阅读任务卡明确链接的文档。不要默认阅读 docs/PRD.md 或 docs/archive/。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后更新必要的 STATUS/TASKS/HANDOFF，并说明测试情况。
 ```
 
 ## 代码审查 session
