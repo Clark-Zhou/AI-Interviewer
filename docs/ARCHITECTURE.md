@@ -38,7 +38,7 @@ lib/server/                       服务端 AI 调用、解析器和文档解析
 lib/supabase/                     Supabase browser/server client
 proxy.js                          Supabase cookie 刷新和 /interview 访问保护
 docs/                             轻量项目文档
-docs/archive/                     历史长文档归档，默认不读
+docs/archive/                     历史材料只写区，所有 AI session 禁止读取
 ```
 
 ## 前后端职责边界

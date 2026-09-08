@@ -2,15 +2,19 @@
 
 ## 文档职责
 
-记录 AI Interview Simulator 当前事实状态。默认不必全文读取；需要了解当前功能、暂缓事项或残余风险时读本文件。
+记录已经成立的项目事实、用户可见能力、已知限制和残余风险。当前分支、当前任务和下一步动作归 `docs/HANDOFF.md`，未来方向归 `docs/ROADMAP.md`。
 
-## 当前分支
+## 当前基线
 
+<<<<<<< HEAD
 ```text
 codex/optimize-homepage
 ```
 
 阶段 1-25 已完成、审查并合并到 `main`。阶段 26 已完成开发、生产构建验证和代码审查，当前待 PR 合并。
+=======
+阶段 1-25 已完成、审查并合并到 `main`。
+>>>>>>> origin/main
 
 ## 已完成功能摘要
 
@@ -24,27 +28,9 @@ codex/optimize-homepage
 - 历史记录：最终评价成功后保存到浏览器 `localStorage`，最多保留 10 条，支持列表和详情查看、单条删除、清空全部和左侧列表收起/展开；新记录保存 `jobTitle`，旧记录缺少 `jobTitle` 时按岗位信息摘要 fallback。
 - 文档：已完成多 session 协作规范、内部测试准备、轻量 docs 结构和历史归档。
 
-## 当前技术栈
+技术栈、路由、目录和数据流以 `docs/ARCHITECTURE.md` 为准。
 
-- Next.js App Router
-- React
-- DeepSeek API
-- Supabase Auth
-- mammoth@1.12.1
-- pdf-parse@2.4.5
-- 普通 CSS
-
-## 当前暂未使用
-
-- 数据库
-- 云端历史记录
-- 云端文件存储
-- OCR 或图片识别
-- Tailwind CSS
-- UI 组件库
-- TypeScript
-
-## 暂未完成 / 暂缓事项
+## 当前限制
 
 - 扫描版 PDF OCR、图片简历识别或复杂文件解析。
 - 恢复历史 session 到当前页面。
@@ -60,7 +46,10 @@ codex/optimize-homepage
 - `/api/parse-document` 的 5MB 文件大小限制发生在 `request.formData()` 之后；超大 multipart 请求仍可能先进入 Next.js formData 解析流程并占用内存。后续如需更可靠防护，应在部署平台、反向代理或更底层请求体配置中增加更早的 body size 限制。
 - 历史记录保存在浏览器 localStorage；换浏览器、换设备或清理浏览器数据后不可恢复。
 - 真实 AI 质量依赖 DeepSeek 返回结果和解析器容错，仍需人工观察生成质量。
+<<<<<<< HEAD
 
 ## 下一步建议
 
 下一步创建并合并阶段 26 PR；合并后回到最新 `main`，再由产品助理 session 规划下一阶段。`npm run build` 已通过，浏览器人工响应式检查尚未运行。帮助页、公告页、云端历史、数据库、OCR、历史搜索和恢复历史 session 继续暂缓。
+=======
+>>>>>>> origin/main
