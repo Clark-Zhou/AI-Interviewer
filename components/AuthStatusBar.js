@@ -87,8 +87,13 @@ export default function AuthStatusBar({ userEmail }) {
         </button>
       </div>
       {isConfirmingSignOut && (
-        <div className="auth-signout-confirmation" role="group" aria-label="确认登出">
-          <p>当前面试尚未保存，登出后会丢失本次内容。</p>
+        <div
+          className="auth-signout-confirmation"
+          role="group"
+          aria-label="确认登出"
+          aria-describedby="auth-unsaved-signout-warning"
+        >
+          <p id="auth-unsaved-signout-warning">当前面试尚未保存，登出后会丢失本次内容。</p>
           <div className="button-row">
             <button
               ref={cancelSignOutRef}
@@ -96,6 +101,7 @@ export default function AuthStatusBar({ userEmail }) {
               className="secondary-button compact-button"
               onClick={() => setIsConfirmingSignOut(false)}
               disabled={isSigningOut}
+              aria-describedby="auth-unsaved-signout-warning"
             >
               取消
             </button>
@@ -104,6 +110,7 @@ export default function AuthStatusBar({ userEmail }) {
               className="danger-button compact-button"
               onClick={performSignOut}
               disabled={isSigningOut}
+              aria-describedby="auth-unsaved-signout-warning"
             >
               {isSigningOut ? '正在登出...' : '继续登出'}
             </button>
