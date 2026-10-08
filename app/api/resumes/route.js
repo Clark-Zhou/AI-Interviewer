@@ -4,8 +4,9 @@
  * 注意事项：API 自行验证 Auth；前端不能指定 user_id 或 Storage 路径。
  */
 import {
-  cleanupPendingResumes, getResumeAuth, getResumeMime, RESUME_BUCKET,
-  RESUME_SELECT, ResumeValidationError, resumeError, validateResumeUpload,
+  cleanupPendingResumes, getResumeAuth, getResumeMime, removeResumeObject,
+  reserveResume, RESUME_BUCKET, RESUME_SELECT, ResumeValidationError,
+  resumeError, transitionResume, validateResumeUpload,
 } from '../../../lib/server/resumeRepository';
 
 export const runtime = 'nodejs';
@@ -41,13 +42,13 @@ export async function POST(request) {
     // 先插入 pending 元数据，让数据库在并发上传时原子地预留 10 份名额。
     reservedId = crypto.randomUUID();
     storagePath = `${user.id}/${reservedId}.${type}`;
-    const { error: reserveError } = await supabase.from('resume_files').insert({
-      id: reservedId, user_id: user.id, original_name: originalName,
-      file_type: type, size_bytes: buffer.length, storage_path: storagePath, status: 'pending',
-    });
-    if (reserveError) {
-      reservedId = undefined;
+    try {
+      await reserveResume(supabase, {
+        id: reservedId, name: originalName, type, size: buffer.length,
+      });
+    } catch (reserveError) {
       if (reserveError.message?.includes('resume_limit_reached')) {
+        reservedId = undefined;
         return resumeError('简历仓库最多保存 10 份，请先删除一份。', 409);
       }
       throw reserveError;
@@ -57,18 +58,15 @@ export async function POST(request) {
     });
     if (uploadError) throw uploadError;
     const { data, error: readyError } = await supabase.from('resume_files')
-      .update({ status: 'ready' }).eq('id', reservedId).eq('user_id', user.id)
-      .select(RESUME_SELECT).single();
+      .select(RESUME_SELECT).eq('id', reservedId).eq('user_id', user.id).single();
     if (readyError) throw readyError;
+    await transitionResume(supabase, reservedId, 'ready');
     reservedId = undefined;
     return Response.json({ resume: data }, { status: 201 });
   } catch (error) {
-    // Storage 和数据库不共享事务；任一步失败都尽量移除对象与预留行。
+    // 标记 cleanup 先释放名额；对象删除失败时后续列表/上传会继续清理。
     if (reservedId && supabase && user) {
-      const { error: cleanupError } = await supabase.storage.from(RESUME_BUCKET).remove([storagePath]);
-      if (!cleanupError) {
-        await supabase.from('resume_files').delete().eq('id', reservedId).eq('user_id', user.id);
-      }
+      try { await removeResumeObject(supabase, { id: reservedId, storage_path: storagePath }); } catch {}
     }
     if (error instanceof ResumeValidationError) return resumeError(error.message);
     return resumeError('简历上传失败，请检查云端配置或稍后重试。', 503);

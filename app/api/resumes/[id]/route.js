@@ -1,10 +1,10 @@
 /**
  * 文件职责：删除当前账号的一份仓库简历及其原文件。
  * 关联文件：lib/server/resumeRepository.js、components/ResumeLibrary.js。
- * 注意事项：先删除 Storage 对象再删除元数据；失败时保留可重试入口。
+ * 注意事项：先标记 cleanup 释放名额，再尝试删除对象；残留对象随后重试。
  */
 import {
-  getOwnedResume, getResumeAuth, RESUME_BUCKET, resumeError,
+  getOwnedResume, getResumeAuth, removeResumeObject, resumeError,
 } from '../../../../lib/server/resumeRepository';
 
 export async function DELETE(_request, { params }) {
@@ -14,11 +14,12 @@ export async function DELETE(_request, { params }) {
     const { id } = await params;
     const row = await getOwnedResume(supabase, user.id, id);
     if (!row) return resumeError('简历不存在或无权访问。', 404);
-    const { error: storageError } = await supabase.storage.from(RESUME_BUCKET).remove([row.storage_path]);
-    if (storageError) throw storageError;
-    const { error: deleteError } = await supabase.from('resume_files')
-      .delete().eq('id', id).eq('user_id', user.id);
-    if (deleteError) throw deleteError;
+    // 标记成功后对用户视为已删除；Storage 故障时记录留待后续请求重试。
+    await removeResumeObject(supabase, row).catch(async (error) => {
+      const { data } = await supabase.from('resume_files').select('status')
+        .eq('id', id).eq('user_id', user.id).maybeSingle();
+      if (data?.status !== 'cleanup') throw error;
+    });
     return Response.json({ deleted: true });
   } catch {
     return resumeError('删除失败，请稍后重试。', 503);

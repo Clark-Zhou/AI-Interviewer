@@ -25,6 +25,20 @@ export default function ResumeLibrary() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
+  const refreshResumes = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      setResumes(await listResumes());
+      setLoadFailed(false);
+    } catch (loadError) {
+      setError(loadError.message);
+      setLoadFailed(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     let active = true;
     listResumes().then((items) => {
@@ -55,10 +69,15 @@ export default function ResumeLibrary() {
     if (resumes.length >= 10) { setError('简历仓库最多保存 10 份，请先删除一份。'); return; }
     setIsUploading(true);
     try {
-      await uploadResume(file);
-      setResumes(await listResumes());
+      const saved = await uploadResume(file);
+      setResumes((items) => [saved, ...items]);
       setLoadFailed(false);
       setMessage('简历已保存到仓库。');
+      try {
+        setResumes(await listResumes());
+      } catch {
+        setError('简历已保存，但列表刷新失败。请点击重新读取。');
+      }
     } catch (uploadError) {
       setError(uploadError.message);
     } finally {
@@ -121,6 +140,7 @@ export default function ResumeLibrary() {
 
       {error && <p className="resume-feedback resume-feedback-error" role="alert">{error}</p>}
       {message && <p className="resume-feedback" role="status">{message}</p>}
+      {loadFailed && <button className="secondary-button" type="button" onClick={refreshResumes}>重新读取列表</button>}
 
       <section className="resume-list-section" aria-label="已保存简历">
         <div className="resume-list-heading"><h2>已保存简历</h2><span>按上传时间排序</span></div>

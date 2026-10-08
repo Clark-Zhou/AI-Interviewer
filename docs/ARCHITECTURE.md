@@ -53,7 +53,7 @@ docs/archive/                     既有历史资料
 - DeepSeek API Key 只能在服务端读取。
 - 文档解析库 `mammoth` / `pdf-parse` 只应在服务端使用，不打进前端 bundle。
 - localStorage 历史记录只在浏览器端访问。
-- 简历原文件保存到私有 `interview-resumes` Storage 桶；`public.resume_files` 记录当前账号的文件元数据及上传状态，数据库触发器在并发插入时限制每账号最多 10 份。仓库 API 自行校验 Auth，仅使用用户会话与 publishable key；Storage 和表都以 RLS 隔离账号。
+- 简历原文件保存到私有 `interview-resumes` Storage 桶；`public.resume_files` 记录当前账号的文件元数据及上传状态。服务端凭当前用户会话及私有令牌调用受控 RPC，数据库以账号级事务锁限制并发预留最多 10 份。表只向登录用户开放自己的只读数据；Storage RLS 限制预留路径上传及清理状态删除。上传/删除的对象清理失败会留下不占名额的 `cleanup` 记录，后续请求重试。
 - `app/interview/layout.js` 集中校验登录态并承载品牌页头、五入口导航和离开保护；`proxy.js` 仍保护整个 `/interview/:path*`。面试区页面共用约 1200px 的响应式容器，视觉样式限制在 `.interview-shell` 内。
 - `app/interview/profile/page.js` 服务端读取当前用户，独占挂载 `AuthStatusBar`；其他面试区页面不展示邮箱或登出。
 - 面试区页面链接使用原生跳转，使浏览器 `beforeunload` 可以提醒未完成面试；登出在个人中心的账号卡片显示页面内确认。
