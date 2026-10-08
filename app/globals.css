@@ -2019,3 +2019,54 @@ button:disabled {
   .interview-shell .interview-nav-item { font-size: 9px; }
   .interview-shell .interview-navigation { padding-inline: 2px; }
 }
+
+/* 简历仓库：延续面试区的浅色卡片体系，文件操作与阅读信息分层显示。 */
+.interview-shell .resume-page-heading { display: flex; flex-direction: column; align-items: flex-start; }
+.interview-shell .resume-page-heading .text-link { margin-top: 18px; }
+.interview-shell .resume-upload-panel { align-items: center; display: flex; gap: 24px; justify-content: space-between; }
+.interview-shell .resume-upload-panel h2 { margin: 0 0 8px; }
+.resume-upload-actions { align-items: flex-end; display: flex; flex: 0 0 auto; flex-direction: column; gap: 12px; }
+.resume-count { background: #e6f5f1; border-radius: 999px; color: #087f78; font-size: 13px; font-weight: 800; padding: 7px 13px; }
+.resume-list-section { margin-top: 30px; }
+.resume-list-heading { align-items: baseline; display: flex; gap: 16px; justify-content: space-between; margin-bottom: 14px; }
+.interview-shell .resume-list-heading h2 { font-size: 22px; margin: 0; }
+.resume-list-heading span { color: #698087; font-size: 12px; }
+.resume-list { display: grid; gap: 12px; list-style: none; margin: 0; padding: 0; }
+.interview-shell .resume-list-item { align-items: center; display: flex; gap: 18px; min-width: 0; padding: 20px 24px; }
+.resume-file-icon { align-items: center; background: #e1f3ee; border-radius: 12px; color: #087f78; display: inline-flex; flex: 0 0 64px; font-size: 11px; font-weight: 850; height: 58px; justify-content: center; letter-spacing: .03em; }
+.resume-file-info { display: flex; flex: 1; flex-direction: column; gap: 6px; min-width: 0; }
+.resume-file-info strong { color: #17333a; font-size: 15px; overflow-wrap: anywhere; }
+.resume-file-info span { color: #698087; font-size: 12px; }
+.resume-file-actions { display: flex; flex: 0 0 auto; gap: 8px; }
+.interview-shell button.resume-delete-button { background: #fff0ee; color: #a3443a; }
+.interview-shell button.resume-delete-button:hover { background: #ffe2dd; }
+.interview-shell .resume-empty { color: #60777e; line-height: 1.8; text-align: center; }
+.resume-feedback { background: #e6f5f1; border-radius: 10px; color: #087f78; font-size: 14px; line-height: 1.6; margin: 14px 0; padding: 12px 15px; }
+.resume-feedback-error { background: #fff0ee; color: #a3443a; }
+.resume-import-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.resume-picker-dialog { background: #fff; border: 1px solid #dceae8; border-radius: 20px; box-shadow: 0 24px 72px rgba(17, 55, 58, .24); color: #17333a; max-height: min(75vh, 660px); max-width: min(560px, calc(100vw - 28px)); padding: 28px; width: 100%; }
+.resume-picker-dialog::backdrop { background: rgba(15, 46, 49, .4); }
+.resume-picker-header { align-items: flex-start; display: flex; gap: 20px; justify-content: space-between; margin-bottom: 20px; }
+.resume-picker-header h2 { margin: 0; }
+.resume-picker-list { display: grid; gap: 9px; list-style: none; margin: 0; padding: 0; }
+.resume-picker-list li { align-items: center; border: 1px solid #dceae8; border-radius: 12px; display: flex; gap: 12px; padding: 10px; }
+.resume-picker-list .resume-file-icon { flex-basis: 48px; height: 44px; }
+.resume-picker-empty { background: #f2faf8; border-radius: 12px; padding: 24px; text-align: center; }
+.resume-picker-empty p { margin: 0 0 12px; }
+.resume-confirm-panel { background: #fff; border: 0; border-radius: 18px; box-shadow: 0 24px 72px rgba(17, 55, 58, .24); color: #17333a; max-width: min(440px, calc(100vw - 28px)); padding: 28px; width: 100%; }
+.resume-confirm-panel::backdrop { background: rgba(15, 46, 49, .4); }
+.resume-confirm-panel h2 { margin-top: 0; }
+.resume-confirm-panel p { color: #60777e; line-height: 1.7; overflow-wrap: anywhere; }
+
+@media (max-width: 720px) {
+  .interview-shell .resume-upload-panel { align-items: stretch; flex-direction: column; }
+  .resume-upload-actions { align-items: stretch; }
+  .resume-count { align-self: flex-start; }
+  .interview-shell .resume-list-item { align-items: flex-start; flex-wrap: wrap; padding: 18px; }
+  .resume-file-icon { flex-basis: 52px; height: 52px; }
+  .resume-file-actions { justify-content: flex-end; width: 100%; }
+  .resume-picker-dialog { padding: 20px; }
+  .resume-picker-list li { flex-wrap: wrap; }
+  .resume-picker-list li button { margin-left: auto; }
+}
