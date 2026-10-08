@@ -24,7 +24,7 @@
 - `/interview/history`：受保护的本地历史记录列表和详情。
 - `/interview/resumes`：受保护的简历仓库页面骨架。
 - `/interview/analytics`：受保护的数据和分析页面骨架。
-- `/interview/profile`：受保护的个人中心页面骨架。
+- `/interview/profile`：受保护的个人中心，服务端读取当前用户并展示邮箱与登出。
 - `/api/generate-questions`：生成面试问题。
 - `/api/evaluate-interview`：生成最终评价。
 - `/api/parse-document`：PDF/DOCX 解析成纯文本。
@@ -52,8 +52,9 @@ docs/archive/                     既有历史资料
 - DeepSeek API Key 只能在服务端读取。
 - 文档解析库 `mammoth` / `pdf-parse` 只应在服务端使用，不打进前端 bundle。
 - localStorage 历史记录只在浏览器端访问。
-- `app/interview/layout.js` 集中校验登录态并承载账号条、五入口导航和离开保护；`proxy.js` 仍保护整个 `/interview/:path*`。
-- 面试区页面链接使用原生跳转，使浏览器 `beforeunload` 可以提醒未完成面试；登出在账号条显示页面内确认。
+- `app/interview/layout.js` 集中校验登录态并承载品牌页头、五入口导航和离开保护；`proxy.js` 仍保护整个 `/interview/:path*`。面试区页面共用约 1200px 的响应式容器，视觉样式限制在 `.interview-shell` 内。
+- `app/interview/profile/page.js` 服务端读取当前用户，独占挂载 `AuthStatusBar`；其他面试区页面不展示邮箱或登出。
+- 面试区页面链接使用原生跳转，使浏览器 `beforeunload` 可以提醒未完成面试；登出在个人中心的账号卡片显示页面内确认。
 
 ## 核心数据流
 
@@ -100,7 +101,7 @@ InterviewSimulator -> lib/client/interviewFileImport.js（分类、大小校验�
 - `components/InterviewSimulator.js`：新面试主流程、导入文件、问题列表、回答提交、评价展示。
 - `components/InterviewHistoryPanel.js`：本地历史列表和详情。
 - `components/LoginEntryShell.js`：登录/注册页面壳。
-- `components/AuthStatusBar.js`：账号状态和登出入口。
+- `components/AuthStatusBar.js`：个人中心的账号状态和登出入口。
 - `components/InterviewNavigation.js`：五入口导航与当前区域高亮。
 - `components/InterviewLeaveGuard.js`：未保存面试的浏览器离开提示与登出确认状态。
 - `lib/client/interviewApi.js`：前端请求封装。

@@ -1,10 +1,9 @@
 /**
- * 文件职责：为受保护的面试区统一提供账号状态、五入口导航和离开保护。
- * 关联文件：components/AuthStatusBar.js、components/InterviewNavigation.js、components/InterviewLeaveGuard.js。
+ * 文件职责：为受保护的面试区统一提供品牌页头、五入口导航和离开保护。
+ * 关联文件：components/InterviewNavigation.js、components/InterviewLeaveGuard.js、app/interview/profile/page.js。
  * 注意事项：所有 /interview 子页面共享此布局；未登录时跳转登录页。
  */
 import { redirect } from 'next/navigation';
-import AuthStatusBar from '../../components/AuthStatusBar';
 import { InterviewLeaveGuardProvider } from '../../components/InterviewLeaveGuard';
 import InterviewNavigation from '../../components/InterviewNavigation';
 import { createSupabaseServerClient } from '../../lib/supabase/serverClient';
@@ -25,8 +24,15 @@ export default async function InterviewLayout({ children }) {
   return (
     <InterviewLeaveGuardProvider>
       <div className="interview-shell">
-        <AuthStatusBar userEmail={user.email} />
-        <InterviewNavigation />
+        <header className="interview-site-header">
+          <div className="interview-header-inner">
+            <a className="interview-brand" href="/interview" aria-label="面试工作台">
+              <span className="interview-brand-mark" aria-hidden="true">AI</span>
+              <span className="interview-brand-name">AI Interview<span>面试练习工作台</span></span>
+            </a>
+            <InterviewNavigation />
+          </div>
+        </header>
         {children}
       </div>
     </InterviewLeaveGuardProvider>

@@ -2,7 +2,7 @@
  * 文件职责：展示当前登录用户和登出入口。
  *
  * 关联文件：
- * - app/interview/layout.js：在所有面试区页面上方挂载本组件。
+ * - app/interview/profile/page.js：仅在个人中心挂载本组件。
  * - components/InterviewLeaveGuard.js：未完成面试时确认登出。
  * - lib/supabase/browserClient.js：浏览器端 Supabase Auth client。
  *

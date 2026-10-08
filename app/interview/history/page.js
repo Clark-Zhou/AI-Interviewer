@@ -3,7 +3,7 @@
  *
  * 关联文件：
  * - components/InterviewHistoryPanel.js：读取并展示浏览器本地历史记录。
- * - app/interview/layout.js：统一提供登录校验、账号状态和导航。
+ * - app/interview/layout.js：统一提供登录校验和导航。
  * - app/interview/page.js：面试工作台入口页。
  *
  * 说明：
