@@ -76,6 +76,7 @@ export default function ResumeLibrary() {
       try {
         setResumes(await listResumes());
       } catch {
+        setLoadFailed(true);
         setError('简历已保存，但列表刷新失败。请点击重新读取。');
       }
     } catch (uploadError) {
