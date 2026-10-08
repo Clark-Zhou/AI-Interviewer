@@ -2,9 +2,8 @@
  * 文件职责：展示当前登录用户和登出入口。
  *
  * 关联文件：
- * - app/interview/page.js：在面试工作台入口页上方挂载本组件。
- * - app/interview/new/page.js：在新面试流程页上方挂载本组件。
- * - app/interview/history/page.js：在本地历史记录页上方挂载本组件。
+ * - app/interview/layout.js：在所有面试区页面上方挂载本组件。
+ * - components/InterviewLeaveGuard.js：未完成面试时确认登出。
  * - lib/supabase/browserClient.js：浏览器端 Supabase Auth client。
  *
  * 说明：
@@ -14,16 +13,32 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createSupabaseBrowserClient } from '../lib/supabase/browserClient';
+import { useInterviewLeaveGuard } from './InterviewLeaveGuard';
 
-// 登出后回到登录页，并让受保护页面重新校验认证状态。
+// 未保存面试先展示页面内确认；实际登出后回到登录页并刷新认证状态。
 export default function AuthStatusBar({ userEmail }) {
   const router = useRouter();
+  const { hasUnsavedInterview } = useInterviewLeaveGuard();
+  const cancelSignOutRef = useRef(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [isConfirmingSignOut, setIsConfirmingSignOut] = useState(false);
   const [signOutError, setSignOutError] = useState('');
 
-  const handleSignOut = async () => {
+  useEffect(() => {
+    if (isConfirmingSignOut) {
+      cancelSignOutRef.current?.focus();
+    }
+  }, [isConfirmingSignOut]);
+
+  useEffect(() => {
+    if (!hasUnsavedInterview) {
+      setIsConfirmingSignOut(false);
+    }
+  }, [hasUnsavedInterview]);
+
+  const performSignOut = async () => {
     setIsSigningOut(true);
     setSignOutError('');
 
@@ -45,6 +60,15 @@ export default function AuthStatusBar({ userEmail }) {
     }
   };
 
+  const handleSignOut = () => {
+    if (hasUnsavedInterview) {
+      setIsConfirmingSignOut(true);
+      return;
+    }
+
+    performSignOut();
+  };
+
   return (
     <div className="auth-status-bar">
       <div>
@@ -62,6 +86,30 @@ export default function AuthStatusBar({ userEmail }) {
           {isSigningOut ? '正在登出...' : '登出'}
         </button>
       </div>
+      {isConfirmingSignOut && (
+        <div className="auth-signout-confirmation" role="group" aria-label="确认登出">
+          <p>当前面试尚未保存，登出后会丢失本次内容。</p>
+          <div className="button-row">
+            <button
+              ref={cancelSignOutRef}
+              type="button"
+              className="secondary-button compact-button"
+              onClick={() => setIsConfirmingSignOut(false)}
+              disabled={isSigningOut}
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              className="danger-button compact-button"
+              onClick={performSignOut}
+              disabled={isSigningOut}
+            >
+              {isSigningOut ? '正在登出...' : '继续登出'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

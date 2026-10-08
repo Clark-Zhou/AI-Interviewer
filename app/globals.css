@@ -713,6 +713,7 @@ button.home-secondary-link:hover {
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 16px;
   margin: 24px auto -16px;
@@ -747,20 +748,94 @@ button.home-secondary-link:hover {
   margin: 0;
 }
 
-/* 面试工作台入口：只提供新面试和本地历史两个真实入口。 */
+.auth-signout-confirmation {
+  align-items: center;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  padding-top: 14px;
+}
+
+.auth-signout-confirmation p {
+  color: #92400e;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* 面试区导航：桌面顶部等宽五栏，中央工作台保持视觉重点。 */
+.interview-navigation {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 28px auto 0;
+  padding: 8px;
+  width: min(960px, calc(100% - 32px));
+}
+
+.interview-nav-item {
+  align-items: center;
+  border-radius: 8px;
+  color: #475569;
+  display: flex;
+  font-size: 14px;
+  font-weight: 700;
+  gap: 6px;
+  justify-content: center;
+  min-height: 48px;
+  padding: 9px 6px;
+  text-align: center;
+  text-decoration: none;
+}
+
+.interview-nav-item:hover,
+.interview-nav-item.is-active:not(.interview-nav-primary) {
+  background: #ecfdf5;
+  color: #0f766e;
+}
+
+.interview-nav-primary {
+  background: #0f766e;
+  color: #ffffff;
+}
+
+.interview-nav-primary:hover,
+.interview-nav-primary.is-active {
+  background: #115e59;
+  color: #ffffff;
+}
+
+.interview-nav-primary.is-active {
+  box-shadow: 0 0 0 2px #99f6e4 inset;
+}
+
+.interview-nav-plus {
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.interview-nav-item:focus-visible,
+.workspace-card:focus-visible,
+.workspace-placeholder-panel a:focus-visible,
+.auth-signout-confirmation button:focus-visible {
+  outline: 3px solid #0d9488;
+  outline-offset: 3px;
+}
+
+/* 面试工作台入口：只提供新建面试操作。 */
 .workspace-panel {
   padding: 32px;
 }
 
 .workspace-heading {
   max-width: 680px;
-}
-
-.workspace-actions {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-top: 24px;
 }
 
 .workspace-card {
@@ -790,6 +865,32 @@ button.home-secondary-link:hover {
 .workspace-card-description {
   color: #4b5563;
   line-height: 1.7;
+}
+
+.workspace-start-card {
+  background: #f0fdfa;
+  border-color: #99f6e4;
+  margin-top: 24px;
+  max-width: 480px;
+  min-height: 128px;
+  position: relative;
+}
+
+.workspace-card-arrow {
+  color: #0f766e;
+  font-size: 26px;
+  position: absolute;
+  right: 22px;
+  top: 20px;
+}
+
+.workspace-placeholder-panel {
+  min-height: 220px;
+}
+
+.workspace-placeholder-panel .text-link {
+  display: inline-block;
+  margin-top: 16px;
 }
 
 .workspace-subpage-heading {
@@ -1574,8 +1675,37 @@ button:disabled {
     flex-direction: column;
   }
 
-  .workspace-actions {
-    grid-template-columns: 1fr;
+  /* 手机端固定底栏，额外留白避免遮住表单和历史记录操作。 */
+  .interview-shell {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+
+  .interview-navigation {
+    border-radius: 14px 14px 0 0;
+    border-width: 1px 0 0;
+    bottom: 0;
+    box-shadow: 0 -10px 30px rgba(15, 23, 42, 0.08);
+    gap: 0;
+    left: 0;
+    margin: 0;
+    padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
+    position: fixed;
+    right: 0;
+    width: 100%;
+    z-index: 20;
+  }
+
+  .interview-nav-item {
+    flex-direction: column;
+    font-size: 11px;
+    gap: 2px;
+    min-height: 48px;
+    padding: 5px 2px;
+  }
+
+  .interview-nav-primary {
+    margin-top: -14px;
+    min-height: 62px;
   }
 
   .dev-helper {
