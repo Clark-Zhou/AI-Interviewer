@@ -31,7 +31,7 @@
 ```text
 app/                              Next.js 页面和 API route
 components/                       前端组件
-lib/client/                       浏览器端请求和 localStorage 工具
+lib/client/                       浏览器端请求、文件导入和 localStorage 工具
 lib/dev/                          开发环境 Mock 数据
 lib/prompts/                      DeepSeek prompt
 lib/server/                       服务端 AI 调用、解析器和文档解析
@@ -69,8 +69,16 @@ InterviewSimulator -> lib/client/interviewApi.js -> /api/evaluate-interview
 解析 PDF/DOCX：
 
 ```text
-InterviewSimulator -> lib/client/interviewApi.js -> /api/parse-document
+InterviewSimulator -> lib/client/interviewFileImport.js（分类与大小校验）
+-> lib/client/interviewApi.js -> /api/parse-document
 -> lib/server/documentParser.js -> mammoth 或 pdf-parse -> textarea
+```
+
+导入 TXT/MD：
+
+```text
+InterviewSimulator -> lib/client/interviewFileImport.js（分类、大小校验与本地读取）
+-> textarea；组件检查导入结果是否过期并清空旧面试结果
 ```
 
 历史记录：
@@ -88,6 +96,7 @@ InterviewSimulator -> lib/client/interviewApi.js -> /api/parse-document
 - `components/AuthStatusBar.js`：账号状态和登出入口。
 - `lib/client/interviewApi.js`：前端请求封装。
 - `lib/client/interviewHistoryStorage.js`：本地历史读写。
+- `lib/client/interviewFileImport.js`：浏览器端文件识别、大小校验和文本读取。
 - `lib/server/deepseek.js`：生成问题的 DeepSeek 调用。
 - `lib/server/interviewEvaluation.js`：最终评价的 DeepSeek 调用。
 - `lib/server/documentParser.js`：PDF/DOCX 纯文本解析。

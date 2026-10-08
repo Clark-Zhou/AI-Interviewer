@@ -3,6 +3,7 @@
  *
  * 关联文件：
  * - lib/client/interviewApi.js：封装前端调用后端 API 的请求方法。
+ * - lib/client/interviewFileImport.js：封装文件类型校验和浏览器本地文本读取。
  * - lib/client/interviewHistoryStorage.js：保存浏览器本地面试历史记录。
  * - lib/dev/interviewMocks.js：提供开发环境使用的本地 mock 问题和 mock 评价。
  * - app/globals.css：提供本组件使用的页面、表单、按钮和结果区样式。
@@ -27,17 +28,17 @@ import {
   saveInterviewSession,
 } from '../lib/client/interviewHistoryStorage';
 import {
+  getInterviewImportKind,
+  getInterviewImportValidationError,
+  IMPORT_FILE_ACCEPT,
+  readInterviewTextFile,
+} from '../lib/client/interviewFileImport';
+import {
   createMockInterviewEvaluation,
   mockInterviewQuestions,
 } from '../lib/dev/interviewMocks';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
-const MAX_TEXT_IMPORT_SIZE_BYTES = 300 * 1024;
-const MAX_DOCUMENT_IMPORT_SIZE_BYTES = 5 * 1024 * 1024;
-const SUPPORTED_TEXT_FILE_EXTENSIONS = ['.txt', '.md'];
-const SUPPORTED_DOCUMENT_FILE_EXTENSIONS = ['.pdf', '.docx'];
-const IMPORT_FILE_ACCEPT =
-  '.txt,.md,.pdf,.docx,text/plain,text/markdown,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
 const SAMPLE_JOB_TITLE = 'AI 产品经理实习生';
 
@@ -102,20 +103,6 @@ function getRequestErrorMessage(prefix, error) {
   return `${prefix}：${detail}`;
 }
 
-function isSupportedTextFile(file) {
-  const fileName = file.name.toLowerCase();
-  return SUPPORTED_TEXT_FILE_EXTENSIONS.some((extension) =>
-    fileName.endsWith(extension),
-  );
-}
-
-function isSupportedDocumentFile(file) {
-  const fileName = file.name.toLowerCase();
-  return SUPPORTED_DOCUMENT_FILE_EXTENSIONS.some((extension) =>
-    fileName.endsWith(extension),
-  );
-}
-
 function getInputTargetLabel(inputTarget) {
   return inputTarget === 'jobInfo' ? '岗位 JD' : '个人简历';
 }
@@ -145,20 +132,37 @@ export default function InterviewSimulator() {
   const [textImportMessage, setTextImportMessage] = useState('');
   const [documentImportTarget, setDocumentImportTarget] = useState('');
 
-  // 输入被文件或示例替换后，清空旧的生成结果，避免新文本混用上一轮问题和评价。
-  const clearGeneratedInterviewState = () => {
-    setQuestions([]);
-    setAnswers({});
-    setSubmittedAnswers({});
-    setAnswerErrors({});
+  // 回答变化后清掉旧评价和历史保存提示，避免展示已失效的报告。
+  const clearEvaluationState = () => {
     setEvaluation(null);
-    setIsLoading(false);
-    setIsEvaluating(false);
-    setError('');
     setEvaluationError('');
     setHistorySaveStatus('');
     setHistorySaveMessage('');
+  };
+
+  // 重新生成问题时清理上一轮问答，但保留当前输入和文件导入提示。
+  const clearQuestionFlowState = () => {
+    setAnswers({});
+    setSubmittedAnswers({});
+    setAnswerErrors({});
+    clearEvaluationState();
     setQuestionGenerationSource('');
+  };
+
+  // 输入被文件或示例替换后，清空旧的生成结果，避免新文本混用上一轮问题和评价。
+  const clearGeneratedInterviewState = () => {
+    setQuestions([]);
+    clearQuestionFlowState();
+    setIsLoading(false);
+    setIsEvaluating(false);
+    setError('');
+  };
+
+  // 更换输入或重置页面时清除上一份文件的状态提示。
+  const clearImportState = () => {
+    setTextImportStatus('');
+    setTextImportMessage('');
+    setDocumentImportTarget('');
   };
 
   // 开发辅助：填入固定示例输入，并清空上一轮生成结果，方便反复测试主流程。
@@ -169,9 +173,7 @@ export default function InterviewSimulator() {
     setJobInfo(SAMPLE_JOB_INFO);
     setResume(SAMPLE_RESUME);
     clearGeneratedInterviewState();
-    setTextImportStatus('');
-    setTextImportMessage('');
-    setDocumentImportTarget('');
+    clearImportState();
   };
 
   // 开发辅助：为当前问题列表填入测试回答，但保留逐题手动提交动作。
@@ -184,10 +186,7 @@ export default function InterviewSimulator() {
     setAnswers(sampleAnswers);
     setSubmittedAnswers({});
     setAnswerErrors({});
-    setEvaluation(null);
-    setEvaluationError('');
-    setHistorySaveStatus('');
-    setHistorySaveMessage('');
+    clearEvaluationState();
   };
 
   // 根据已提交回答计算答题进度，只统计当前问题列表里的题目。
@@ -246,21 +245,8 @@ export default function InterviewSimulator() {
     setJobTitle('');
     setJobInfo('');
     setResume('');
-    setQuestions([]);
-    setAnswers({});
-    setSubmittedAnswers({});
-    setAnswerErrors({});
-    setEvaluation(null);
-    setIsLoading(false);
-    setIsEvaluating(false);
-    setError('');
-    setEvaluationError('');
-    setHistorySaveStatus('');
-    setHistorySaveMessage('');
-    setQuestionGenerationSource('');
-    setTextImportStatus('');
-    setTextImportMessage('');
-    setDocumentImportTarget('');
+    clearGeneratedInterviewState();
+    clearImportState();
   };
 
   const handleJobTitleChange = (nextJobTitle) => {
@@ -272,18 +258,14 @@ export default function InterviewSimulator() {
     fileImportVersionRef.current += 1;
     setJobInfo(nextJobInfo);
     setError('');
-    setTextImportStatus('');
-    setTextImportMessage('');
-    setDocumentImportTarget('');
+    clearImportState();
   };
 
   const handleResumeChange = (nextResume) => {
     fileImportVersionRef.current += 1;
     setResume(nextResume);
     setError('');
-    setTextImportStatus('');
-    setTextImportMessage('');
-    setDocumentImportTarget('');
+    clearImportState();
   };
 
   const handleChooseTextFile = (inputRef) => {
@@ -295,43 +277,14 @@ export default function InterviewSimulator() {
     inputRef.current.click();
   };
 
-  // .txt/.md 文件只在浏览器本地读取，不上传文件，也不保存文件名或文件对象。
-  const handleTextFileImport = (inputTarget, file) => {
-    if (file.size === 0) {
-      setTextImportStatus('error');
-      setTextImportMessage('文件内容为空，请选择包含文本的 .txt 或 .md 文件。');
-      return;
-    }
-
-    if (file.size > MAX_TEXT_IMPORT_SIZE_BYTES) {
-      setTextImportStatus('error');
-      setTextImportMessage('文件过大，请选择 300KB 以内的 .txt 或 .md 文本文件。');
-      return;
-    }
-
+  // .txt/.md 文件只在浏览器本地读取；组件只接收未过期的读取结果。
+  const handleTextFileImport = async (inputTarget, file) => {
     const fileImportVersion = fileImportVersionRef.current + 1;
     fileImportVersionRef.current = fileImportVersion;
-    const reader = new FileReader();
-
-    reader.onerror = () => {
-      if (fileImportVersion !== fileImportVersionRef.current) {
-        return;
-      }
-
-      setTextImportStatus('error');
-      setTextImportMessage('文件读取失败，请重新选择文件或手动粘贴文本。');
-    };
-
-    reader.onload = () => {
-      const fileText = typeof reader.result === 'string' ? reader.result : '';
+    try {
+      const fileText = await readInterviewTextFile(file);
 
       if (fileImportVersion !== fileImportVersionRef.current) {
-        return;
-      }
-
-      if (!fileText.trim()) {
-        setTextImportStatus('error');
-        setTextImportMessage('文件内容为空，请选择包含文本的 .txt 或 .md 文件。');
         return;
       }
 
@@ -346,24 +299,17 @@ export default function InterviewSimulator() {
       clearGeneratedInterviewState();
       setTextImportStatus('success');
       setTextImportMessage('文本已导入，可以继续编辑；旧问题、回答和评价已清空。');
-    };
+    } catch (error) {
+      if (fileImportVersion !== fileImportVersionRef.current) {
+        return;
+      }
 
-    reader.readAsText(file);
+      setTextImportStatus('error');
+      setTextImportMessage(error?.message || '文件读取失败，请重新选择文件或手动粘贴文本。');
+    }
   };
 
   const handleDocumentFileImport = async (inputTarget, file) => {
-    if (file.size === 0) {
-      setTextImportStatus('error');
-      setTextImportMessage('文件内容为空，请重新选择文件。');
-      return;
-    }
-
-    if (file.size > MAX_DOCUMENT_IMPORT_SIZE_BYTES) {
-      setTextImportStatus('error');
-      setTextImportMessage('文件过大，请选择 5MB 以内的 PDF 或 DOCX 文件。');
-      return;
-    }
-
     const fileImportVersion = fileImportVersionRef.current + 1;
     fileImportVersionRef.current = fileImportVersion;
     setDocumentImportTarget(inputTarget);
@@ -410,18 +356,21 @@ export default function InterviewSimulator() {
       return;
     }
 
-    if (isSupportedTextFile(file)) {
+    const importKind = getInterviewImportKind(file);
+    const validationError = getInterviewImportValidationError(file, importKind);
+
+    if (validationError) {
+      setTextImportStatus('error');
+      setTextImportMessage(validationError);
+      return;
+    }
+
+    if (importKind === 'text') {
       handleTextFileImport(inputTarget, file);
       return;
     }
 
-    if (isSupportedDocumentFile(file)) {
-      handleDocumentFileImport(inputTarget, file);
-      return;
-    }
-
-    setTextImportStatus('error');
-    setTextImportMessage('仅支持导入 .txt、.md、.pdf 或 .docx 文件。');
+    handleDocumentFileImport(inputTarget, file);
   };
 
   // 按问题下标保存用户回答，提交整场评价时会使用这些回答。
@@ -440,10 +389,7 @@ export default function InterviewSimulator() {
       ...currentSubmittedAnswers,
       [questionIndex]: '',
     }));
-    setEvaluation(null);
-    setEvaluationError('');
-    setHistorySaveStatus('');
-    setHistorySaveMessage('');
+    clearEvaluationState();
   };
 
   // 统一处理评价展示和历史保存，保证真实 AI 和 Mock 评价复用同一条链路。
@@ -500,10 +446,7 @@ export default function InterviewSimulator() {
       ...currentSubmittedAnswers,
       [questionIndex]: answerText,
     }));
-    setEvaluation(null);
-    setEvaluationError('');
-    setHistorySaveStatus('');
-    setHistorySaveMessage('');
+    clearEvaluationState();
   };
 
   // 一键提交：所有题都有回答时，把当前问题列表里的回答一次性纳入最终评价。
@@ -533,10 +476,7 @@ export default function InterviewSimulator() {
 
     setAnswerErrors(nextErrors);
     setSubmittedAnswers(nextSubmittedAnswers);
-    setEvaluation(null);
-    setEvaluationError('');
-    setHistorySaveStatus('');
-    setHistorySaveMessage('');
+    clearEvaluationState();
   };
 
   // 点击按钮时先做前端校验，再调用 client API 获取问题数组。
@@ -551,27 +491,13 @@ export default function InterviewSimulator() {
     if (!jobInfo.trim() || !resume.trim()) {
       setError('请先填写岗位信息和个人简历，再生成面试问题。');
       setQuestions([]);
-      setAnswers({});
-      setSubmittedAnswers({});
-      setAnswerErrors({});
-      setEvaluation(null);
-      setEvaluationError('');
-      setHistorySaveStatus('');
-      setHistorySaveMessage('');
-      setQuestionGenerationSource('');
+      clearQuestionFlowState();
       return;
     }
 
     setError('');
     setQuestions([]);
-    setAnswers({});
-    setSubmittedAnswers({});
-    setAnswerErrors({});
-    setEvaluation(null);
-    setEvaluationError('');
-    setHistorySaveStatus('');
-    setHistorySaveMessage('');
-    setQuestionGenerationSource('');
+    clearQuestionFlowState();
     setIsLoading(true);
 
     try {
@@ -605,26 +531,13 @@ export default function InterviewSimulator() {
     if (!jobInfo.trim() || !resume.trim()) {
       setError('请先填写岗位信息和个人简历，再使用 Mock 问题。');
       setQuestions([]);
-      setAnswers({});
-      setSubmittedAnswers({});
-      setAnswerErrors({});
-      setEvaluation(null);
-      setEvaluationError('');
-      setHistorySaveStatus('');
-      setHistorySaveMessage('');
-      setQuestionGenerationSource('');
+      clearQuestionFlowState();
       return;
     }
 
     setError('');
     setQuestions(mockInterviewQuestions);
-    setAnswers({});
-    setSubmittedAnswers({});
-    setAnswerErrors({});
-    setEvaluation(null);
-    setEvaluationError('');
-    setHistorySaveStatus('');
-    setHistorySaveMessage('');
+    clearQuestionFlowState();
     setQuestionGenerationSource('mock');
   };
 
@@ -638,10 +551,7 @@ export default function InterviewSimulator() {
       return;
     }
 
-    setEvaluation(null);
-    setEvaluationError('');
-    setHistorySaveStatus('');
-    setHistorySaveMessage('');
+    clearEvaluationState();
     setIsEvaluating(true);
 
     try {
@@ -677,10 +587,7 @@ export default function InterviewSimulator() {
       return;
     }
 
-    setEvaluation(null);
-    setEvaluationError('');
-    setHistorySaveStatus('');
-    setHistorySaveMessage('');
+    clearEvaluationState();
 
     const generatedEvaluation = createMockInterviewEvaluation(submittedQuestionAnswers);
     handleEvaluationGenerated(generatedEvaluation, 'mock');
