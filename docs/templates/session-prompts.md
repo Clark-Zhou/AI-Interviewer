@@ -1,35 +1,21 @@
-# Session Prompts
+# Session 启动提示词
 
-## 文档职责
+使用时替换目标、任务路径或审查对象。执行规则统一见 [AGENTS.md](../../AGENTS.md)。
 
-保存多 session 协作启动提示词模板。使用时替换任务编号、分支名和具体目标。
-
-## 产品助理 session
+## 主 session
 
 ```text
-你是 AI Interview Simulator 的产品助理 session。本轮不写功能代码。先确认目录、分支、git status 和最近提交，再阅读 AGENTS.md、docs/HANDOFF.md、docs/TASKS.md、docs/ROADMAP.md 和必要的 docs/STATUS.md。只有产品边界变化时才阅读 docs/PRD.md。所有 session 禁止读取、搜索或扫描 docs/archive/，但可以根据当前已知内容直接创建新的归档文件。你的产出是阶段方向、已批准任务卡、范围、非目标、验收标准和下一步交接。
+你是 AI Interview Simulator 的主 session。本轮目标是：<目标>。先按 AGENTS.md 同步 Git 与工作区，通过 docs/README.md 选择相关文档。有对应任务时读取 <任务记录路径>。判断任务复杂度：小改动直接实施；较大变化先记录计划并确认，已有明确批准的计划直接实施。完成实现、必要验证和受影响文档更新后，将较大任务交给独立 session 审查。
 ```
 
-## 阶段开发 session
+## 独立审查
 
 ```text
-你是 AI Interview Simulator 的阶段开发 session。本轮只实现用户指定的任务卡。先确认目录、分支、git status 和最近提交，再阅读 AGENTS.md、docs/HANDOFF.md、docs/TASKS.md 以及任务卡明确链接的专题文档。不得自行扩大范围或修改验收标准。所有 session 禁止读取、搜索或扫描 docs/archive/，但可以根据当前已知内容直接创建新的归档文件。不要安装依赖；如果需要依赖，告诉我命令让我自己安装。完成后更新任务状态、已成立的项目事实、受影响的专题文档和 HANDOFF，并说明测试情况。
+你是 AI Interview Simulator 的独立审查 session。任务记录是 <任务记录路径>，审查对象是 <比较基准与目标提交，或明确的工作区 diff>。按 AGENTS.md 同步仓库，阅读任务计划和相关专题文档。检查正确性、风险、范围、验收与文档同步，记录实际审查版本、问题和结论。需要修复时标为修复中；通过时标为完成并从未完成任务索引移除。不要把主 session 的自查视为独立审查，必要验证未满足时不能标为完成。
 ```
 
-## 代码审查 session
+## 继续任务
 
 ```text
-你是 AI Interview Simulator 的代码审查 session。先确认目录、分支、git status 和审查对象，再阅读 AGENTS.md、docs/HANDOFF.md、docs/TASKS.md 及任务卡引用的专题文档，然后检查指定 diff。优先指出 bug、风险、遗漏测试、验收缺口、重复维护状态和文档未同步问题。不要重新定义产品方向。所有 session 禁止读取、搜索或扫描 docs/archive/，但可以根据当前已知内容直接创建新的归档文件。
-```
-
-## 修复开发 session
-
-```text
-你是 AI Interview Simulator 的修复开发 session。先确认目录、分支和 git status，再阅读 AGENTS.md、docs/HANDOFF.md、docs/TASKS.md、审查意见和受影响的专题文档。只修复已确认问题，不扩大范围，不安装依赖。所有 session 禁止读取、搜索或扫描 docs/archive/，但可以根据当前已知内容直接创建新的归档文件。完成后更新任务状态、必要专题文档和 HANDOFF，并说明修复和验证情况。
-```
-
-## 开发测试 session
-
-```text
-你是 AI Interview Simulator 的开发测试 session。先确认目录、分支和 git status，再阅读 AGENTS.md、docs/HANDOFF.md、docs/TASKS.md、docs/TESTING.md；涉及运行环境时再读 docs/WORKFLOW.md，涉及 API 时再读 docs/API.md。你的职责是维护长期有效的测试边界和核心回归清单，不把阶段一次性验收永久写入 TESTING。所有 session 禁止读取、搜索或扫描 docs/archive/，但可以根据当前已知内容直接创建新的归档文件。
+继续 AI Interview Simulator 的任务 <任务记录路径>。先按 AGENTS.md 同步当前 Git 与工作区，阅读该任务的已确认计划、实施结果、审查意见和交接说明，再按需补读专题文档。保留既有改动，从剩余工作继续；范围或验收有实质变化时重新确认。收尾结果与必要交接继续写回同一任务记录。
 ```
