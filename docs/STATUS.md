@@ -6,15 +6,7 @@
 
 ## 当前基线
 
-<<<<<<< HEAD
-```text
-codex/optimize-homepage
-```
-
-阶段 1-25 已完成、审查并合并到 `main`。阶段 26 已完成开发、生产构建验证和代码审查，当前待 PR 合并。
-=======
-阶段 1-25 已完成、审查并合并到 `main`。
->>>>>>> origin/main
+阶段 1-26 已完成并合并到 `main`。
 
 ## 已完成功能摘要
 
@@ -46,10 +38,3 @@ codex/optimize-homepage
 - `/api/parse-document` 的 5MB 文件大小限制发生在 `request.formData()` 之后；超大 multipart 请求仍可能先进入 Next.js formData 解析流程并占用内存。后续如需更可靠防护，应在部署平台、反向代理或更底层请求体配置中增加更早的 body size 限制。
 - 历史记录保存在浏览器 localStorage；换浏览器、换设备或清理浏览器数据后不可恢复。
 - 真实 AI 质量依赖 DeepSeek 返回结果和解析器容错，仍需人工观察生成质量。
-<<<<<<< HEAD
-
-## 下一步建议
-
-下一步创建并合并阶段 26 PR；合并后回到最新 `main`，再由产品助理 session 规划下一阶段。`npm run build` 已通过，浏览器人工响应式检查尚未运行。帮助页、公告页、云端历史、数据库、OCR、历史搜索和恢复历史 session 继续暂缓。
-=======
->>>>>>> origin/main
