@@ -46,4 +46,4 @@ http://localhost:3000
 - `docs/README.md`：完整文档地图和职责说明。
 - `AGENTS.md`：AI session 协作规则和硬性边界。
 
-新的 AI session 默认先读 `AGENTS.md`、`docs/HANDOFF.md` 和 `docs/TASKS.md`，再按当前任务需要选择专题文档。
+新的 AI session 先读 `AGENTS.md` 和 `docs/README.md`。用户指定任务时读取对应记录，否则通过 `docs/tasks/README.md` 找到未完成任务；专题文档按需阅读。

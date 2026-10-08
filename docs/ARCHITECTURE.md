@@ -2,7 +2,7 @@
 
 ## 文档职责
 
-说明当前技术结构、目录、路由、数据流和重要文件职责。修改模块边界、路由、API 分层或数据流时读本文件。
+说明当前技术结构、目录、路由、数据流和重要文件职责。
 
 ## 技术栈
 
@@ -37,8 +37,10 @@ lib/prompts/                      DeepSeek prompt
 lib/server/                       服务端 AI 调用、解析器和文档解析
 lib/supabase/                     Supabase browser/server client
 proxy.js                          Supabase cookie 刷新和 /interview 访问保护
-docs/                             轻量项目文档
-docs/archive/                     历史材料只写区，所有 AI session 禁止读取
+docs/                             按主题拆分的长期文档
+docs/tasks/                       单项较大任务记录与未完成任务索引
+docs/templates/                   任务记录和 session 提示词模板
+docs/archive/                     既有历史资料
 ```
 
 ## 前后端职责边界
