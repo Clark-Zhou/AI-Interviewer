@@ -1503,6 +1503,24 @@ button:disabled {
   margin: 0;
 }
 
+.history-detail-block .history-full-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.history-detail-list {
+  color: #4b5563;
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0;
+  padding-left: 20px;
+  overflow-wrap: anywhere;
+}
+
+.history-detail-list li + li {
+  margin-top: 6px;
+}
+
 .history-qa-list li {
   border-top: 1px solid #e5e7eb;
   padding: 12px 0;

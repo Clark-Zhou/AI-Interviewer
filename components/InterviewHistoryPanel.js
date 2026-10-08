@@ -10,7 +10,7 @@ import {
   clearCloudInterviewSessions, deleteCloudInterviewSession, getCloudInterviewSession,
   importLocalInterviewSession, listCloudInterviewSessions,
 } from '../lib/client/interviewHistoryApi';
-import { getInterviewSessions } from '../lib/client/interviewHistoryStorage';
+import { readLegacyInterviewSessions } from '../lib/client/interviewHistoryStorage';
 
 function getTextSummary(text, maxLength = 48) {
   const normalized = String(text || '').replace(/\s+/g, ' ').trim();
@@ -35,6 +35,10 @@ function formatGenerationSource(source) {
   return `${source.questions === 'mock' ? 'Mock 问题' : 'AI 问题'} / ${source.evaluation === 'mock' ? 'Mock 评价' : 'AI 评价'}`;
 }
 
+function safeStringItems(value) {
+  return Array.isArray(value) ? value.filter((item) => typeof item === 'string') : [];
+}
+
 export default function InterviewHistoryPanel() {
   const [historySessions, setHistorySessions] = useState([]);
   const [selectedId, setSelectedId] = useState('');
@@ -54,7 +58,8 @@ export default function InterviewHistoryPanel() {
   // 列表只读取云端；本地旧记录仅用于决定是否展示手动导入入口。
   useEffect(() => {
     let active = true;
-    setLocalCount(getInterviewSessions().length);
+    const legacy = readLegacyInterviewSessions();
+    setLocalCount(legacy.sessions.length + legacy.malformedCount);
     listCloudInterviewSessions(0).then((result) => {
       if (!active) return;
       setHistorySessions(result.items);
@@ -156,16 +161,17 @@ export default function InterviewHistoryPanel() {
   };
 
   const handleImportLocal = async () => {
-    const localSessions = getInterviewSessions();
-    if (!localSessions.length) { setLocalCount(0); return; }
-    if (!window.confirm(`确定把此浏览器的 ${localSessions.length} 条旧历史导入当前账号吗？这些记录可能是在其他账号登录时产生的；原记录仍会留在此浏览器。`)) return;
+    const legacy = readLegacyInterviewSessions();
+    const localCount = legacy.sessions.length + legacy.malformedCount;
+    if (!localCount) { setLocalCount(0); return; }
+    if (!window.confirm(`确定把此浏览器的 ${localCount} 条旧历史导入当前账号吗？这些记录可能是在其他账号登录时产生的；原记录仍会留在此浏览器。`)) return;
     setIsBusy(true);
     setHistoryActionMessage('');
     let imported = 0;
     let duplicates = 0;
-    let failed = 0;
+    let failed = legacy.malformedCount;
     // 逐条导入，单条损坏或网络错误不会阻断其余记录。
-    for (const session of localSessions) {
+    for (const session of legacy.sessions) {
       try {
         const result = await importLocalInterviewSession(session);
         if (result.duplicate) duplicates += 1;
@@ -257,11 +263,23 @@ export default function InterviewHistoryPanel() {
                   </div>
                   {typeof selectedScore === 'number' && <span className="evaluation-score">{selectedScore} / 100</span>}
                 </div>
-                <div className="history-detail-block"><h4>岗位信息摘要</h4><p>{getTextSummary(selectedSession.jobInfo, 120)}</p></div>
-                <div className="history-detail-block"><h4>简历摘要</h4><p>{getTextSummary(selectedSession.resume, 120)}</p></div>
+                <div className="history-detail-block"><h4>完整岗位 JD</h4><p className="history-full-text">{String(selectedSession.jobInfo || '')}</p></div>
+                <div className="history-detail-block"><h4>完整简历文本</h4><p className="history-full-text">{String(selectedSession.resume || '')}</p></div>
                 {typeof selectedSession.evaluation?.summary === 'string' && (
-                  <div className="history-detail-block"><h4>整体评价</h4><p>{selectedSession.evaluation.summary}</p></div>
+                  <div className="history-detail-block"><h4>整体评价</h4><p className="history-full-text">{selectedSession.evaluation.summary}</p></div>
                 )}
+                {[
+                  ['主要优势', selectedSession.evaluation?.strengths],
+                  ['风险点', selectedSession.evaluation?.risks],
+                  ['改进建议', selectedSession.evaluation?.improvementSuggestions],
+                ].map(([title, items]) => (
+                  <div className="history-detail-block" key={title}>
+                    <h4>{title}</h4>
+                    <ul className="history-detail-list">
+                      {safeStringItems(items).map((item, index) => <li key={index}>{item}</li>)}
+                    </ul>
+                  </div>
+                ))}
                 <div className="history-detail-block">
                   <h4>问答记录</h4>
                   <ul className="history-qa-list">
@@ -269,9 +287,31 @@ export default function InterviewHistoryPanel() {
                       <li key={`${selectedSession.id}-${index}`}>
                         <p className="category">第 {index + 1} 题｜{String(item?.category || '')}</p>
                         <p className="question">{String(item?.question || '')}</p>
-                        <p className="reason">回答：{String(item?.answer || '')}</p>
+                        <p className="reason">提问原因：{String(item?.reason || '')}</p>
+                        <p className="reason history-full-text">回答：{String(item?.answer || '')}</p>
                       </li>
                     ))}
+                  </ul>
+                </div>
+                <div className="history-detail-block">
+                  <h4>逐题反馈</h4>
+                  <ul className="history-qa-list">
+                    {(Array.isArray(selectedSession.evaluation?.questionFeedback)
+                      ? selectedSession.evaluation.questionFeedback : []).map((item, index) => (
+                      <li key={index}>
+                        <p className="category">第 {index + 1} 题｜{Number.isInteger(item?.score) ? `${item.score} / 100` : '未评分'}</p>
+                        <p className="question">{String(item?.question || '')}</p>
+                        <p className="reason history-full-text">{String(item?.feedback || '')}</p>
+                        <p className="reason history-full-text">改进建议：{String(item?.suggestion || '')}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="history-detail-block">
+                  <h4>后续练习题</h4>
+                  <ul className="history-detail-list">
+                    {safeStringItems(selectedSession.evaluation?.nextPracticeQuestions)
+                      .map((item, index) => <li key={index}>{item}</li>)}
                   </ul>
                 </div>
               </>
