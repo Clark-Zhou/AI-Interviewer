@@ -13,7 +13,7 @@
 - mammoth / pdf-parse
 - 普通 CSS
 
-当前没有使用数据库、云端文件存储、OCR、Tailwind、组件库或 TypeScript。
+仅简历仓库使用 Supabase 数据表与私有 Storage；历史记录仍在浏览器 localStorage。当前没有 OCR、Tailwind、组件库或 TypeScript。
 
 ## 路由结构
 
@@ -22,12 +22,13 @@
 - `/interview`：受保护的面试工作台入口。
 - `/interview/new`：受保护的新面试流程。
 - `/interview/history`：受保护的本地历史记录列表和详情。
-- `/interview/resumes`：受保护的简历仓库页面骨架。
+- `/interview/resumes`：受保护的简历仓库。
 - `/interview/analytics`：受保护的数据和分析页面骨架。
 - `/interview/profile`：受保护的个人中心，服务端读取当前用户并展示邮箱与登出。
 - `/api/generate-questions`：生成面试问题。
 - `/api/evaluate-interview`：生成最终评价。
 - `/api/parse-document`：PDF/DOCX 解析成纯文本。
+- `/api/resumes` 及 `/api/resumes/[id]` 子路由：当前用户的简历列表、上传、删除、下载与文本提取。
 
 ## 目录结构
 
@@ -52,6 +53,7 @@ docs/archive/                     既有历史资料
 - DeepSeek API Key 只能在服务端读取。
 - 文档解析库 `mammoth` / `pdf-parse` 只应在服务端使用，不打进前端 bundle。
 - localStorage 历史记录只在浏览器端访问。
+- 简历原文件保存到私有 `interview-resumes` Storage 桶；`public.resume_files` 记录当前账号的文件元数据及上传状态，数据库触发器在并发插入时限制每账号最多 10 份。仓库 API 自行校验 Auth，仅使用用户会话与 publishable key；Storage 和表都以 RLS 隔离账号。
 - `app/interview/layout.js` 集中校验登录态并承载品牌页头、五入口导航和离开保护；`proxy.js` 仍保护整个 `/interview/:path*`。面试区页面共用约 1200px 的响应式容器，视觉样式限制在 `.interview-shell` 内。
 - `app/interview/profile/page.js` 服务端读取当前用户，独占挂载 `AuthStatusBar`；其他面试区页面不展示邮箱或登出。
 - 面试区页面链接使用原生跳转，使浏览器 `beforeunload` 可以提醒未完成面试；登出在个人中心的账号卡片显示页面内确认。
@@ -96,10 +98,19 @@ InterviewSimulator -> lib/client/interviewFileImport.js（分类、大小校验�
 -> localStorage ai-interview-sessions -> InterviewHistoryPanel
 ```
 
+简历仓库：
+
+```text
+ResumeLibrary -> /api/resumes -> 校验及提取文本 -> resume_files 预留名额
+-> 私有 Storage 保存原文件 -> 元数据置为 ready
+ResumePicker -> /api/resumes/[id]/content -> 私有 Storage 下载并解析 -> 新面试 textarea
+```
+
 ## 重要文件职责
 
 - `components/InterviewSimulator.js`：新面试主流程、导入文件、问题列表、回答提交、评价展示。
 - `components/InterviewHistoryPanel.js`：本地历史列表和详情。
+- `components/ResumeLibrary.js`、`components/ResumePicker.js`：云端简历列表与新面试选择。
 - `components/LoginEntryShell.js`：登录/注册页面壳。
 - `components/AuthStatusBar.js`：个人中心的账号状态和登出入口。
 - `components/InterviewNavigation.js`：五入口导航与当前区域高亮。
@@ -110,6 +121,7 @@ InterviewSimulator -> lib/client/interviewFileImport.js（分类、大小校验�
 - `lib/server/deepseek.js`：生成问题的 DeepSeek 调用。
 - `lib/server/interviewEvaluation.js`：最终评价的 DeepSeek 调用。
 - `lib/server/documentParser.js`：PDF/DOCX 纯文本解析。
+- `lib/server/resumeRepository.js`：简历服务端校验、解析与账号元数据辅助逻辑。
 - `lib/prompts/interviewQuestions.js`：生成问题 prompt。
 - `lib/prompts/interviewEvaluation.js`：最终评价 prompt。
 - `proxy.js`：Auth cookie 刷新和受保护路由拦截。

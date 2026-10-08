@@ -70,10 +70,18 @@ Supabase Auth 需要配置：
 - Redirect URLs 包含生产域名通配，例如 `https://your-project.vercel.app/**`。
 - 本地开发地址 `http://localhost:3000/**` 可继续保留。
 
+### 简历仓库的 Supabase 配置（项目所有者手动执行）
+
+1. 在 Supabase Dashboard 的 **Storage** 创建名为 `interview-resumes` 的**私有** bucket，不启用 Public。设置单文件上限为 5 MB；允许 MIME 类型 `application/pdf`、`application/vnd.openxmlformats-officedocument.wordprocessingml.document`、`text/plain`、`text/markdown`。
+2. 在同一项目的 **SQL Editor** 打开并执行 `supabase/migrations/20261008_resume_library.sql`，创建 `public.resume_files`、账号名额限制和表/Storage RLS 规则。该脚本只需执行一次；不需要 `service_role` key，也不要将 SQL 或密钥放入前端环境变量。
+3. 使用两个测试账号验收：账号 A 上传并下载简历；账号 B 的仓库应为空，直接访问 A 的 ID 也应返回 404。再检查第 10 份成功、第 11 份拒绝和删除后的补位。
+
+如果桶或 SQL 尚未配置，页面会显示读取/上传失败提示。配置前的构建通过不代表云端功能已验收。
+
 ## 内部测试提醒
 
 - 历史记录只保存在当前浏览器本地。
-- 不要输入特别敏感的真实简历或公司内部信息。
+- 简历仓库会把上传的原文件保存在当前 Supabase 项目中；内部测试建议使用虚构简历，不要输入特别敏感的真实简历或公司内部信息。
 - PDF/DOCX 只做纯文本解析，不支持扫描件 OCR。
 - 测试时至少覆盖注册/登录、生成问题、提交回答、最终评价、保存历史和文件解析。
 

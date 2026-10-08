@@ -18,6 +18,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useInterviewLeaveGuard } from './InterviewLeaveGuard';
+import ResumePicker from './ResumePicker';
+import { getResumeText } from '../lib/client/resumeApi';
 import {
   evaluateInterview,
   generateInterviewQuestions,
@@ -383,6 +385,31 @@ export default function InterviewSimulator() {
     }
   };
 
+  // 仓库只提供本次面试的文本副本；旧问题和评价在成功选取后立即失效。
+  const handleRepositoryResumeImport = async (resumeId) => {
+    const fileImportVersion = fileImportVersionRef.current + 1;
+    fileImportVersionRef.current = fileImportVersion;
+    setDocumentImportTarget('resume');
+    try {
+      const text = await getResumeText(resumeId);
+      if (fileImportVersion !== fileImportVersionRef.current) return false;
+      actionVersionRef.current += 1;
+      setResume(text);
+      clearGeneratedInterviewState();
+      setTextImportStatus('success');
+      setTextImportMessage('已从简历仓库导入，可以继续编辑；旧问题、回答和评价已清空。');
+      return true;
+    } finally {
+      if (fileImportVersion === fileImportVersionRef.current) setDocumentImportTarget('');
+    }
+  };
+
+  // 用户关闭选择弹层时，使仍在进行的仓库读取结果失效。
+  const handleRepositoryImportCancel = () => {
+    fileImportVersionRef.current += 1;
+    setDocumentImportTarget('');
+  };
+
   const handleImportFileChange = (inputTarget, event) => {
     const file = event.target.files?.[0];
     event.target.value = '';
@@ -705,14 +732,17 @@ export default function InterviewSimulator() {
         <div className="field">
           <div className="field-label-row">
             <label htmlFor="resume">个人简历</label>
-            <button
-              type="button"
-              className="secondary-button compact-button"
-              disabled={isQuestionGenerationDisabled}
-              onClick={() => handleChooseTextFile(resumeFileInputRef)}
-            >
-              {documentImportTarget === 'resume' ? '正在解析...' : '导入简历文件'}
-            </button>
+            <div className="resume-import-actions">
+              <button
+                type="button"
+                className="secondary-button compact-button"
+                disabled={isQuestionGenerationDisabled}
+                onClick={() => handleChooseTextFile(resumeFileInputRef)}
+              >
+                {documentImportTarget === 'resume' ? '正在读取...' : '从电脑导入'}
+              </button>
+              <ResumePicker disabled={isQuestionGenerationDisabled} onSelect={handleRepositoryResumeImport} onCancelImport={handleRepositoryImportCancel} />
+            </div>
             <input
               ref={resumeFileInputRef}
               className="file-input-hidden"

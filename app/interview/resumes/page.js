@@ -1,16 +1,20 @@
 /**
- * 文件职责：提供简历仓库的页面骨架和现有新面试入口。
- * 关联文件：app/interview/layout.js、app/interview/new/page.js。
- * 注意事项：本页不上传或保存简历；当前文件导入仍在新面试页面。
+ * 文件职责：展示受保护的账号简历仓库入口与列表组件。
+ * 关联文件：components/ResumeLibrary.js、app/interview/new/page.js。
+ * 注意事项：实际文件操作由需要再次验证 Auth 的项目 API 执行。
  */
+import ResumeLibrary from '../../../components/ResumeLibrary';
+
 export default function ResumesPage() {
   return (
-    <main className="page">
-      <section className="panel workspace-placeholder-panel">
+    <main className="page resume-library-page">
+      <section className="panel workspace-subpage-heading resume-page-heading">
         <p className="category">简历仓库</p>
         <h1>简历仓库</h1>
-        <a className="text-link" href="/interview/new">新建面试</a>
+        <p className="subtitle">集中保存你的常用简历，让每一次针对岗位的练习更快开始。</p>
+        <a className="text-link" href="/interview/new">新建面试 ↗</a>
       </section>
+      <ResumeLibrary />
     </main>
   );
 }
