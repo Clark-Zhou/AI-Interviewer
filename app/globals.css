@@ -1349,7 +1349,7 @@ button:disabled {
   padding-top: 0;
 }
 
-/* 历史记录区：展示最近保存的本地面试 session。 */
+/* 历史记录区：分页展示当前账号保存的云端面试。 */
 .history-panel {
   margin-top: 20px;
 }
@@ -1373,6 +1373,11 @@ button:disabled {
 
 .history-list li {
   margin-bottom: 8px;
+}
+
+.history-load-more {
+  margin-top: 10px;
+  width: 100%;
 }
 
 .history-panel-actions {

@@ -87,6 +87,18 @@ target: jobInfo | resume
 
 错误边界：target 无效、缺少文件、扩展名不支持、文件为空、超过 5MB、文件内容和扩展名不匹配、解析失败、解析为空。
 
+## 云端历史 API
+
+全部接口逐次验证 Supabase Auth，未登录返回 401。完整记录包含当前面试的 JD、简历文本、问题、已提交回答、评价及 Mock/AI 来源，不包含原始上传文件。单条 JSON 上限 2MB。
+
+- `POST /api/history`：请求 `{ session }`，其中新记录 `session.id` 为浏览器生成的 UUID。成功返回 201 与 `{ item, duplicate: false }`；相同 ID 的重试返回 200 与 `duplicate: true`，不重复保存。
+- `GET /api/history?offset=0`：按时间倒序返回 `{ items, nextOffset }`，每页 20 条；列表项含 ID、岗位标题、总分、生成来源和创建时间，不返回完整 JD/简历。
+- `GET /api/history/[id]`：返回 `{ session }` 完整记录；`DELETE /api/history/[id]`：删除单条，返回 `{ deleted: true }`。
+- `DELETE /api/history`：清空当前账号的全部云端记录，不触碰浏览器旧本地记录。
+- `POST /api/history/import`：请求 `{ session }`，每次导入一条旧本地记录；按当前账号与旧本地 ID 去重，响应与创建接口同形。客户端逐条调用并汇总新增、重复和失败数量。
+
+无权访问或不存在的 ID 返回 404；无效或超大记录返回 400/413，数据库或网络故障返回 503。保存失败时前端保留评价，并用相同 ID 提供重试。
+
 ## 简历仓库 API
 
 全部接口先用 Supabase Auth cookie 验证当前用户，未登录返回 401。元数据只属于当前账号，原文件从私有 Storage 读取。

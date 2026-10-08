@@ -4,14 +4,14 @@
  * 关联文件：
  * - lib/client/interviewApi.js：封装前端调用后端 API 的请求方法。
  * - lib/client/interviewFileImport.js：封装文件类型校验和浏览器本地文本读取。
- * - lib/client/interviewHistoryStorage.js：保存浏览器本地面试历史记录。
+ * - lib/client/interviewHistoryApi.js：保存当前账号的云端面试历史。
  * - lib/dev/interviewMocks.js：提供开发环境使用的本地 mock 问题和 mock 评价。
  * - app/globals.css：提供本组件使用的页面、表单、按钮和结果区样式。
  * - app/api/generate-questions/route.js：前端通过请求层调用生成问题 API。
  * - app/api/evaluate-interview/route.js：前端通过请求层调用最终评价 API。
  *
  * 说明：
- * - 这个文件只处理浏览器端交互：输入、按钮点击、loading、错误、结果展示和本地历史保存提示。
+ * - 这个文件只处理浏览器端交互：输入、按钮点击、loading、错误、结果展示和云端历史保存提示。
  * - 不要在这里读取 DEEPSEEK_API_KEY，API Key 只能放在服务端。
  */
 'use client';
@@ -20,15 +20,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useInterviewLeaveGuard } from './InterviewLeaveGuard';
 import ResumePicker from './ResumePicker';
 import { getResumeText } from '../lib/client/resumeApi';
+import { saveCloudInterviewSession } from '../lib/client/interviewHistoryApi';
 import {
   evaluateInterview,
   generateInterviewQuestions,
   parseInterviewDocument,
 } from '../lib/client/interviewApi';
-import {
-  createInterviewSessionId,
-  saveInterviewSession,
-} from '../lib/client/interviewHistoryStorage';
 import {
   getInterviewImportKind,
   getInterviewImportValidationError,
@@ -120,6 +117,8 @@ export default function InterviewSimulator() {
   const actionVersionRef = useRef(0);
   const fileImportVersionRef = useRef(0);
   const lastSavedContentRef = useRef('');
+  const pendingHistorySessionRef = useRef(null);
+  const historySaveVersionRef = useRef(0);
   const jobInfoFileInputRef = useRef(null);
   const resumeFileInputRef = useRef(null);
   const [jobTitle, setJobTitle] = useState('');
@@ -143,6 +142,8 @@ export default function InterviewSimulator() {
 
   // 回答变化后清掉旧评价和历史保存提示，避免展示已失效的报告。
   const clearEvaluationState = () => {
+    historySaveVersionRef.current += 1;
+    pendingHistorySessionRef.current = null;
     setEvaluation(null);
     setEvaluationError('');
     setHistorySaveStatus('');
@@ -268,7 +269,7 @@ export default function InterviewSimulator() {
 
   useEffect(() => () => setHasUnsavedInterview(false), [setHasUnsavedInterview]);
 
-  // 清空当前面试状态，但保留 localStorage 历史记录。
+  // 清空当前面试状态，但保留当前账号的云端历史记录。
   const handleResetInterview = () => {
     if (
       hasCurrentInterviewContent &&
@@ -289,12 +290,14 @@ export default function InterviewSimulator() {
   const handleJobTitleChange = (nextJobTitle) => {
     setJobTitle(nextJobTitle);
     setError('');
+    clearEvaluationState();
   };
 
   const handleJobInfoChange = (nextJobInfo) => {
     fileImportVersionRef.current += 1;
     setJobInfo(nextJobInfo);
     setError('');
+    clearEvaluationState();
     clearImportState();
   };
 
@@ -302,6 +305,7 @@ export default function InterviewSimulator() {
     fileImportVersionRef.current += 1;
     setResume(nextResume);
     setError('');
+    clearEvaluationState();
     clearImportState();
   };
 
@@ -454,40 +458,50 @@ export default function InterviewSimulator() {
     clearEvaluationState();
   };
 
-  // 统一处理评价展示和历史保存，保证真实 AI 和 Mock 评价复用同一条链路。
-  const handleEvaluationGenerated = (generatedEvaluation, evaluationGenerationSource) => {
-    setEvaluation(generatedEvaluation);
-
+  // 云端保存只在服务端确认后解除离开提醒；失败保留评价和同一 ID 供重试。
+  const saveGeneratedHistory = async (session) => {
+    const saveVersion = historySaveVersionRef.current + 1;
+    historySaveVersionRef.current = saveVersion;
+    setHistorySaveStatus('saving');
+    setHistorySaveMessage('最终评价已生成，正在保存到云端历史记录…');
     try {
-      const savedAt = new Date().toISOString();
-
-      saveInterviewSession({
-        id: createInterviewSessionId(),
-        version: 1,
-        source: 'localStorage',
-        generationSource: {
-          questions: questionGenerationSource || 'ai',
-          evaluation: evaluationGenerationSource,
-        },
-        jobTitle,
-        jobInfo,
-        resume,
-        questions,
-        answers: submittedAnswers,
-        questionAnswers: submittedQuestionAnswers,
-        evaluation: generatedEvaluation,
-        createdAt: savedAt,
-        updatedAt: savedAt,
-      });
-
+      await saveCloudInterviewSession(session);
+      if (saveVersion !== historySaveVersionRef.current) return;
       lastSavedContentRef.current = getInterviewContentSignature({
         jobTitle, jobInfo, resume, questions, answers, submittedAnswers,
       });
       setHistorySaveStatus('success');
-      setHistorySaveMessage('最终评价已生成，并已保存到本地历史记录。');
+      setHistorySaveMessage('最终评价已保存到云端历史记录。');
     } catch {
+      if (saveVersion !== historySaveVersionRef.current) return;
       setHistorySaveStatus('error');
-      setHistorySaveMessage('最终评价已生成，但暂时无法保存到本地历史记录。你仍可以先查看本次评价。');
+      setHistorySaveMessage('最终评价已生成，但尚未保存到云端。请重试保存。');
+    }
+  };
+
+  // 真实 AI 和 Mock 评价共用完整记录格式与云端保存链路。
+  const handleEvaluationGenerated = (generatedEvaluation, evaluationGenerationSource) => {
+    setEvaluation(generatedEvaluation);
+    const savedAt = new Date().toISOString();
+    const session = {
+      id: crypto.randomUUID(),
+      version: 2,
+      source: 'cloud',
+      generationSource: {
+        questions: questionGenerationSource || 'ai',
+        evaluation: evaluationGenerationSource,
+      },
+      jobTitle, jobInfo, resume, questions, answers: submittedAnswers,
+      questionAnswers: submittedQuestionAnswers, evaluation: generatedEvaluation,
+      createdAt: savedAt, updatedAt: savedAt,
+    };
+    pendingHistorySessionRef.current = session;
+    void saveGeneratedHistory(session);
+  };
+
+  const handleRetryHistorySave = () => {
+    if (pendingHistorySessionRef.current && historySaveStatus === 'error') {
+      void saveGeneratedHistory(pendingHistorySessionRef.current);
     }
   };
 
@@ -931,6 +945,11 @@ export default function InterviewSimulator() {
                 <a className="text-link" href="/interview/history">
                   查看历史记录
                 </a>
+              )}
+              {historySaveStatus === 'error' && (
+                <button className="secondary-button compact-button" type="button" onClick={handleRetryHistorySave}>
+                  重试保存
+                </button>
               )}
             </div>
           )}
