@@ -2,64 +2,48 @@
  * 文件职责：受保护的面试工作台入口页。
  *
  * 关联文件：
- * - components/AuthStatusBar.js：展示当前用户并提供登出入口。
+ * - app/interview/layout.js：统一提供登录校验和导航。
  * - app/interview/new/page.js：承载新面试完整流程。
- * - app/interview/history/page.js：承载本地历史记录列表和详情。
- * - lib/supabase/serverClient.js：服务端读取 Supabase Auth 用户。
- * - app/login/page.js：体验版入口页壳路由。
  *
  * 说明：
- * - `/interview` 需要登录后访问；未登录用户会回到 `/login`。
- * - 本页只做工作台入口，不承载新面试表单或历史详情。
- * - 本阶段不做云端历史记录、用户资料页或角色权限系统。
+ * - `/interview` 的登录保护由共享布局处理。
+ * - 本页只做新建面试入口，不承载表单或历史详情。
+ * - 本阶段不做云端历史记录、个人资料功能或角色权限系统。
  */
-import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import AuthStatusBar from '../../components/AuthStatusBar';
-import { createSupabaseServerClient } from '../../lib/supabase/serverClient';
-
-export const dynamic = 'force-dynamic';
-
-// 工作台入口路由：服务端先确认 Supabase 登录态，再展示两个真实入口。
-export default async function InterviewPage() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
-
+// 工作台入口只引导用户开始一轮新面试。
+export default function InterviewPage() {
   return (
-    <>
-      <AuthStatusBar userEmail={user.email} />
-      <main className="page">
-        <section className="panel workspace-panel">
-          <div className="workspace-heading">
-            <p className="category">面试工作台</p>
-            <h1>选择这次要做的事情</h1>
-            <p className="subtitle">
-              你可以开始一次新的模拟面试，或者查看当前浏览器里保存的本地历史记录。
-            </p>
+    <main className="page workspace-page">
+      <section className="panel workspace-panel">
+        <div className="workspace-hero-copy">
+          <p className="category">面试工作台</p>
+          <h1>为下一次面试，做好准备。</h1>
+          <p className="subtitle">围绕目标岗位和你的经历，完成一轮有针对性的模拟练习。</p>
+          <a className="workspace-card workspace-start-card" href="/interview/new">
+            <span className="workspace-card-title">新建面试 <span aria-hidden="true">↗</span></span>
+            <span className="workspace-card-description">填写岗位信息与简历，开始练习</span>
+          </a>
+        </div>
+        <div className="workspace-hero-art" aria-hidden="true">
+          <div className="workspace-art-card workspace-art-card-back" />
+          <div className="workspace-art-card workspace-art-card-front">
+            <span className="workspace-art-label">INTERVIEW SESSION</span>
+            <span className="workspace-art-line" /><span className="workspace-art-line short" />
+            <span className="workspace-art-dots"><i /><i /><i /></span>
           </div>
-
-          <div className="workspace-actions" aria-label="面试工作台入口">
-            <Link className="workspace-card" href="/interview/new">
-              <span className="workspace-card-title">开始新的面试</span>
-              <span className="workspace-card-description">
-                填写岗位 JD 和简历，生成问题、提交回答，并获得最终评价。
-              </span>
-            </Link>
-            <Link className="workspace-card" href="/interview/history">
-              <span className="workspace-card-title">查看历史记录</span>
-              <span className="workspace-card-description">
-                查看最近保存在当前浏览器里的面试记录和问答详情。
-              </span>
-            </Link>
-          </div>
-        </section>
-      </main>
-    </>
+        </div>
+      </section>
+      <section className="workspace-guide" aria-labelledby="workspace-guide-title">
+        <div className="workspace-guide-heading">
+          <p className="category">练习流程</p>
+          <h2 id="workspace-guide-title">三步完成一次模拟面试</h2>
+        </div>
+        <ol className="workspace-guide-grid">
+          <li><span className="workspace-step-number">01</span><h3>准备 JD 与简历</h3><p>输入目标岗位信息和个人经历，让问题更贴近你的求职方向。</p></li>
+          <li><span className="workspace-step-number">02</span><h3>回答 6 道问题</h3><p>逐题思考并提交回答，完整走过一轮面试练习。</p></li>
+          <li><span className="workspace-step-number">03</span><h3>查看最终评价</h3><p>回看整体表现、优势和改进建议，整理下一次练习重点。</p></li>
+        </ol>
+      </section>
+    </main>
   );
 }

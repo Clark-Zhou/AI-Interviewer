@@ -16,8 +16,8 @@
  */
 'use client';
 
-import Link from 'next/link';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useInterviewLeaveGuard } from './InterviewLeaveGuard';
 import {
   evaluateInterview,
   generateInterviewQuestions,
@@ -107,10 +107,17 @@ function getInputTargetLabel(inputTarget) {
   return inputTarget === 'jobInfo' ? '岗位 JD' : '个人简历';
 }
 
+// 只比较会影响当前面试内容的数据；成功保存后再次编辑仍需离开提醒。
+function getInterviewContentSignature({ jobTitle, jobInfo, resume, questions, answers, submittedAnswers }) {
+  return JSON.stringify({ jobTitle, jobInfo, resume, questions, answers, submittedAnswers });
+}
+
 // 前端主组件：负责收集输入、生成问题、提交回答，并展示最终评价。
 export default function InterviewSimulator() {
+  const { setHasUnsavedInterview } = useInterviewLeaveGuard();
   const actionVersionRef = useRef(0);
   const fileImportVersionRef = useRef(0);
+  const lastSavedContentRef = useRef('');
   const jobInfoFileInputRef = useRef(null);
   const resumeFileInputRef = useRef(null);
   const [jobTitle, setJobTitle] = useState('');
@@ -230,6 +237,34 @@ export default function InterviewSimulator() {
     isDocumentImporting ||
     isLoading ||
     isEvaluating;
+
+  const currentContentSignature = getInterviewContentSignature({
+    jobTitle, jobInfo, resume, questions, answers, submittedAnswers,
+  });
+  const hasDraftContent =
+    Boolean(jobTitle.trim()) ||
+    Boolean(jobInfo.trim()) ||
+    Boolean(resume.trim()) ||
+    questions.length > 0 ||
+    Object.values(answers).some((answerText) => Boolean(answerText?.trim())) ||
+    Boolean(evaluation) ||
+    isDocumentImporting ||
+    isLoading ||
+    isEvaluating;
+  const shouldWarnOnLeave = hasDraftContent && (
+    historySaveStatus !== 'success' ||
+    currentContentSignature !== lastSavedContentRef.current ||
+    isDocumentImporting ||
+    isLoading ||
+    isEvaluating
+  );
+
+  // 将当前未保存状态交给共享布局，供浏览器离开提示和登出确认使用。
+  useEffect(() => {
+    setHasUnsavedInterview(shouldWarnOnLeave);
+  }, [setHasUnsavedInterview, shouldWarnOnLeave]);
+
+  useEffect(() => () => setHasUnsavedInterview(false), [setHasUnsavedInterview]);
 
   // 清空当前面试状态，但保留 localStorage 历史记录。
   const handleResetInterview = () => {
@@ -418,6 +453,9 @@ export default function InterviewSimulator() {
         updatedAt: savedAt,
       });
 
+      lastSavedContentRef.current = getInterviewContentSignature({
+        jobTitle, jobInfo, resume, questions, answers, submittedAnswers,
+      });
       setHistorySaveStatus('success');
       setHistorySaveMessage('最终评价已生成，并已保存到本地历史记录。');
     } catch {
@@ -860,9 +898,9 @@ export default function InterviewSimulator() {
                 {historySaveMessage}
               </p>
               {historySaveStatus === 'success' && (
-                <Link className="text-link" href="/interview/history">
+                <a className="text-link" href="/interview/history">
                   查看历史记录
-                </Link>
+                </a>
               )}
             </div>
           )}
