@@ -14,13 +14,11 @@
  */
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { createSupabaseBrowserClient } from '../lib/supabase/browserClient';
 
 // 登录入口表单：复用当前视觉风格，提供最小登录/注册闭环。
 export default function LoginEntryShell() {
-  const router = useRouter();
   const [authMode, setAuthMode] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -67,8 +65,8 @@ export default function LoginEntryShell() {
       }
 
       if (data.session) {
-        router.push('/');
-        router.refresh();
+        // 等会话写入 cookie 后整页请求主页，避免客户端导航读取旧的未登录视图。
+        window.location.replace('/');
         return;
       }
 
@@ -90,8 +88,8 @@ export default function LoginEntryShell() {
       return;
     }
 
-    router.push('/');
-    router.refresh();
+    // signInWithPassword 完成会话持久化后再整页跳转，让服务端读取新 cookie。
+    window.location.replace('/');
   };
 
   return (
