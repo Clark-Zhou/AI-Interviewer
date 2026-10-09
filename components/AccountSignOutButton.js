@@ -1,13 +1,13 @@
 /**
- * 文件职责：展示当前登录用户和登出入口。
+ * 文件职责：在账户子页面提供登出及未保存面试确认。
  *
  * 关联文件：
- * - app/interview/profile/page.js：仅在个人中心挂载本组件。
+ * - app/interview/profile/account/page.js：仅在账户子页面挂载本组件。
  * - components/InterviewLeaveGuard.js：未完成面试时确认登出。
  * - lib/supabase/browserClient.js：浏览器端 Supabase Auth client。
  *
  * 说明：
- * - 本组件只做登出和轻量账号状态展示。
+ * - 本组件只处理登出，不展示邮箱或读取账号资料。
  * - 不读取、不保存、不打印用户密码或 Supabase token。
  */
 'use client';
@@ -18,7 +18,7 @@ import { createSupabaseBrowserClient } from '../lib/supabase/browserClient';
 import { useInterviewLeaveGuard } from './InterviewLeaveGuard';
 
 // 未保存面试先展示页面内确认；实际登出后回到登录页并刷新认证状态。
-export default function AuthStatusBar({ userEmail }) {
+export default function AccountSignOutButton() {
   const router = useRouter();
   const { hasUnsavedInterview } = useInterviewLeaveGuard();
   const cancelSignOutRef = useRef(null);
@@ -70,16 +70,12 @@ export default function AuthStatusBar({ userEmail }) {
   };
 
   return (
-    <div className="auth-status-bar">
-      <div>
-        <p className="auth-status-label">当前账号</p>
-        <p className="auth-status-email">{userEmail || '已登录用户'}</p>
-      </div>
-      <div className="auth-status-actions">
+    <div className="account-signout-action">
+      <div className="account-signout-controls">
         {signOutError && <p className="auth-status-error">{signOutError}</p>}
         <button
           type="button"
-          className="secondary-button compact-button"
+          className="secondary-button compact-button account-signout-button"
           onClick={handleSignOut}
           disabled={isSigningOut}
         >

@@ -24,7 +24,8 @@
 - `/interview/history`：受保护的云端历史记录列表和详情。
 - `/interview/resumes`：受保护的简历仓库。
 - `/interview/analytics`：受保护的数据和分析页面骨架。
-- `/interview/profile`：受保护的个人中心，服务端读取当前用户并展示邮箱与登出。
+- `/interview/profile`：受保护的个人中心总览，展示默认头像、昵称和静态模块列表。
+- `/interview/profile/account`：受保护的账户页，服务端读取当前用户并展示邮箱、手机号状态和登出。
 - `/api/generate-questions`：生成面试问题。
 - `/api/evaluate-interview`：生成最终评价。
 - `/api/parse-document`：PDF/DOCX 解析成纯文本。
@@ -57,8 +58,8 @@ docs/archive/                     既有历史资料
 - `public.interview_sessions` 存储完整历史 JSON、列表字段和可选的旧本地 ID；RLS 按当前 Supabase 用户限制读写。新历史由服务端确认写入后才解除离开提醒；旧记录按账号和本地 ID 去重。
 - 简历原文件保存到私有 `interview-resumes` Storage 桶；`public.resume_files` 记录当前账号的文件元数据及上传状态。服务端凭当前用户会话及私有令牌调用受控 RPC，数据库以账号级事务锁限制并发预留最多 10 份。表只向登录用户开放自己的只读数据；Storage RLS 限制预留路径上传及清理状态删除。上传/删除的对象清理失败会留下不占名额的 `cleanup` 记录，后续请求重试。
 - `app/interview/layout.js` 集中校验登录态并承载品牌页头、五入口导航和离开保护；`proxy.js` 仍保护整个 `/interview/:path*`。面试区页面共用约 1200px 的响应式容器，视觉样式限制在 `.interview-shell` 内。
-- `app/interview/profile/page.js` 服务端读取当前用户，独占挂载 `AuthStatusBar`；其他面试区页面不展示邮箱或登出。
-- 面试区页面链接使用原生跳转，使浏览器 `beforeunload` 可以提醒未完成面试；登出在个人中心的账号卡片显示页面内确认。
+- `app/interview/profile/page.js` 展示不含邮箱的个人中心总览；`app/interview/profile/account/page.js` 服务端读取当前用户，仅账户页显示邮箱、手机号状态和登出。资料不另存储。
+- 面试区页面链接使用原生跳转，使浏览器 `beforeunload` 可以提醒未完成面试；登出在账户子页面显示页面内确认。
 
 ## 核心数据流
 
@@ -115,7 +116,8 @@ ResumePicker -> /api/resumes/[id]/content -> 私有 Storage 下载并解析 -> �
 - `components/InterviewHistoryPanel.js`：云端历史列表、详情、删除及旧记录手动导入。
 - `components/ResumeLibrary.js`、`components/ResumePicker.js`：云端简历列表与新面试选择。
 - `components/LoginEntryShell.js`：登录/注册页面壳。
-- `components/AuthStatusBar.js`：个人中心的账号状态和登出入口。
+- `components/AccountSignOutButton.js`：账户子页面的登出入口和未保存面试确认。
+- `components/ProfileAvatar.js`：个人中心与账户页共用的默认头像图形。
 - `components/InterviewNavigation.js`：五入口导航与当前区域高亮。
 - `components/InterviewLeaveGuard.js`：未保存面试的浏览器离开提示与登出确认状态。
 - `lib/client/interviewApi.js`：前端请求封装。
