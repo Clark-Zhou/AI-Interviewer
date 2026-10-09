@@ -28,7 +28,7 @@ function NavigationIcon({ name }) {
   return <svg className="interview-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
 
-// 新面试属于工作台；其他入口仅在自己的页面高亮。
+// 新面试属于工作台；账户子页面属于个人中心。
 export default function InterviewNavigation() {
   const pathname = usePathname();
 
@@ -37,7 +37,9 @@ export default function InterviewNavigation() {
       {navigationItems.map(({ href, label, icon, isPrimary }) => {
         const isActive = href === '/interview'
           ? pathname === href || pathname === '/interview/new'
-          : pathname === href;
+          : href === '/interview/profile'
+            ? pathname === href || pathname.startsWith(`${href}/`)
+            : pathname === href;
 
         return (
           <a

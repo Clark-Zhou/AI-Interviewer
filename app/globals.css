@@ -706,42 +706,6 @@ button.home-secondary-link:hover {
   text-align: center;
 }
 
-/* 账号状态条：受保护面试区域顶部展示当前登录用户和登出入口。 */
-.auth-status-bar {
-  align-items: center;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 16px;
-  margin: 24px auto -16px;
-  padding: 14px 16px;
-  width: min(900px, calc(100% - 32px));
-}
-
-.auth-status-label {
-  color: #6b7280;
-  font-size: 12px;
-  font-weight: 700;
-  margin: 0 0 4px;
-}
-
-.auth-status-email {
-  color: #111827;
-  font-size: 14px;
-  font-weight: 700;
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
-.auth-status-actions {
-  align-items: center;
-  display: flex;
-  gap: 10px;
-}
-
 .auth-status-error {
   color: #dc2626;
   font-size: 13px;
@@ -1687,17 +1651,6 @@ button:disabled {
     font-size: 28px;
   }
 
-  .auth-status-bar {
-    align-items: stretch;
-    flex-direction: column;
-    margin-top: 16px;
-  }
-
-  .auth-status-actions {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
   /* 手机端固定底栏，额外留白避免遮住表单和历史记录操作。 */
   .interview-shell {
     padding-bottom: calc(88px + env(safe-area-inset-bottom));
@@ -1984,9 +1937,6 @@ button:disabled {
 .interview-shell .history-item-button:hover,
 .interview-shell .history-item-button.active { background: #e9f7f3; border-color: #72c5b8; }
 .interview-shell .history-detail { border-color: var(--interview-line); }
-.interview-shell .auth-status-bar { background: #fff; border: 1px solid var(--interview-line); border-radius: 20px; box-shadow: 0 14px 40px rgba(29, 89, 91, .055); margin: 0; padding: 28px 32px; width: 100%; }
-.interview-shell .auth-status-label { color: var(--interview-muted); font-size: 13px; margin-bottom: 8px; }
-.interview-shell .auth-status-email { color: var(--interview-ink); font-size: 18px; }
 .interview-shell a:focus-visible,
 .interview-shell button:focus-visible,
 .interview-shell input:focus-visible,
@@ -2031,7 +1981,6 @@ button:disabled {
   .workspace-guide-grid { grid-template-columns: 1fr; }
   .workspace-guide-grid li { min-height: 0; }
   .interview-shell .history-layout { grid-template-columns: 1fr; }
-  .interview-shell .auth-status-bar { padding: 24px 20px; }
   .interview-shell .secondary-button { width: auto; }
   .interview-shell .history-panel-actions button,
   .interview-shell .button-row button { width: 100%; }
@@ -2092,4 +2041,115 @@ button:disabled {
   .resume-picker-dialog { padding: 20px; }
   .resume-picker-list li { flex-wrap: wrap; }
   .resume-picker-list li button { margin-left: auto; }
+}
+
+/* 个人中心：主题背景、账户入口和静态模块列表只作用于面试区。 */
+.profile-overview-hero {
+  background: #fff;
+  border: 1px solid var(--interview-line);
+  border-radius: 22px;
+  box-shadow: 0 14px 40px rgba(29, 89, 91, .055);
+  overflow: hidden;
+}
+.profile-cover {
+  background: linear-gradient(115deg, #075f5c 0%, #0c9487 55%, #6ac9af 100%);
+  color: #fff;
+  min-height: 225px;
+  overflow: hidden;
+  padding: 42px 48px;
+  position: relative;
+}
+.profile-cover::after {
+  border: 1px solid rgba(255, 255, 255, .3);
+  border-radius: 50%;
+  content: "";
+  height: 320px;
+  position: absolute;
+  right: -50px;
+  top: -125px;
+  width: 320px;
+}
+.profile-cover-art { inset: 0; overflow: hidden; pointer-events: none; position: absolute; }
+.profile-cover-art span { border: 1px solid rgba(255, 255, 255, .16); border-radius: 50%; height: 420px; position: absolute; right: -100px; top: -165px; width: 420px; }
+.profile-cover-art span:nth-child(2) { height: 520px; right: -145px; top: -215px; width: 520px; }
+.profile-cover-art span:nth-child(3) { background: rgba(202, 255, 238, .12); border: 0; height: 155px; right: 260px; top: 120px; width: 155px; }
+.interview-shell .profile-cover .category { color: #bcf5e8; position: relative; z-index: 1; }
+.interview-shell .profile-cover h1 { color: #fff; font-size: clamp(31px, 3.7vw, 46px); position: relative; z-index: 1; }
+.profile-identity-link {
+  align-items: flex-start;
+  color: var(--interview-ink);
+  display: flex;
+  flex-direction: column;
+  margin: -53px 0 0 48px;
+  padding: 0 12px 30px 0;
+  position: relative;
+  text-decoration: none;
+  width: max-content;
+  z-index: 1;
+}
+.profile-avatar {
+  align-items: center;
+  background: linear-gradient(150deg, #d9f8ee, #a9e1d4);
+  border: 5px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 8px 22px rgba(9, 80, 75, .15);
+  color: #08766e;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 102px;
+  justify-content: center;
+  width: 102px;
+}
+.profile-avatar svg { height: 66px; width: 66px; }
+.profile-display-name { font-size: 24px; font-weight: 800; letter-spacing: -.03em; margin-top: 13px; }
+.profile-identity-action { color: #0a827a; font-size: 13px; font-weight: 700; margin-top: 3px; }
+.profile-identity-link:hover .profile-display-name,
+.profile-identity-link:hover .profile-identity-action { color: #075f5c; text-decoration: underline; text-underline-offset: 4px; }
+.interview-shell .profile-module-panel { margin-top: 24px; padding: 28px 36px 10px; }
+.profile-module-heading { margin-bottom: 18px; }
+.interview-shell .profile-module-heading h2 { font-size: 23px; margin: 0; }
+.profile-module-list { list-style: none; margin: 0; padding: 0; }
+.profile-module-row { align-items: center; border-top: 1px solid var(--interview-line); display: flex; gap: 18px; min-height: 89px; padding: 16px 4px; }
+.profile-module-icon { align-items: center; background: #e9f7f3; border-radius: 14px; color: #0a827a; display: inline-flex; flex: 0 0 50px; height: 50px; justify-content: center; }
+.profile-module-icon svg { height: 25px; width: 25px; }
+.profile-module-copy { display: flex; flex-direction: column; gap: 4px; }
+.profile-module-copy strong { color: var(--interview-ink); font-size: 16px; }
+.profile-module-copy > span { color: var(--interview-muted); font-size: 13px; }
+
+/* 账户详情：只读数据与真实登出操作在视觉上分开。 */
+.interview-shell .profile-account-page { max-width: 1000px; }
+.profile-back-link { color: #0a827a; display: inline-block; font-size: 14px; font-weight: 700; margin: 0 0 19px; text-decoration: none; }
+.profile-back-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+.interview-shell .profile-account-panel { padding-bottom: 16px; }
+.profile-account-identity { align-items: center; background: linear-gradient(100deg, #f1fbf8, #fff); border: 1px solid var(--interview-line); border-radius: 16px; display: flex; gap: 22px; margin: 24px 0 28px; padding: 22px; }
+.profile-account-identity .profile-avatar { height: 76px; width: 76px; }
+.profile-account-identity .profile-avatar svg { height: 49px; width: 49px; }
+.profile-account-caption { color: var(--interview-muted); font-size: 13px; margin: 0 0 6px; }
+.profile-account-name { color: var(--interview-ink); font-size: 21px; font-weight: 800; margin: 0; }
+.profile-account-details { margin: 0; }
+.profile-account-details > div { align-items: baseline; border-top: 1px solid var(--interview-line); display: grid; gap: 16px; grid-template-columns: 160px minmax(0, 1fr); padding: 20px 2px; }
+.profile-account-details dt { color: var(--interview-muted); font-size: 14px; }
+.profile-account-details dd { color: var(--interview-ink); font-size: 15px; font-weight: 700; margin: 0; min-width: 0; }
+.profile-account-email { overflow-wrap: anywhere; }
+.interview-shell .profile-signout-panel { align-items: center; display: flex; gap: 24px; justify-content: space-between; margin-top: 22px; }
+.interview-shell .profile-signout-panel h2 { font-size: 20px; margin: 0 0 8px; }
+.profile-signout-panel p { color: var(--interview-muted); font-size: 13px; line-height: 1.7; margin: 0; }
+.account-signout-action { flex: 0 0 auto; }
+.account-signout-controls { align-items: center; display: flex; flex-wrap: wrap; gap: 10px; }
+.interview-shell .account-signout-button { min-width: 112px; }
+.account-signout-action .auth-signout-confirmation { margin-top: 16px; }
+.account-signout-action .auth-signout-confirmation p { color: #92400e; }
+
+@media (max-width: 720px) {
+  .profile-cover { min-height: 185px; padding: 30px 24px; }
+  .profile-cover-art span:nth-child(3) { display: none; }
+  .profile-identity-link { margin-left: 24px; padding-bottom: 24px; }
+  .profile-avatar { height: 90px; width: 90px; }
+  .profile-avatar svg { height: 58px; width: 58px; }
+  .interview-shell .profile-module-panel { padding: 22px 20px 4px; }
+  .profile-module-row { min-height: 78px; }
+  .profile-account-details > div { gap: 6px; grid-template-columns: 1fr; padding-block: 16px; }
+  .interview-shell .profile-signout-panel { align-items: stretch; flex-direction: column; }
+  .account-signout-action { width: 100%; }
+  .interview-shell .account-signout-button { width: 100%; }
 }

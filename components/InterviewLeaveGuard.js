@@ -1,6 +1,6 @@
 /**
  * 文件职责：共享新面试未保存内容的离开保护状态。
- * 关联文件：app/interview/layout.js、components/InterviewSimulator.js、components/AuthStatusBar.js。
+ * 关联文件：app/interview/layout.js、components/InterviewSimulator.js、components/AccountSignOutButton.js。
  * 注意事项：页面链接使用原生跳转；刷新、返回与关闭由浏览器的 beforeunload 提示处理。
  */
 'use client';
