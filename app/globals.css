@@ -1888,11 +1888,6 @@ button:disabled {
 .interview-shell h1 { color: var(--interview-ink); font-size: clamp(28px, 3vw, 38px); letter-spacing: -.045em; line-height: 1.25; margin: 0 0 13px; }
 .interview-shell h2 { color: var(--interview-ink); letter-spacing: -.03em; }
 .interview-shell .subtitle { color: var(--interview-muted); line-height: 1.8; margin: 0; max-width: 720px; }
-.interview-shell .interview-auth-unavailable { background: linear-gradient(120deg, #fff 55%, #eaf8f5 100%); max-width: 740px; }
-.interview-shell .interview-auth-unavailable p:not(.category) { color: var(--interview-muted); line-height: 1.8; }
-.interview-shell .interview-auth-unavailable a { background: #087f78; border-radius: 10px; color: #fff; display: inline-flex; font-weight: 700; margin-top: 18px; padding: 12px 18px; text-decoration: none; }
-.interview-shell .interview-auth-unavailable a:hover { background: #086c67; }
-.interview-shell .interview-auth-unavailable a:focus-visible { outline: 3px solid #0a827a; outline-offset: 3px; }
 .interview-shell .workspace-subpage-heading { background: linear-gradient(120deg, #fff 48%, #eaf8f5 100%); margin-bottom: 22px; min-height: 158px; }
 .interview-shell .workspace-placeholder-panel { background: linear-gradient(120deg, #fff 62%, #e9f7f3 100%); min-height: 260px; }
 .interview-shell .workspace-placeholder-panel .text-link { align-items: center; background: #e2f3ef; border-radius: 10px; display: inline-flex; min-height: 44px; padding: 10px 16px; }

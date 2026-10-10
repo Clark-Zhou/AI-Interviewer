@@ -7,8 +7,6 @@ import { redirect } from 'next/navigation';
 import { InterviewLeaveGuardProvider } from '../../components/InterviewLeaveGuard';
 import InterviewNavigation from '../../components/InterviewNavigation';
 import { createSupabaseServerClient } from '../../lib/supabase/serverClient';
-import { isAuthServiceUnavailable } from '../../lib/supabase/authState';
-import AuthUnavailableNotice from '../../components/AuthUnavailableNotice';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,12 +14,8 @@ export const dynamic = 'force-dynamic';
 export default async function InterviewLayout({ children }) {
   const supabase = await createSupabaseServerClient();
   const {
-    data: { user }, error,
+    data: { user },
   } = await supabase.auth.getUser();
-
-  if (isAuthServiceUnavailable(error)) {
-    return <div className="interview-shell"><AuthUnavailableNotice /></div>;
-  }
 
   if (!user) {
     redirect('/login');

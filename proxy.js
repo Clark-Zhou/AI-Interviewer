@@ -15,7 +15,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import { getSupabaseConfig } from './lib/supabase/config';
-import { isAuthServiceUnavailable } from './lib/supabase/authState';
 
 // proxy 负责刷新 Supabase cookie，避免刷新页面后登录态丢失。
 export async function proxy(request) {
@@ -62,11 +61,10 @@ export async function proxy(request) {
   );
 
   const {
-    data: { user }, error,
+    data: { user },
   } = await supabase.auth.getUser();
 
-  // 网络错误时交给受保护布局展示重试提示，不能当作主动退出。
-  if (!user && !isAuthServiceUnavailable(error) && request.nextUrl.pathname.startsWith('/interview')) {
+  if (!user && request.nextUrl.pathname.startsWith('/interview')) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = '/login';
     redirectUrl.search = '';

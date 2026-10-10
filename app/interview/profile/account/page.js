@@ -9,14 +9,11 @@ import AccountSignOutButton from '../../../../components/AccountSignOutButton';
 import ProfileAvatar from '../../../../components/ProfileAvatar';
 import { createSupabaseServerClient } from '../../../../lib/supabase/serverClient';
 import { getDisplayNickname } from '../../../../lib/userProfile';
-import { isAuthServiceUnavailable } from '../../../../lib/supabase/authState';
-import AuthUnavailableNotice from '../../../../components/AuthUnavailableNotice';
 
 export default async function AccountPage() {
   // 账户数据以服务端认证会话为准，不从浏览器缓存推断身份。
   const supabase = await createSupabaseServerClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (isAuthServiceUnavailable(error)) return <AuthUnavailableNotice href="/interview/profile/account" />;
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
   const nickname = getDisplayNickname(user.user_metadata?.nickname);
 
