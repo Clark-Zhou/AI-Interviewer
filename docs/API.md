@@ -4,6 +4,16 @@
 
 记录当前项目 API route 的请求、响应和错误边界。修改 API、请求封装、服务端解析或前后端协议时读本文件。
 
+## POST /api/auth/session
+
+用途：浏览器登录成功后，以独立请求确认服务端能识别本次登录账号。请求体为 `{ "expectedUserId": "刚登录的 Supabase 用户 ID" }`；不返回邮箱、用户资料或令牌。响应均禁止缓存。
+
+- `200 { "status": "authenticated" }`：当前请求已登录。
+- `400 { "status": "invalid_request" }`：请求体不是有效 JSON，或缺少合法的 `expectedUserId`。
+- `401 { "status": "unauthenticated" }`：没有有效登录会话。
+- `409 { "status": "mismatch" }`：浏览器送来的会话属于另一账号。
+- `503 { "status": "unavailable" }`：账号服务暂时不可用，不能据此判断用户已退出。
+
 ## POST /api/generate-questions
 
 用途：根据岗位 JD 和简历生成 6 道结构化面试问题。

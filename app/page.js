@@ -15,6 +15,7 @@ import Link from 'next/link';
 import HomeSignOutButton from '../components/HomeSignOutButton';
 import { getSupabaseConfig } from '../lib/supabase/config';
 import { createSupabaseServerClient } from '../lib/supabase/serverClient';
+import { isAuthServiceUnavailable } from '../lib/supabase/authState';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,30 +26,33 @@ async function getHomeAuthState() {
     return {
       user: null,
       isAuthConfigured: false,
+      isAuthUnavailable: false,
     };
   }
 
   try {
     const supabase = await createSupabaseServerClient();
     const {
-      data: { user },
+      data: { user }, error,
     } = await supabase.auth.getUser();
 
     return {
       user,
       isAuthConfigured: true,
+      isAuthUnavailable: isAuthServiceUnavailable(error),
     };
   } catch {
     return {
       user: null,
-      isAuthConfigured: false,
+      isAuthConfigured: true,
+      isAuthUnavailable: true,
     };
   }
 }
 
 // 基础主页：提供首屏入口、登录状态和轻量产品说明，不承载面试业务逻辑。
 export default async function Home() {
-  const { user, isAuthConfigured } = await getHomeAuthState();
+  const { user, isAuthConfigured, isAuthUnavailable } = await getHomeAuthState();
   const isLoggedIn = Boolean(user);
   const interviewHref = isLoggedIn ? '/interview' : '/login';
 
@@ -85,12 +89,14 @@ export default async function Home() {
           </div>
 
           <nav className="home-nav-links" aria-label="主页导航">
-            {isLoggedIn ? (
+            {isAuthUnavailable ? (
+              <a href="/">重新检查登录状态</a>
+            ) : isLoggedIn ? (
               <HomeSignOutButton className="home-nav-sign-out" />
             ) : (
               <Link href="/login">登录入口</Link>
             )}
-            <Link href={interviewHref}>{isLoggedIn ? '进入面试' : '面试入口'}</Link>
+            {!isAuthUnavailable && <Link href={interviewHref}>{isLoggedIn ? '进入面试' : '面试入口'}</Link>}
           </nav>
         </header>
 
@@ -109,11 +115,21 @@ export default async function Home() {
               </p>
             )}
 
+            {isAuthUnavailable && (
+              <p className="home-warning" role="status">
+                暂时无法确认登录状态。请稍后重新检查，通常无需再次输入密码。
+              </p>
+            )}
+
             <div className="home-actions" aria-label="主页入口">
-              <Link className="home-primary-link" href={interviewHref}>
-                {isLoggedIn ? '进入面试工作台' : '开始模拟面试'}
-              </Link>
-              {isLoggedIn ? (
+              {isAuthUnavailable ? (
+                <a className="home-primary-link" href="/">重新检查登录状态</a>
+              ) : (
+                <Link className="home-primary-link" href={interviewHref}>
+                  {isLoggedIn ? '进入面试工作台' : '开始模拟面试'}
+                </Link>
+              )}
+              {isAuthUnavailable ? null : isLoggedIn ? (
                 <HomeSignOutButton />
               ) : (
                 <Link className="home-secondary-link" href="/login">

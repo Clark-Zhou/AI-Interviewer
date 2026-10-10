@@ -6,6 +6,8 @@
 import ProfileAvatar from '../../../components/ProfileAvatar';
 import { createSupabaseServerClient } from '../../../lib/supabase/serverClient';
 import { getDisplayNickname } from '../../../lib/userProfile';
+import { isAuthServiceUnavailable } from '../../../lib/supabase/authState';
+import AuthUnavailableNotice from '../../../components/AuthUnavailableNotice';
 
 const profileModules = [
   { label: '主题外观', description: '界面风格与阅读体验', icon: 'theme' },
@@ -30,7 +32,8 @@ function ProfileModuleIcon({ name }) {
 
 export default async function ProfilePage() {
   const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (isAuthServiceUnavailable(error)) return <AuthUnavailableNotice href="/interview/profile" />;
   const nickname = getDisplayNickname(user?.user_metadata?.nickname);
 
   return (

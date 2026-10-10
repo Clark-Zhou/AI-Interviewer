@@ -94,20 +94,49 @@ export default function LoginEntryShell() {
       return;
     }
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
 
-    setIsSubmitting(false);
+      if (error || !data?.session) {
+        setEntryError(error?.message || '登录失败，请检查邮箱和密码后重试。');
+        return;
+      }
 
-    if (error) {
-      setEntryError(error.message || '登录失败，请检查邮箱和密码后重试。');
-      return;
+      // 登录成功后用独立请求验证 cookie 已被服务端读取，避免跳转后误显未登录。
+      const sessionResponse = await fetch('/api/auth/session', {
+        method: 'POST',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expectedUserId: data.user.id }),
+      });
+      const sessionResult = await sessionResponse.json();
+
+      if (sessionResult.status === 'unavailable') {
+        // 会话已由浏览器保存；主页会展示服务暂不可用和重试入口。
+        window.location.replace('/');
+        return;
+      }
+
+      if (sessionResult.status === 'mismatch') {
+        setEntryError('登录账号与当前浏览器会话不一致，请刷新页面后重试。');
+        return;
+      }
+
+      if (!sessionResponse.ok || sessionResult.status !== 'authenticated') {
+        setEntryError('登录已完成，但浏览器未保留登录状态。请检查 Cookie 设置后重试。');
+        return;
+      }
+
+      window.location.replace('/');
+    } catch {
+      setEntryError('登录暂时不可用，请检查网络后重试。');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    // signInWithPassword 完成会话持久化后再整页跳转，让服务端读取新 cookie。
-    window.location.replace('/');
   };
 
   return (

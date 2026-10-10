@@ -19,6 +19,7 @@
 
 - `/`：主页，展示产品入口、登录/登出入口、面试入口和登录状态。
 - `/login`：登录/注册入口，使用 Supabase Auth；注册时写入昵称元数据。
+- `/api/auth/session`：登录后确认服务端识别的浏览器会话与本次登录账号一致；区分未登录与账号服务暂时不可用。
 - `/interview`：受保护的面试工作台入口。
 - `/interview/new`：受保护的新面试流程。
 - `/interview/history`：受保护的云端历史记录列表和详情。
@@ -59,6 +60,7 @@ docs/archive/                     既有历史资料
 - 简历原文件保存到私有 `interview-resumes` Storage 桶；`public.resume_files` 记录当前账号的文件元数据及上传状态。服务端凭当前用户会话及私有令牌调用受控 RPC，数据库以账号级事务锁限制并发预留最多 10 份。表只向登录用户开放自己的只读数据；Storage RLS 限制预留路径上传及清理状态删除。上传/删除的对象清理失败会留下不占名额的 `cleanup` 记录，后续请求重试。
 - `app/interview/layout.js` 集中校验登录态并承载品牌页头、五入口导航和离开保护；`proxy.js` 仍保护整个 `/interview/:path*`。面试区页面共用约 1200px 的响应式容器，视觉样式限制在 `.interview-shell` 内。
 - 昵称保存于 Supabase Auth 的 `user_metadata.nickname`，只用于展示；`lib/userProfile.js` 统一校验昵称和提供已有账号的默认值。`app/interview/profile/page.js` 和账户页服务端读取当前用户；账户页内 `AccountSettingsPanel` 通过浏览器 Auth client 更新昵称或密码。邮箱和手机号保持只读，不另建资料表。
+- 登录由浏览器 Supabase client 写入 cookie，再调用 `/api/auth/session` 确认服务端可读取。主页、proxy 和面试区布局只把明确的无会话状态视为未登录；可重试的 Supabase 网络/服务错误展示重试提示，不清除浏览器会话。
 - 面试区页面链接使用原生跳转，使浏览器 `beforeunload` 可以提醒未完成面试；登出在账户子页面显示页面内确认。
 
 ## 核心数据流
