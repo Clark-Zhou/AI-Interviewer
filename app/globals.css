@@ -669,6 +669,13 @@ button.home-secondary-link:hover {
   box-shadow: 0 0 0 3px rgba(43, 184, 170, 0.14);
 }
 
+.entry-field-hint {
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 7px 0 0;
+}
+
 .entry-error {
   color: #dc2626;
   font-size: 14px;
@@ -2116,7 +2123,7 @@ button:disabled {
 .profile-module-copy strong { color: var(--interview-ink); font-size: 16px; }
 .profile-module-copy > span { color: var(--interview-muted); font-size: 13px; }
 
-/* 账户详情：只读数据与真实登出操作在视觉上分开。 */
+/* 账户详情：邮箱和手机号只读，昵称与密码在同页按需展开修改表单。 */
 .interview-shell .profile-account-page { max-width: 1000px; }
 .profile-back-link { color: #0a827a; display: inline-block; font-size: 14px; font-weight: 700; margin: 0 0 19px; text-decoration: none; }
 .profile-back-link:hover { text-decoration: underline; text-underline-offset: 4px; }
@@ -2131,6 +2138,18 @@ button:disabled {
 .profile-account-details dt { color: var(--interview-muted); font-size: 14px; }
 .profile-account-details dd { color: var(--interview-ink); font-size: 15px; font-weight: 700; margin: 0; min-width: 0; }
 .profile-account-email { overflow-wrap: anywhere; }
+.profile-account-value-action { align-items: center; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; }
+.interview-shell .profile-account-edit-button { flex: 0 0 auto; font-size: 13px; min-height: 36px; padding: 8px 12px; }
+.profile-password-mask { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; letter-spacing: .13em; }
+.profile-account-editor { background: #f5fbf9; border: 1px solid #cfe6e0; border-radius: 12px; display: grid; gap: 10px; margin-top: 16px; max-width: 560px; padding: 18px; }
+.profile-account-editor label { color: #2b4c52; font-size: 13px; font-weight: 800; }
+.profile-account-editor input { background: #fff; border: 1px solid #bfd8d2; border-radius: 9px; color: var(--interview-ink); min-height: 43px; padding: 10px 12px; width: 100%; }
+.profile-account-editor input:focus { border-color: #0a827a; box-shadow: 0 0 0 4px rgba(8, 127, 120, .13); outline: 0; }
+.profile-account-hint, .profile-account-message, .profile-account-error { font-size: 13px; line-height: 1.6; margin: 0; }
+.profile-account-hint { color: var(--interview-muted); }
+.profile-account-message { color: #08766e; margin-top: 10px; }
+.profile-account-error { color: #b64646; }
+.profile-account-editor-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 4px; }
 .interview-shell .profile-signout-panel { align-items: center; display: flex; gap: 24px; justify-content: space-between; margin-top: 22px; }
 .interview-shell .profile-signout-panel h2 { font-size: 20px; margin: 0 0 8px; }
 .profile-signout-panel p { color: var(--interview-muted); font-size: 13px; line-height: 1.7; margin: 0; }
@@ -2149,6 +2168,10 @@ button:disabled {
   .interview-shell .profile-module-panel { padding: 22px 20px 4px; }
   .profile-module-row { min-height: 78px; }
   .profile-account-details > div { gap: 6px; grid-template-columns: 1fr; padding-block: 16px; }
+  .profile-account-value-action { align-items: flex-start; flex-direction: column; }
+  .interview-shell .profile-account-edit-button { width: 100%; }
+  .profile-account-editor { max-width: none; }
+  .profile-account-editor-actions button { flex: 1; }
   .interview-shell .profile-signout-panel { align-items: stretch; flex-direction: column; }
   .account-signout-action { width: 100%; }
   .interview-shell .account-signout-button { width: 100%; }
