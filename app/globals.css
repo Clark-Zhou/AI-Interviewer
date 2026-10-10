@@ -1221,6 +1221,28 @@ button:disabled {
   margin: 0 0 12px;
 }
 
+.evaluation-ready-panel .evaluation-loading-status {
+  color: #087f78;
+  font-weight: 700;
+  margin: 12px 0 0;
+}
+
+/* 生成结果定位时保留页边距，键盘焦点与手机固定底栏均能清楚看到目标。 */
+.question-preview-panel,
+.question-preview-panel h2,
+.evaluation-panel h2,
+.evaluation-loading-status,
+.message-with-action [role='alert'] {
+  scroll-margin-top: 24px;
+}
+
+.question-preview-panel h2:focus,
+.evaluation-panel h2:focus,
+.message-with-action [role='alert']:focus {
+  outline: 3px solid #0a827a;
+  outline-offset: 5px;
+}
+
 /* 最终评价区：展示整体分数、总结、优势风险和逐题反馈。 */
 .evaluation-panel {
   margin-top: 20px;

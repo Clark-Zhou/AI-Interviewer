@@ -121,6 +121,12 @@ export default function InterviewSimulator() {
   const historySaveVersionRef = useRef(0);
   const jobInfoFileInputRef = useRef(null);
   const resumeFileInputRef = useRef(null);
+  const questionPanelRef = useRef(null);
+  const questionHeadingRef = useRef(null);
+  const questionErrorRef = useRef(null);
+  const evaluationLoadingRef = useRef(null);
+  const evaluationHeadingRef = useRef(null);
+  const evaluationErrorRef = useRef(null);
   const [jobTitle, setJobTitle] = useState('');
   const [jobInfo, setJobInfo] = useState('');
   const [resume, setResume] = useState('');
@@ -139,6 +145,45 @@ export default function InterviewSimulator() {
   const [textImportStatus, setTextImportStatus] = useState('');
   const [textImportMessage, setTextImportMessage] = useState('');
   const [documentImportTarget, setDocumentImportTarget] = useState('');
+  const [scrollRequest, setScrollRequest] = useState(null);
+
+  // 滚动请求带上操作版本，输入改变或开始新一轮后不会定位到旧结果。
+  const requestResultScroll = (target, actionVersion) => {
+    setScrollRequest({ target, actionVersion });
+  };
+
+  // 只在目标完成渲染后滚动；结果和错误获得程序焦点，便于键盘与读屏继续阅读。
+  useEffect(() => {
+    if (!scrollRequest || scrollRequest.actionVersion !== actionVersionRef.current) return;
+    const targets = {
+      'question-loading': questionPanelRef,
+      'question-result': questionHeadingRef,
+      'question-error': questionErrorRef,
+      'evaluation-loading': evaluationLoadingRef,
+      'evaluation-result': evaluationHeadingRef,
+      'evaluation-error': evaluationErrorRef,
+    };
+    const target = targets[scrollRequest.target]?.current;
+    if (!target) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      if (scrollRequest.actionVersion !== actionVersionRef.current) return;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (scrollRequest.target.endsWith('result') || scrollRequest.target.endsWith('error')) {
+        target.focus({ preventScroll: true });
+      }
+      target.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [scrollRequest]);
+
+  // 编辑期间的生成请求已失去上下文；同时撤销尚未执行的自动滚动。
+  const invalidatePendingGeneration = () => {
+    actionVersionRef.current += 1;
+    setIsLoading(false);
+    setIsEvaluating(false);
+    setScrollRequest(null);
+  };
 
   // 回答变化后清掉旧评价和历史保存提示，避免展示已失效的报告。
   const clearEvaluationState = () => {
@@ -177,7 +222,7 @@ export default function InterviewSimulator() {
 
   // 开发辅助：填入固定示例输入，并清空上一轮生成结果，方便反复测试主流程。
   const handleFillSampleInputs = () => {
-    actionVersionRef.current += 1;
+    invalidatePendingGeneration();
     fileImportVersionRef.current += 1;
     setJobTitle(SAMPLE_JOB_TITLE);
     setJobInfo(SAMPLE_JOB_INFO);
@@ -188,6 +233,7 @@ export default function InterviewSimulator() {
 
   // 开发辅助：为当前问题列表填入测试回答，但保留逐题手动提交动作。
   const handleFillSampleAnswers = () => {
+    invalidatePendingGeneration();
     const sampleAnswers = questions.reduce((nextAnswers, questionItem, questionIndex) => ({
       ...nextAnswers,
       [questionIndex]: buildSampleAnswer(questionItem, questionIndex),
@@ -278,7 +324,7 @@ export default function InterviewSimulator() {
       return;
     }
 
-    actionVersionRef.current += 1;
+    invalidatePendingGeneration();
     fileImportVersionRef.current += 1;
     setJobTitle('');
     setJobInfo('');
@@ -288,12 +334,14 @@ export default function InterviewSimulator() {
   };
 
   const handleJobTitleChange = (nextJobTitle) => {
+    invalidatePendingGeneration();
     setJobTitle(nextJobTitle);
     setError('');
     clearEvaluationState();
   };
 
   const handleJobInfoChange = (nextJobInfo) => {
+    invalidatePendingGeneration();
     fileImportVersionRef.current += 1;
     setJobInfo(nextJobInfo);
     setError('');
@@ -302,6 +350,7 @@ export default function InterviewSimulator() {
   };
 
   const handleResumeChange = (nextResume) => {
+    invalidatePendingGeneration();
     fileImportVersionRef.current += 1;
     setResume(nextResume);
     setError('');
@@ -441,6 +490,7 @@ export default function InterviewSimulator() {
 
   // 按问题下标保存用户回答，提交整场评价时会使用这些回答。
   const handleAnswerChange = (questionIndex, answerText) => {
+    invalidatePendingGeneration();
     setAnswers((currentAnswers) => ({
       ...currentAnswers,
       [questionIndex]: answerText,
@@ -507,6 +557,7 @@ export default function InterviewSimulator() {
 
   // 单题提交：在前端记录已确认的回答，最终评价接口只使用已提交回答。
   const handleSubmitAnswer = (questionIndex) => {
+    invalidatePendingGeneration();
     const answerText = answers[questionIndex]?.trim();
 
     if (!answerText) {
@@ -530,6 +581,7 @@ export default function InterviewSimulator() {
 
   // 一键提交：所有题都有回答时，把当前问题列表里的回答一次性纳入最终评价。
   const handleSubmitAllAnswers = () => {
+    invalidatePendingGeneration();
     const nextErrors = {};
     const nextSubmittedAnswers = {};
     let hasEmptyAnswer = false;
@@ -571,6 +623,7 @@ export default function InterviewSimulator() {
       setError('请先填写岗位信息和个人简历，再生成面试问题。');
       setQuestions([]);
       clearQuestionFlowState();
+      requestResultScroll('question-error', actionVersion);
       return;
     }
 
@@ -578,6 +631,7 @@ export default function InterviewSimulator() {
     setQuestions([]);
     clearQuestionFlowState();
     setIsLoading(true);
+    requestResultScroll('question-loading', actionVersion);
 
     try {
       const generatedQuestions = await generateInterviewQuestions({ jobTitle, jobInfo, resume });
@@ -588,12 +642,14 @@ export default function InterviewSimulator() {
 
       setQuestions(generatedQuestions);
       setQuestionGenerationSource('ai');
+      requestResultScroll('question-result', actionVersion);
     } catch (error) {
       if (actionVersion !== actionVersionRef.current) {
         return;
       }
 
       setError(getRequestErrorMessage('生成问题失败', error));
+      requestResultScroll('question-error', actionVersion);
     } finally {
       if (actionVersion === actionVersionRef.current) {
         setIsLoading(false);
@@ -608,16 +664,22 @@ export default function InterviewSimulator() {
     }
 
     if (!jobInfo.trim() || !resume.trim()) {
+      const actionVersion = actionVersionRef.current + 1;
+      actionVersionRef.current = actionVersion;
       setError('请先填写岗位信息和个人简历，再使用 Mock 问题。');
       setQuestions([]);
       clearQuestionFlowState();
+      requestResultScroll('question-error', actionVersion);
       return;
     }
 
+    const actionVersion = actionVersionRef.current + 1;
+    actionVersionRef.current = actionVersion;
     setError('');
     setQuestions(mockInterviewQuestions);
     clearQuestionFlowState();
     setQuestionGenerationSource('mock');
+    requestResultScroll('question-result', actionVersion);
   };
 
   // 所有题目提交后，调用最终评价 API 生成整体报告和逐题反馈。
@@ -627,11 +689,13 @@ export default function InterviewSimulator() {
 
     if (!isReadyForEvaluation) {
       setEvaluationError('请先提交所有题目的回答。');
+      requestResultScroll('evaluation-error', actionVersion);
       return;
     }
 
     clearEvaluationState();
     setIsEvaluating(true);
+    requestResultScroll('evaluation-loading', actionVersion);
 
     try {
       const generatedEvaluation = await evaluateInterview({
@@ -646,12 +710,14 @@ export default function InterviewSimulator() {
       }
 
       handleEvaluationGenerated(generatedEvaluation, 'ai');
+      requestResultScroll('evaluation-result', actionVersion);
     } catch (error) {
       if (actionVersion !== actionVersionRef.current) {
         return;
       }
 
       setEvaluationError(getRequestErrorMessage('生成最终评价失败', error));
+      requestResultScroll('evaluation-error', actionVersion);
     } finally {
       if (actionVersion === actionVersionRef.current) {
         setIsEvaluating(false);
@@ -661,8 +727,11 @@ export default function InterviewSimulator() {
 
   // 开发辅助：使用当前已提交问答生成本地 mock 评价，并复用真实评价后的保存链路。
   const handleUseMockEvaluation = () => {
+    const actionVersion = actionVersionRef.current + 1;
+    actionVersionRef.current = actionVersion;
     if (!isReadyForEvaluation) {
       setEvaluationError('请先提交所有题目的回答。');
+      requestResultScroll('evaluation-error', actionVersion);
       return;
     }
 
@@ -670,6 +739,7 @@ export default function InterviewSimulator() {
 
     const generatedEvaluation = createMockInterviewEvaluation(submittedQuestionAnswers);
     handleEvaluationGenerated(generatedEvaluation, 'mock');
+    requestResultScroll('evaluation-result', actionVersion);
   };
 
   return (
@@ -799,7 +869,7 @@ export default function InterviewSimulator() {
 
         {error && (
           <div className="message-with-action">
-            <p className="error-message">{error}</p>
+            <p className="error-message" ref={questionErrorRef} role="alert" tabIndex={-1}>{error}</p>
             {canRetryGenerateQuestions && (
               <button
                 type="button"
@@ -816,9 +886,9 @@ export default function InterviewSimulator() {
 
       {/* 结果区：生成开始后展示加载状态或结构化问题列表。 */}
       {shouldShowQuestionPanel && (
-        <section className="panel preview question-preview-panel">
+        <section className="panel preview question-preview-panel" ref={questionPanelRef}>
           <div className="preview-header">
-            <h2>模拟问题</h2>
+            <h2 ref={questionHeadingRef} tabIndex={-1}>模拟问题</h2>
             {totalQuestionCount > 0 && (
               <div className="preview-actions">
                 <span className="answer-progress">
@@ -843,7 +913,7 @@ export default function InterviewSimulator() {
               </div>
             )}
           </div>
-          {isLoading && <p className="empty-state">DeepSeek 正在生成问题，请稍等。</p>}
+          {isLoading && <p className="empty-state" role="status">DeepSeek 正在生成问题，请稍等。</p>}
           {!isLoading && questions.length > 0 && (
             <>
               <ul className="question-list">
@@ -906,9 +976,14 @@ export default function InterviewSimulator() {
                     </button>
                   )}
                 </div>
+                {isEvaluating && (
+                  <p className="evaluation-loading-status" ref={evaluationLoadingRef} role="status">
+                    正在生成最终评价，请稍等。
+                  </p>
+                )}
                 {evaluationError && (
                   <div className="message-with-action">
-                    <p className="answer-error">{evaluationError}</p>
+                    <p className="answer-error" ref={evaluationErrorRef} role="alert" tabIndex={-1}>{evaluationError}</p>
                     {canRetryEvaluation && (
                       <button
                         type="button"
@@ -931,11 +1006,10 @@ export default function InterviewSimulator() {
       {evaluation && (
         <section className="panel evaluation-panel">
           <div className="evaluation-header">
-            <h2>最终评价</h2>
+            <h2 ref={evaluationHeadingRef} tabIndex={-1}>最终评价</h2>
             <span className="evaluation-score">{evaluation.overallScore} / 100</span>
           </div>
 
-          <p className="evaluation-summary">{evaluation.summary}</p>
           {historySaveMessage && (
             <div className="history-save-row">
               <p className={`history-save-status ${historySaveStatus}`}>
@@ -953,6 +1027,7 @@ export default function InterviewSimulator() {
               )}
             </div>
           )}
+          <p className="evaluation-summary">{evaluation.summary}</p>
 
           <div className="evaluation-grid">
             <div>
