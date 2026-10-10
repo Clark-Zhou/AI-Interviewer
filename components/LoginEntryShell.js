@@ -16,13 +16,16 @@
 
 import { useState } from 'react';
 import { createSupabaseBrowserClient } from '../lib/supabase/browserClient';
+import { validateNickname } from '../lib/userProfile';
 
 // 登录入口表单：复用当前视觉风格，提供最小登录/注册闭环。
 export default function LoginEntryShell() {
   const [authMode, setAuthMode] = useState('login');
   const [email, setEmail] = useState('');
+  const [nickname, setNickname] = useState('');
   const [password, setPassword] = useState('');
   const [entryError, setEntryError] = useState('');
+  const [nicknameError, setNicknameError] = useState('');
   const [entryMessage, setEntryMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -35,6 +38,18 @@ export default function LoginEntryShell() {
       setEntryError('请填写邮箱和密码。');
       setEntryMessage('');
       return;
+    }
+
+    if (isRegisterMode) {
+      const nicknameValidation = validateNickname(nickname);
+      if (!nicknameValidation.isValid) {
+        setNicknameError(nicknameValidation.message);
+        setEntryError('');
+        setEntryMessage('');
+        return;
+      }
+
+      setNicknameError('');
     }
 
     setIsSubmitting(true);
@@ -55,6 +70,9 @@ export default function LoginEntryShell() {
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
+        options: {
+          data: { nickname },
+        },
       });
 
       setIsSubmitting(false);
@@ -131,6 +149,7 @@ export default function LoginEntryShell() {
               onClick={() => {
                 setAuthMode('login');
                 setEntryError('');
+                setNicknameError('');
                 setEntryMessage('');
               }}
             >
@@ -142,6 +161,7 @@ export default function LoginEntryShell() {
               onClick={() => {
                 setAuthMode('register');
                 setEntryError('');
+                setNicknameError('');
                 setEntryMessage('');
               }}
             >
@@ -166,6 +186,29 @@ export default function LoginEntryShell() {
             />
           </div>
 
+          {isRegisterMode && (
+            <div className="entry-field">
+              <label htmlFor="entry-nickname">昵称</label>
+              <input
+                id="entry-nickname"
+                type="text"
+                value={nickname}
+                onChange={(event) => {
+                  setNickname(event.target.value);
+                  setNicknameError('');
+                  setEntryMessage('');
+                }}
+                placeholder="最多 7 个汉字或 14 个英文字母"
+                autoComplete="nickname"
+                disabled={isSubmitting}
+                aria-invalid={Boolean(nicknameError)}
+                aria-describedby={nicknameError ? 'entry-nickname-hint entry-nickname-error' : 'entry-nickname-hint'}
+              />
+              <p id="entry-nickname-hint" className="entry-field-hint">仅支持汉字和英文字母。</p>
+              {nicknameError && <p id="entry-nickname-error" className="entry-error" role="alert">{nicknameError}</p>}
+            </div>
+          )}
+
           <div className="entry-field">
             <label htmlFor="entry-password">密码</label>
             <input
@@ -183,7 +226,7 @@ export default function LoginEntryShell() {
             />
           </div>
 
-          {entryError && <p className="entry-error">{entryError}</p>}
+          {entryError && <p className="entry-error" role="alert">{entryError}</p>}
           {entryMessage && <p className="entry-message">{entryMessage}</p>}
 
           <button type="submit" className="entry-submit" disabled={isSubmitting}>

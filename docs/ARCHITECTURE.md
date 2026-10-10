@@ -18,14 +18,14 @@
 ## 路由结构
 
 - `/`：主页，展示产品入口、登录/登出入口、面试入口和登录状态。
-- `/login`：登录/注册入口，使用 Supabase Auth。
+- `/login`：登录/注册入口，使用 Supabase Auth；注册时写入昵称元数据。
 - `/interview`：受保护的面试工作台入口。
 - `/interview/new`：受保护的新面试流程。
 - `/interview/history`：受保护的云端历史记录列表和详情。
 - `/interview/resumes`：受保护的简历仓库。
 - `/interview/analytics`：受保护的数据和分析页面骨架。
 - `/interview/profile`：受保护的个人中心总览，展示默认头像、昵称和静态模块列表。
-- `/interview/profile/account`：受保护的账户页，服务端读取当前用户并展示邮箱、手机号状态和登出。
+- `/interview/profile/account`：受保护的账户页，服务端读取当前用户并展示邮箱、手机号状态、昵称和密码修改入口及登出。
 - `/api/generate-questions`：生成面试问题。
 - `/api/evaluate-interview`：生成最终评价。
 - `/api/parse-document`：PDF/DOCX 解析成纯文本。
@@ -58,7 +58,7 @@ docs/archive/                     既有历史资料
 - `public.interview_sessions` 存储完整历史 JSON、列表字段和可选的旧本地 ID；RLS 按当前 Supabase 用户限制读写。新历史由服务端确认写入后才解除离开提醒；旧记录按账号和本地 ID 去重。
 - 简历原文件保存到私有 `interview-resumes` Storage 桶；`public.resume_files` 记录当前账号的文件元数据及上传状态。服务端凭当前用户会话及私有令牌调用受控 RPC，数据库以账号级事务锁限制并发预留最多 10 份。表只向登录用户开放自己的只读数据；Storage RLS 限制预留路径上传及清理状态删除。上传/删除的对象清理失败会留下不占名额的 `cleanup` 记录，后续请求重试。
 - `app/interview/layout.js` 集中校验登录态并承载品牌页头、五入口导航和离开保护；`proxy.js` 仍保护整个 `/interview/:path*`。面试区页面共用约 1200px 的响应式容器，视觉样式限制在 `.interview-shell` 内。
-- `app/interview/profile/page.js` 展示不含邮箱的个人中心总览；`app/interview/profile/account/page.js` 服务端读取当前用户，仅账户页显示邮箱、手机号状态和登出。资料不另存储。
+- 昵称保存于 Supabase Auth 的 `user_metadata.nickname`，只用于展示；`lib/userProfile.js` 统一校验昵称和提供已有账号的默认值。`app/interview/profile/page.js` 和账户页服务端读取当前用户；账户页内 `AccountSettingsPanel` 通过浏览器 Auth client 更新昵称或密码。邮箱和手机号保持只读，不另建资料表。
 - 面试区页面链接使用原生跳转，使浏览器 `beforeunload` 可以提醒未完成面试；登出在账户子页面显示页面内确认。
 
 ## 核心数据流
@@ -116,10 +116,12 @@ ResumePicker -> /api/resumes/[id]/content -> 私有 Storage 下载并解析 -> �
 - `components/InterviewHistoryPanel.js`：云端历史列表、详情、删除及旧记录手动导入。
 - `components/ResumeLibrary.js`、`components/ResumePicker.js`：云端简历列表与新面试选择。
 - `components/LoginEntryShell.js`：登录/注册页面壳。
+- `components/AccountSettingsPanel.js`：账户页的昵称和密码修改交互；不持久化密码。
 - `components/AccountSignOutButton.js`：账户子页面的登出入口和未保存面试确认。
 - `components/ProfileAvatar.js`：个人中心与账户页共用的默认头像图形。
 - `components/InterviewNavigation.js`：五入口导航与当前区域高亮。
 - `components/InterviewLeaveGuard.js`：未保存面试的浏览器离开提示与登出确认状态。
+- `lib/userProfile.js`：昵称元数据的展示回退与格式校验。
 - `lib/client/interviewApi.js`：前端请求封装。
 - `lib/client/interviewHistoryApi.js`：云端历史请求封装；`lib/client/interviewHistoryStorage.js`：旧本地历史读取，保留原数据。
 - `lib/client/interviewFileImport.js`：浏览器端文件识别、大小校验和文本读取。

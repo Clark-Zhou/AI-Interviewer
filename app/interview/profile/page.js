@@ -4,6 +4,8 @@
  * 注意事项：总览不显示邮箱；未实现的模块只作为静态信息展示。
  */
 import ProfileAvatar from '../../../components/ProfileAvatar';
+import { createSupabaseServerClient } from '../../../lib/supabase/serverClient';
+import { getDisplayNickname } from '../../../lib/userProfile';
 
 const profileModules = [
   { label: '主题外观', description: '界面风格与阅读体验', icon: 'theme' },
@@ -26,7 +28,11 @@ function ProfileModuleIcon({ name }) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const nickname = getDisplayNickname(user?.user_metadata?.nickname);
+
   return (
     <main className="page profile-overview-page">
       <section className="profile-overview-hero" aria-labelledby="profile-page-title">
@@ -35,9 +41,9 @@ export default function ProfilePage() {
           <p className="category">我的空间</p>
           <h1 id="profile-page-title">个人中心</h1>
         </div>
-        <a className="profile-identity-link" href="/interview/profile/account" aria-label="面试用户，进入账户">
+        <a className="profile-identity-link" href="/interview/profile/account" aria-label={`${nickname}，进入账户`}>
           <ProfileAvatar />
-          <span className="profile-display-name">面试用户</span>
+          <span className="profile-display-name">{nickname}</span>
           <span className="profile-identity-action">账户</span>
         </a>
       </section>
