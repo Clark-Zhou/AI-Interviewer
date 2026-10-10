@@ -202,7 +202,7 @@ export default function InterviewHistoryPanel() {
           {historySessions.length > 0 && (
             <>
               <button className="secondary-button compact-button" type="button" onClick={() => setIsHistoryListCollapsed((value) => !value)}>
-                {isHistoryListCollapsed ? '展开左栏' : '收起左栏'}
+                {isHistoryListCollapsed ? '展开记录列表' : '收起记录列表'}
               </button>
               <button className="danger-button compact-button" type="button" disabled={isBusy} onClick={handleClearHistorySessions}>清空全部</button>
             </>

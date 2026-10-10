@@ -127,7 +127,7 @@ export default async function Home() {
                 已登录 · {user.email}
               </p>
             )}
-            <p className="home-note">记录仅保存在当前浏览器 · 请使用脱敏信息</p>
+            <p className="home-note">面试历史与简历仓库按账号保存在云端 · 请使用脱敏信息</p>
           </div>
 
           <div className="home-cover" aria-hidden="true">
