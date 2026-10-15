@@ -11,18 +11,13 @@
  * - 这里只做请求解析、基础校验和统一响应，不直接写 prompt 或模型请求细节。
  */
 import { generateInterviewQuestionsWithDeepSeek } from '../../../lib/server/deepseek';
+import { aiErrorResponse, readAiRequest, reserveAiCall } from '../../../lib/server/aiRequestGuard';
 
 // 后端入口：接收前端请求，做基础校验，然后交给 DeepSeek 服务层处理。
 export async function POST(request) {
   try {
-    const { jobTitle, jobInfo, resume } = await request.json();
-
-    if (!jobInfo?.trim() || !resume?.trim()) {
-      return Response.json(
-        { error: '请提供岗位信息和个人简历。' },
-        { status: 400 },
-      );
-    }
+    const { jobTitle, jobInfo, resume } = await readAiRequest(request);
+    await reserveAiCall();
 
     // 服务层已经完成 AI 调用和 JSON 解析，这里只把标准 questions 数组返回给前端。
     const questions = await generateInterviewQuestionsWithDeepSeek({
@@ -32,12 +27,6 @@ export async function POST(request) {
     });
     return Response.json({ questions });
   } catch (error) {
-    return Response.json(
-      {
-        error: error.message || '生成问题时发生未知错误。',
-        detail: error.detail,
-      },
-      { status: error.status || 500 },
-    );
+    return aiErrorResponse(error, '生成问题失败，请稍后重试。');
   }
 }

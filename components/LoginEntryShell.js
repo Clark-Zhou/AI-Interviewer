@@ -209,6 +209,8 @@ export default function LoginEntryShell() {
             </div>
           )}
 
+          {isRegisterMode && <p className="entry-note">内测仅限受邀邮箱注册。使用真实岗位信息或简历时，相关文本会发送给 DeepSeek 生成问题和评价；简历仓库原文件及面试历史保存在账号对应的 Supabase 云端，可在页面中自行删除。</p>}
+
           <div className="entry-field">
             <label htmlFor="entry-password">密码</label>
             <input

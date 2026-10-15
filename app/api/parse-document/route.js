@@ -11,10 +11,13 @@
  * - 本阶段不做 OCR、图片识别、云端文件管理或 AI 自动结构化。
  */
 import { parseDocumentToText } from '../../../lib/server/documentParser';
+import { PublicApiError, requireApiUser } from '../../../lib/server/aiRequestGuard';
+import { MultipartLimitError, readBoundedFormData } from '../../../lib/server/boundedFormData';
 
 export const runtime = 'nodejs';
 
 const MAX_DOCUMENT_PARSE_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+const MAX_MULTIPART_BYTES = MAX_DOCUMENT_PARSE_FILE_SIZE_BYTES + 64 * 1024;
 const SUPPORTED_DOCUMENT_EXTENSIONS = ['.pdf', '.docx'];
 const SUPPORTED_TARGETS = ['jobInfo', 'resume'];
 
@@ -66,7 +69,8 @@ function isSupportedDocumentContent(buffer, extension) {
 // 后端入口：接收单个 PDF/DOCX 文件，解析成纯文本后立即返回给前端。
 export async function POST(request) {
   try {
-    const formData = await request.formData();
+    await requireApiUser();
+    const formData = await readBoundedFormData(request, MAX_MULTIPART_BYTES);
     const file = formData.get('file');
     const target = formData.get('target');
 
@@ -129,6 +133,12 @@ export async function POST(request) {
 
     return Response.json({ text });
   } catch (error) {
+    if (error instanceof PublicApiError) {
+      return Response.json({ error: error.message }, { status: error.status });
+    }
+    if (error instanceof MultipartLimitError) {
+      return Response.json({ error: error.message }, { status: 413 });
+    }
     const fallbackMessage = '文档解析失败，请确认文件未损坏，或改用复制粘贴文本。';
     const message = error.message?.startsWith('文档解析失败')
       ? error.message

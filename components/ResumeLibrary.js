@@ -129,6 +129,7 @@ export default function ResumeLibrary() {
           <p className="category">我的文件</p>
           <h2>保存常用简历</h2>
           <p className="subtitle">支持 PDF、DOCX、TXT 和 MD。文件会保存在你的账号中，可在新面试时选用。</p>
+          <p className="material-notice">上传的原文件保存在账号的私有云端仓库，可随时在此下载或删除。选入新面试后，简历文本会用于 AI 生成。</p>
         </div>
         <div className="resume-upload-actions">
           <span className="resume-count" aria-live="polite">{isLoading ? '正在读取' : `${resumes.length} / 10 份`}</span>

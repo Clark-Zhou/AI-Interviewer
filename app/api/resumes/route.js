@@ -8,6 +8,7 @@ import {
   reserveResume, RESUME_BUCKET, RESUME_SELECT, ResumeValidationError,
   resumeError, transitionResume, validateResumeUpload,
 } from '../../../lib/server/resumeRepository';
+import { MultipartLimitError, readBoundedFormData } from '../../../lib/server/boundedFormData';
 
 export const runtime = 'nodejs';
 
@@ -33,9 +34,7 @@ export async function POST(request) {
   try {
     ({ supabase, user } = await getResumeAuth());
     if (!user) return resumeError('请先登录后上传简历。', 401);
-    const contentLength = Number(request.headers.get('content-length'));
-    if (contentLength > 6 * 1024 * 1024) return resumeError('文件过大，请按格式限制选择简历。', 413);
-    const formData = await request.formData();
+    const formData = await readBoundedFormData(request, 5 * 1024 * 1024 + 64 * 1024);
     const { originalName, type, buffer } = await validateResumeUpload(formData.get('file'));
     await cleanupPendingResumes(supabase, user.id);
 
@@ -69,6 +68,7 @@ export async function POST(request) {
       try { await removeResumeObject(supabase, { id: reservedId, storage_path: storagePath }); } catch {}
     }
     if (error instanceof ResumeValidationError) return resumeError(error.message);
+    if (error instanceof MultipartLimitError) return resumeError('文件过大，请按格式限制选择简历。', 413);
     return resumeError('简历上传失败，请检查云端配置或稍后重试。', 503);
   }
 }

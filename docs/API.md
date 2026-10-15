@@ -34,7 +34,7 @@
 }
 ```
 
-错误边界：缺少 JD/简历、缺少 `DEEPSEEK_API_KEY`、DeepSeek 请求失败、AI 返回无法解析。
+错误边界：JSON 请求体最多 1MB；岗位名称最多 160 字符，JD/简历各最多 30000 字符。未登录返回 401，Supabase 登录态或额度不可用返回 503，每账号 UTC 自然日第 21 次及之后返回 429。有效请求在调用 DeepSeek 前预留一次名额，失败调用同样计数。上游错误只返回统一文案，不返回原始 AI 输出。
 
 ## POST /api/evaluate-interview
 
@@ -62,7 +62,7 @@
 
 成功响应：返回结构化 `evaluation`，包括总分、总结、优势、风险点、改进建议、逐题反馈和后续练习题。
 
-错误边界：缺少输入、回答未提交完整、缺少 `DEEPSEEK_API_KEY`、DeepSeek 请求失败、AI 返回无法解析。
+错误边界：与生成问题接口共用 1MB 请求体、登录态和每日 20 次总额；问答必须有 1 至 6 条，四个字段均为非空字符串。上游错误只返回统一文案。
 
 ## POST /api/parse-document
 
@@ -85,7 +85,7 @@ target: jobInfo | resume
 }
 ```
 
-错误边界：target 无效、缺少文件、扩展名不支持、文件为空、超过 5MB、文件内容和扩展名不匹配、解析失败、解析为空。
+错误边界：未登录返回 401，认证服务不可用返回 503；实际 multipart 请求体最多 5MB 加 64KB 表单开销。其他包括 target 无效、缺少文件、扩展名不支持、文件为空、超过 5MB、文件内容和扩展名不匹配、解析失败、解析为空。
 
 ## 云端历史 API
 
@@ -104,7 +104,7 @@ target: jobInfo | resume
 全部接口先用 Supabase Auth cookie 验证当前用户，未登录返回 401。元数据只属于当前账号，原文件从私有 Storage 读取。
 
 - `GET /api/resumes`：返回 `{ resumes: [{ id, original_name, file_type, size_bytes, created_at }] }`，按上传时间倒序，不返回存储路径。
-- `POST /api/resumes`：`multipart/form-data` 的 `file` 字段；上传有效 PDF/DOCX（≤5MB）或 TXT/MD（≤300KB），成功返回 201 与 `{ resume }`。账号已有 10 份时返回 409；不支持格式、无文本或损坏文件返回 400。
+- `POST /api/resumes`：`multipart/form-data` 的 `file` 字段；实际请求流限制为 5MB 加 64KB 表单开销，上传有效 PDF/DOCX（≤5MB）或 TXT/MD（≤300KB），成功返回 201 与 `{ resume }`。账号已有 10 份时返回 409；不支持格式、无文本或损坏文件返回 400。
 - `GET /api/resumes/[id]/content`：返回 `{ text }`，用于填入新面试可编辑文本框。
 - `GET /api/resumes/[id]/download`：下载原文件，保留原文件名。
 - `DELETE /api/resumes/[id]`：删除当前用户的原文件与元数据，返回 `{ deleted: true }`。

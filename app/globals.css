@@ -1888,6 +1888,7 @@ button:disabled {
 .interview-shell h1 { color: var(--interview-ink); font-size: clamp(28px, 3vw, 38px); letter-spacing: -.045em; line-height: 1.25; margin: 0 0 13px; }
 .interview-shell h2 { color: var(--interview-ink); letter-spacing: -.03em; }
 .interview-shell .subtitle { color: var(--interview-muted); line-height: 1.8; margin: 0; max-width: 720px; }
+.interview-shell .material-notice { max-width: 760px; margin: 12px 0 22px; padding: 12px 16px; border-left: 3px solid #2d9c89; border-radius: 0 10px 10px 0; background: #edf8f5; color: #315c56; font-size: 13px; line-height: 1.7; }
 .interview-shell .workspace-subpage-heading { background: linear-gradient(120deg, #fff 48%, #eaf8f5 100%); margin-bottom: 22px; min-height: 158px; }
 .interview-shell .workspace-placeholder-panel { background: linear-gradient(120deg, #fff 62%, #e9f7f3 100%); min-height: 260px; }
 .interview-shell .workspace-placeholder-panel .text-link { align-items: center; background: #e2f3ef; border-radius: 10px; display: inline-flex; min-height: 44px; padding: 10px 16px; }

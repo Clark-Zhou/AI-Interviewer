@@ -29,6 +29,7 @@
 - `/api/generate-questions`：生成面试问题。
 - `/api/evaluate-interview`：生成最终评价。
 - `/api/parse-document`：PDF/DOCX 解析成纯文本。
+- 两个 AI API 通过 `lib/server/aiRequestGuard.js` 校验请求、当前用户和数据库原子额度；文档解析 API 复用登录校验并限制实际请求流。
 - `/api/resumes` 及 `/api/resumes/[id]` 子路由：当前用户的简历列表、上传、删除、下载与文本提取。
 - `/api/history`、`/api/history/[id]`、`/api/history/import`：当前账号的面试历史保存、分页、详情、删除与旧记录手动导入。
 
@@ -67,6 +68,7 @@ docs/archive/                     既有历史资料
 
 ```text
 InterviewSimulator -> lib/client/interviewApi.js -> /api/generate-questions
+-> Auth getUser + public.reserve_daily_ai_call()（同账号 UTC 日上限 20）
 -> lib/server/deepseek.js -> lib/prompts/interviewQuestions.js
 -> DeepSeek -> lib/server/parseAiQuestions.js -> 前端展示
 ```
@@ -75,6 +77,7 @@ InterviewSimulator -> lib/client/interviewApi.js -> /api/generate-questions
 
 ```text
 InterviewSimulator -> lib/client/interviewApi.js -> /api/evaluate-interview
+-> Auth getUser + public.reserve_daily_ai_call()（与生成问题共用额度）
 -> lib/server/interviewEvaluation.js -> lib/prompts/interviewEvaluation.js
 -> DeepSeek -> lib/server/parseInterviewEvaluation.js -> 前端展示并保存历史
 ```
@@ -126,6 +129,8 @@ ResumePicker -> /api/resumes/[id]/content -> 私有 Storage 下载并解析 -> �
 - `lib/client/interviewHistoryApi.js`：云端历史请求封装；`lib/client/interviewHistoryStorage.js`：旧本地历史读取，保留原数据。
 - `lib/client/interviewFileImport.js`：浏览器端文件识别、大小校验和文本读取。
 - `lib/server/deepseek.js`：生成问题的 DeepSeek 调用。
+- `lib/server/aiRequestGuard.js`：AI 请求大小、结构、当前用户和额度检查；失败时限制返回信息。
+- `lib/server/boundedFormData.js`：在解析前限制文档及简历上传请求的实际字节数。
 - `lib/server/interviewEvaluation.js`：最终评价的 DeepSeek 调用。
 - `lib/server/documentParser.js`：PDF/DOCX 纯文本解析。
 - `lib/server/resumeRepository.js`：简历服务端校验、解析与账号元数据辅助逻辑。

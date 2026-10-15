@@ -762,6 +762,7 @@ export default function InterviewSimulator() {
         <p className="subtitle">
           粘贴岗位信息和个人简历，生成模拟问题；回答并提交所有题目后，可以获得一份最终面试评价。
         </p>
+        <p className="material-notice">使用真实材料时，岗位与简历文本会发送给 DeepSeek；生成评价后的面试内容会保存到账号云端历史。电脑当次导入的原文件不会存入简历仓库。</p>
 
         {isDevelopment && (
           <div className="dev-helper">
