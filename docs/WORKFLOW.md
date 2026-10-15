@@ -74,11 +74,13 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_or_anon_key
 1. 在新 Supabase 项目执行 `supabase/migrations/20261008_resume_library.sql`、`20261008_interview_history.sql` 和 `20261015_invite_alpha.sql`。创建私有 `interview-resumes` Storage 桶及 5MB/MIME 设置，步骤见下文。SQL 执行后先不要发送邀请。
 2. 在 SQL Editor 向 `public.beta_invited_emails` 添加两名测试账号邮箱，统一小写，例如 `insert into public.beta_invited_emails(email) values (lower('tester@example.com'));`。请替换示例邮箱；邮箱只在控制台维护，不提交仓库。表不向网页用户开放读取或修改。
 3. 在 **Authentication → Hooks** 启用 **Before User Created** 的 Postgres 函数 `public.hook_allow_invited_email`。空名单会拒绝全部新注册；先分别试一位未受邀和一位受邀邮箱，再开放邀请。已有账号登录不受注册 hook 影响。
-4. Auth 的 Site URL 与 Redirect URLs 配置正式网址和当前预览网址（预览域名每次变化时核对）。在 Vercel 的 Preview 环境填入新 Supabase URL/publishable key、相应 `SUPABASE_RESUME_API_TOKEN` 与测试 DeepSeek key；正式环境在通过预览验收、准备生产发布时再切换到新项目。**同一部署的三项 Supabase 值必须指向同一项目**。
+4. Auth 的 Site URL 与 Redirect URLs 配置正式网址和当前预览网址（预览域名每次变化时核对）。在 Vercel 的 Preview 环境填入新 Supabase URL/publishable key、相应 `SUPABASE_RESUME_API_TOKEN` 与测试 DeepSeek key，**修改环境变量后重新部署预览**。正式环境在通过预览验收、准备生产发布时再切换到新项目并重新部署。**同一部署的三项 Supabase 值必须指向同一项目**。
 5. 新代码在没有 `reserve_daily_ai_call` RPC 时会拒绝 AI 调用（503），不会跳过名额限制。额度按照 UTC 自然日、两个 AI 接口合并计算，每次进入 DeepSeek 前扣一次；上游失败也计数。
 6. 在预览部署用两个受邀账号验证注册限制、登录保持、真实 AI、每日额度、云端历史保存失败重试、简历仓库及账号隔离。确认 Review/验收通过后再合并到 `main`，核对生产部署提交、tag 和完整流程。仅打 Git tag 不会让 Vercel 自动部署该 tag。
 
 当前 Vercel 环境变量列表尚未发现 `SUPABASE_RESUME_API_TOKEN`。配置完成前不得把简历仓库记为线上验收通过。`v1.0.0-alpha.1` 是既有代码快照；`alpha.2` 仅在审查与线上验收通过后记录。
+
+Vercel Authentication 的 All Deployments 会要求访问者具备 Vercel 权限；外部测试者的访问方式须在开放前单独确认。可使用限定部署的 Shareable Link，但持有链接的人可访问该部署，应只发给受邀测试者并在结束后撤销。任何访问方式都不替代应用内的邮箱名单与逐接口鉴权。
 
 Supabase Auth 需要配置：
 
